@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Página de prueba</title>
+    <style>
+      body { font-family: system-ui, Arial, sans-serif; margin: 2rem; }
+      .card { padding: 1.5rem; border: 1px solid #ddd; border-radius: 8px; max-width: 600px; }
+      button { padding: 0.5rem 1rem; border: 1px solid #333; background: #f5f5f5; border-radius: 6px; cursor: pointer; }
+      button:hover { background: #eaeaea; }
+    </style>
+  </head>
+  <body>
+    <h1>Hola 👋</h1>
+    <div class="card">
+      <p>Esta es una página HTML muy básica de prueba.</p>
+      <button id="btn">Haz clic</button>
+      <p id="estado" aria-live="polite"></p>
+    </div>
+
+    <script>
+      const btn = document.getElementById('btn');
+      const estado = document.getElementById('estado');
+      btn.addEventListener('click', () => {
+        estado.textContent = '¡Botón funcionando!';
+        console.log('Prueba OK');
+      });
+    </script>
+  </body>
+</html>
