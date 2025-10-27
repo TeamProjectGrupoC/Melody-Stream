@@ -1,6 +1,7 @@
 {
   "projects": {
-    "melodystream123": "melodystream123"
+    "melodystream123": "melodystream123",
+    "default": "melodystream123"
   },
   "targets": {},
   "etags": {}
