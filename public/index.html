@@ -19,7 +19,7 @@
       <p id="estado" aria-live="polite"></p>
     </div>
     <div class = "TEST">
-      <button id = "test_spotify" href="test_spotify.html">Test spotify</button>
+      <button id = "test_spotify">Test spotify</button>
       <button id = "test_database">Test database</button>
     </div>
     <script>
@@ -28,6 +28,9 @@
       btn.addEventListener('click', () => {
         estado.textContent = '¡Botón funcionando!';
         console.log('Prueba OK');
+      });
+      document.getElementById("test_spotify").addEventListener("click", () => {
+        window.location.href = "test_spotify.html";
       });
     </script>
   </body>
