@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Spotify Login Test</title>
+</head>
+<body>
+  <h1>Login con Spotify</h1>
+  <button id="spotifyLogin">Iniciar sesión en Spotify</button>
+
+  <script>
+    const clientId = "fda6231b7bf340168b6b4b0f94f29988"; 
+    const redirectUri = "https://melodystream123.web.app/test_spotify.html";
+    const scopes = "user-read-private user-read-email streaming";
+
+    document.getElementById("spotifyLogin").addEventListener("click", () => {
+      const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes)}`;
+      window.location.href = authUrl;
+    });
+  </script>
+</body>
+</html>
