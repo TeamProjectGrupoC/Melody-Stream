@@ -11,28 +11,37 @@
   <div id="trackInfo"></div>
 
   <script>
-    // Obtener token de la URL
-    const hash = window.location.hash.substring(1);
-    const params = new URLSearchParams(hash);
-    const accessToken = params.get("access_token");
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("code");
 
-    if (!accessToken) {
-      document.getElementById("trackInfo").innerHTML = "<p>No se pudo obtener el token. Vuelve a iniciar sesión.</p>";
+    let accessToken = null;
+
+    async function getToken() {
+      if (!code) {
+        document.getElementById("trackInfo").innerHTML = "<p>No se encontró código. Vuelve a iniciar sesión.</p>";
+        return;
+      }
+
+      try {
+        const res = await fetch(`https://us-central1-TU_PROYECTO.cloudfunctions.net/getSpotifyToken?code=${code}`);
+        const data = await res.json();
+        accessToken = data.access_token;
+      } catch (err) {
+        console.error(err);
+        document.getElementById("trackInfo").innerHTML = "<p>Error obteniendo el token.</p>";
+      }
     }
 
-    // Buscar canciones
-    document.getElementById("searchBtn").addEventListener("click", () => {
+    async function searchTrack() {
       const query = document.getElementById("searchInput").value.trim();
       if (!query) return alert("Introduce el nombre de una canción.");
+      if (!accessToken) return alert("Token no disponible.");
 
-      fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=1`, {
-        headers: { Authorization: "Bearer " + accessToken }
-      })
-      .then(res => {
-        if (!res.ok) throw new Error("Token inválido o expirado");
-        return res.json();
-      })
-      .then(data => {
+      try {
+        const res = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=1`, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        const data = await res.json();
         const track = data.tracks?.items[0];
         if (!track) {
           document.getElementById("trackInfo").innerHTML = "<p>No se encontró ninguna canción.</p>";
@@ -42,15 +51,19 @@
         document.getElementById("trackInfo").innerHTML = `
           <h2>${track.name}</h2>
           <p>${track.artists[0].name}</p>
-          <img src="${track.album.images[0].url}" width="150" alt="Portada del álbum">
+          <img src="${track.album.images[0].url}" width="150">
           ${track.preview_url ? `<audio controls src="${track.preview_url}"></audio>` : "<p>No hay preview disponible.</p>"}
         `;
-      })
-      .catch(err => {
+      } catch (err) {
         console.error(err);
-        document.getElementById("trackInfo").innerHTML = `<p>Error: ${err.message}</p>`;
-      });
-    });
+        document.getElementById("trackInfo").innerHTML = "<p>Error al buscar canción.</p>";
+      }
+    }
+
+    document.getElementById("searchBtn").addEventListener("click", searchTrack);
+
+    // Llamar al backend al cargar
+    getToken();
   </script>
 </body>
 </html>
