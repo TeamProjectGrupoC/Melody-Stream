@@ -21,7 +21,7 @@
     <div class = "TEST">
       <button id = "test_spotify">Test spotify</button>
       <button id = "test_database">Test database</button>
-      <button id = "test_podcast">Test upload podcast</button>
+      <button id = "test_podcast_upload">Test upload podcast</button>
       <button id = "test_login">Test login user</button>
       <button id = "test_podcast_searcher">Test podcast</button>
 
@@ -35,6 +35,9 @@
       });
       document.getElementById("test_spotify").addEventListener("click", () => {
         window.location.href = "test_register_spotify.html";
+      });
+      document.getElementById("test_podcast_upload").addEventListener("click", () => {
+        window.location.href = "podcast_upload.html";
       });
       document.getElementById("test_login").addEventListener("click", () => {
         window.location.href = "login.html";
