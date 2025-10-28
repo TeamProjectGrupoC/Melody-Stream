@@ -30,4 +30,4 @@ exports.getSpotifyToken = functions.https.onRequest(async (req, res) => {
     console.error(error.response?.data || error.message);
     res.status(500).json({ error: "Error fetching Spotify token" });
   }
-});
+});//prueba
