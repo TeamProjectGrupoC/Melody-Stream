@@ -1,12 +1,80 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <title>Search podcasts</title>
-</head>
-<body>
-  <h1>Search Podcasts</h1>
-  <input type="text" id="searchInput" placeholder="What do you want to listen?">
-  <button id="searchButton">Search</button>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Search podcasts</title>
+  </head>
+
+  <body>
+    <h1>Search Podcasts</h1>
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="What do you want to listen?"
+    />
+    <button id="searchButton">Search</button>
+
+    <h2>Available Podcasts</h2>
+    <ul id="podcastList"></ul>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+      import {
+        getStorage,
+        ref,
+        listAll,
+        getDownloadURL,
+      } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
+        authDomain: "melodystream123.firebaseapp.com",
+        databaseURL:
+          "https://melodystream123-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "melodystream123",
+        storageBucket: "melodystream123.firebasestorage.app",
+        messagingSenderId: "640160988809",
+        appId: "1:640160988809:web:d0995d302123ccf0431058",
+        measurementId: "G-J97KEDLYMB",
+      };
+
+      // Firebase Initialization
+      const app = initializeApp(firebaseConfig);
+      const storage = getStorage(app);
+
+      // Path reference to "podcast" folder
+      const podcastRef = ref(storage, "podcast");
+
+      // Get the podcast list container
+      const podcastList = document.getElementById("podcastList");
+
+      // List podcasts
+      async function listPodcasts() {
+        try {
+          const res = await listAll(podcastRef);
+          const files = res.items;
+
+          // Iterate through each file and get its download URL
+          for (const file of files) {
+            const url = await getDownloadURL(file);
+
+            // Create list item with link
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.href = url;
+            a.textContent = file.name;
+            a.target = "_blank"; // Open in new tab
+            li.appendChild(a);
+            podcastList.appendChild(li);
+          }
+        } catch (error) {
+          console.error("Error listing podcasts:", error);
+        }
+      }
+
+      // Call the function to list podcasts on page load
+      listPodcasts();
+    </script>
+  </body>
 </html>
