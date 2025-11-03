@@ -1,18 +1,17 @@
-const functions = require("firebase-functions");
+const { onRequest } = require("firebase-functions/v2/https");
 const axios = require("axios");
-const cors = require("cors")({ origin: true }); // 👈 habilita CORS
+const cors = require("cors")({ origin: true });
 
-exports.getSpotifyToken = functions.https.onRequest((req, res) => {
-  cors(req, res, async () => { // 👈 envolvemos la función con cors
-
+exports.getSpotifyToken = onRequest((req, res) => {
+  cors(req, res, async () => {
     const code = req.query.code;
     if (!code) {
       return res.status(400).json({ error: "Missing authorization code" });
     }
 
-    const clientId = functions.config().spotify.client_id;
-    const clientSecret = functions.config().spotify.client_secret;
-    const redirectUri = functions.config().spotify.redirect_uri;
+    const clientId = process.env.SPOTIFY_CLIENT_ID;
+    const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+    const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
 
     try {
       const response = await axios.post(
@@ -27,12 +26,11 @@ exports.getSpotifyToken = functions.https.onRequest((req, res) => {
         { headers: { "Content-Type": "application/x-www-form-urlencoded" } }
       );
 
-      // 👇 Importante: devolver el token y permitir CORS
-      res.set("Access-Control-Allow-Origin", "*"); // o tu dominio específico
+      res.set("Access-Control-Allow-Origin", "*");
       res.json(response.data);
     } catch (error) {
-      console.error(error.response?.data || error.message);
-      res.status(500).json({ error: "Error fetching Spotify token" });
+      console.error("Spotify API error:", error.response?.data || error.message);
+      res.status(500).json({ error: error.response?.data || error.message });
     }
   });
 });
