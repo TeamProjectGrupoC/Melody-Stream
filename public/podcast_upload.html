@@ -41,11 +41,16 @@ button { padding:8px 12px; margin-right:8px; cursor:pointer; }
 <!-- Botón visible solo si no hay sesión -->
 <button id="loginBtn" style="display:none;">Go to Login</button>
 
+<!-- Firebase -->
 <script type="module">
+// Initialize
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+// Authentication
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+// Database
 import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+// Id of the firebase project
 const firebaseConfig = {
   apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
   authDomain: "melodystream123.firebaseapp.com",
@@ -73,7 +78,7 @@ const loginBtn = document.getElementById('loginBtn');
 
 let currentUser = null;
 
-// 🧠 Detectar usuario logueado o no
+// Detect active session
 onAuthStateChanged(auth, (user) => {
   if (user) {
     currentUser = user;
@@ -88,7 +93,7 @@ onAuthStateChanged(auth, (user) => {
   }
 });
 
-// 🧾 Guardar podcast
+// Save podcast
 uploadBtn.addEventListener('click', async () => {
   if (!currentUser) {
     msg.textContent = "❌ Error: You are not logged in.";
@@ -107,7 +112,7 @@ uploadBtn.addEventListener('click', async () => {
 
   try {
     const podcastsRef = ref(db, 'podcasts');
-    const newPodcastRef = push(podcastsRef);
+    const newPodcastRef = push(podcastsRef); // creates a new entry and an unique ID
     await set(newPodcastRef, {
       nombre: nombre,
       Descripcion: descripcion,
@@ -126,7 +131,7 @@ uploadBtn.addEventListener('click', async () => {
   }
 });
 
-// 🔙 Botones de navegación
+// Botones de navegación
 backBtn.addEventListener('click', () => window.location.href='index.html');
 loginBtn.addEventListener('click', () => window.location.href='login.html');
 </script>
