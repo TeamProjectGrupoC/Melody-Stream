@@ -59,13 +59,16 @@
           for (const file of files) {
             const url = await getDownloadURL(file);
 
-            // Create list item with link
+            // Remove the .mp3 extension from the file name
+            const fileName = file.name.replace('.mp3', '');
+
+            // Create list item with audio player
             const li = document.createElement("li");
-            const a = document.createElement("a");
-            a.href = url;
-            a.textContent = file.name;
-            a.target = "_blank"; // Open in new tab
-            li.appendChild(a);
+            const audio = document.createElement("audio");
+            audio.controls = true; // Add audio controls
+            audio.src = url; // Set the audio source to the file URL
+            li.textContent = file.name + " "; // Add the file name
+            li.appendChild(audio);
             podcastList.appendChild(li);
           }
         } catch (error) {
