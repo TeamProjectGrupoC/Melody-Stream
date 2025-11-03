@@ -23,7 +23,7 @@
       }
 
       try {
-        const res = await fetch(`https://us-central1-TU_PROYECTO.cloudfunctions.net/getSpotifyToken?code=${code}`);
+        const res = await fetch(`https://us-central1-melodystream123.cloudfunctions.net/getSpotifyToken?code=${code}`);
         const data = await res.json();
         accessToken = data.access_token;
       } catch (err) {
