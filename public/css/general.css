@@ -1,0 +1,334 @@
+/* Estilos Generales */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;700&display=swap');
+
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Variables de colores */
+:root {
+    --color-negro: #00010B;
+    --color-gris: #3A3A3A;
+    --color-azul1: #3E9ADE;
+    --color-azul2: #97D3FF;
+    --color-morado: #5431C1;
+    --color-blanco: #FFFFFF;
+}
+
+/* Configuración del cuerpo */
+body {
+    background-color: var(--color-negro);
+    background-image: 
+        radial-gradient(circle at 50% 10%, rgba(62, 154, 222, 0.25), transparent 30%), /* --color-azul1 */
+        radial-gradient(circle at 30% 20%, rgba(84, 49, 193, 0.02), transparent 60%), /* --color-morado */
+        radial-gradient(circle at 60% 10%, rgba(62, 154, 222, 0.05), transparent 60%), /* --color-azul1 */
+        radial-gradient(circle at 80% 50%, rgba(84, 49, 193, 0.1), transparent 40%), /* --color-morado */
+        radial-gradient(circle at 50% 50%, rgba(62, 154, 222, 0.02), transparent 60%), /* --color-azul1 */
+        radial-gradient(circle at 15% 60%, rgba(62, 154, 222, 0.05), transparent 60%), /* --color-azul1 */
+        radial-gradient(circle at 85% 40%, rgba(84, 49, 193, 0.08), transparent 60%), /* --color-morado */
+        radial-gradient(circle at 75% 10%, rgba(84, 49, 193, 0.05), transparent 30%), /* --color-morado */
+        radial-gradient(circle at 50% 90%, rgba(62, 154, 222, 0.05), transparent 60%), /* --color-azul1 */
+        radial-gradient(circle at 80% 90%, rgba(62, 154, 222, 0.25), transparent 30%), /* --color-morado */
+        radial-gradient(circle at 20% 90%, rgba(62, 154, 222, 0.25), transparent 30%); /* --color-morado */
+    color: var(--color-blanco);
+    line-height: 1.6;
+    font-size: 0.875rem; /* 14px */
+}
+
+/* Header */
+#headerPrincipal {
+    background-color: rgba(36, 36, 48, 0.5); /* Establece el color de fondo del header con 50% de transparencia */
+    color: var(--color-blanco); /* Establece el color del texto dentro del header */
+    text-transform: uppercase; /* Convierte el texto a mayúsculas */
+    display: flex; /* Utiliza el modelo de caja flexible para el layout del header */
+    gap:1vw; /* Aumenta la separación entre los elementos del header */
+    justify-content: space-between; /* Distribuye el espacio entre los elementos hijos, con espacio igual entre ellos */
+    position: static; /* Establece la posición del header como estática (valor por defecto) */
+    border-bottom: 0.1rem solid var(--color-blanco); /* Añade un borde inferior de 1px (0.1rem) de color blanco */
+    padding: 0.5rem 3rem; /* Añade padding alrededor del header */
+    width: 100%; /* Asegura que el header ocupe todo el ancho de la pantalla */
+    box-sizing: border-box; /* Incluye el padding y el borde en el ancho total del header */
+}
+
+#headerPrincipal figure {
+    padding: 0.2rem; /* Añade padding alrededor de la imagen */
+    width: 20%; /* La figura ocupa el 20% del ancho de su contenedor */
+}
+
+
+#headerPrincipal figure img {
+    height: 70px;
+    width: 70px;
+    transition: transform 1s linear; /* Transición suave */
+}
+
+
+#headerPrincipal figure img:hover {
+  transform: rotate(360deg); /* Gira 360 grados al pasar el cursor */
+}
+
+#headerPrincipal nav {
+    flex-grow: 1; /* Hace que el nav ocupe el espacio restante disponible en el header */
+    display: flex;
+    justify-content: flex-end; /* Alinea los elementos de la lista a la derecha */
+    align-items: center; /* Centra los elementos verticalmente con respecto al header */
+}
+
+#headerPrincipal nav ul {
+    list-style: none; /* Elimina los puntos de la lista */
+    display: flex; /* Convierte la lista en un contenedor flexible */
+    gap: 3vw; /* Aumenta más la separación entre los elementos de la lista */
+}
+
+#headerPrincipal nav ul li {
+    display: inline; /* Asegura que los elementos de la lista estén en línea */
+    text-align: center;
+}
+
+#headerPrincipal nav ul li a {
+    font-family: 'Archivo', Verdana, Arial, sans-serif;
+    font-size: 1.50rem; 
+    text-transform: uppercase;
+    color: var(--color-blanco);
+    text-decoration: none;
+}
+
+#headerPrincipal nav ul li a:hover {
+    color: var(--color-azul2); 
+}
+
+/* Footer */
+footer {
+    background-color: var(--color-negro);
+    text-align: center;
+    padding: 1.25rem 4rem; 
+    margin-top: 2.5rem; 
+    display: flex; /* Utiliza flexbox para los elementos dentro del footer */
+    justify-content: space-between; /* Distribuye los elementos a los extremos */
+    align-items: center; /* Centra los elementos en el eje vertical */
+    flex-direction: row; /* Asegura que los elementos estén en fila */
+    width: 100%; /* Asegura que el footer ocupe todo el ancho de la pantalla */
+    box-sizing: border-box; /* Incluye el padding y el borde en el ancho total del footer */
+}
+
+#footer-title {
+    font-family: 'Archivo', Verdana, Arial, sans-serif; /* Cambia la fuente a Archivo */
+    font-weight: 400; /* Establece el peso de la fuente a regular (400) */
+    font-size: 2rem; /* 32px to rem */
+    color: var(--color-blanco);
+    margin: 0; /* Elimina el margen para una mejor alineación */
+}
+
+#footer-follow {
+    display: flex;
+    align-items: center;
+    gap: 3vw; /* Ajusta el espacio entre "Síguenos" y la lista */
+    margin-left: auto; /* Empuja el contenedor hacia la derecha */
+}
+
+#footer-follow p {
+    font-size: 1.25rem; /* 20px */
+    color: var(--color-blanco);
+    margin: 0; /* Elimina el margen para una mejor alineación */
+    margin-right: 1rem; /* Ajusta el espacio entre "Síguenos" y la lista */
+}
+
+footer ul {
+    list-style: none;
+    padding: 0;
+    display: flex;
+    gap: 3vw; /* Ajusta el espacio entre los elementos de la lista */
+}
+
+
+footer ul li img {
+    width: 1.875rem; /* 30px to rem */
+    height: 1.875rem; /* 30px to rem */
+    transition: transform 0.3s ease-in-out;
+}
+
+footer ul li img:hover {
+    transform: scale(1.1); /* Efecto de zoom al pasar el cursor */
+}
+
+footer ul li figcaption {
+    font-size: 0.875rem;
+    color: var(--color-blanco);
+    margin-top: 0.3125rem; 
+}
+
+
+/* Estilos Generales */
+main {
+    padding: 3rem 3rem; 
+    min-height:80vh;
+}
+/* Secciones */
+main h1 {
+    font-size: 3rem; 
+}
+
+main h2 {
+    font-size: 2rem; 
+}
+
+main h3 {
+    font-size: 1.6rem; 
+}
+
+main h4 {
+    font-size: 1.45rem; 
+}
+main h5 {
+    font-size: 1.3rem; 
+}
+main h6 {
+    font-size: 1.1rem; 
+}
+
+main p {
+    font-size: 1rem; 
+}
+
+
+/* Tipografía */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: 'Archivo', Verdana, Arial, sans-serif;
+    font-weight: bold;
+    color: var(--color-blanco);
+    text-align: center;
+}
+
+
+/* Enlaces */
+a{
+    text-decoration: underline; /* Subrayar enlaces */
+    color: var(--color-azul1);
+    transition: color 0.3s ease-in-out;
+    font-size:1rem;
+}
+
+a:hover {
+    color: var(--color-morado);
+}
+
+/* Botones */
+button {
+    background-color: var(--color-azul1);
+    color: var(--color-blanco);
+    border: none;
+    padding: 0.625rem 1.25rem; /* 10px 20px to rem */
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: var(--color-azul2);
+}
+
+
+/* Animaciones */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.fade-in {
+    animation: fadeIn 1s ease-in-out;
+}
+
+.hamburguesa {
+    display: none;
+    padding: 10px 20px;
+    color: var(--color-blanco);
+    text-decoration: none;
+    border-radius: 5px;
+    text-align: center;
+    border-radius: 50px;
+}
+
+.hamburguesa:hover {
+    background-color: var(--color-azul1); /* Azul más oscuro */
+}
+
+/* Responsive Styles */
+@media (max-width: 800px) {
+    #headerPrincipal {
+        flex-direction: column; /* Cambia la dirección del flex a columna */
+        align-items: center; /* Centra los elementos en el eje horizontal */
+        padding: 1rem; /* Ajusta el padding para dispositivos móviles */
+        width: 100%; /* Asegura que el header ocupe todo el ancho de la pantalla */
+        min-width: 250px;
+    }
+
+    #headerPrincipal nav ul {
+        flex-direction: column; /* Cambia la dirección del flex a columna */
+        gap: 3vw; /* Ajusta el espacio entre los elementos de la lista */
+        align-items: center; /* Centra los elementos en el eje horizontal */
+    }
+    #headerPrincipal figure{
+        display: flex;          /* Habilita Flexbox */
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .hamburguesa {
+        display: inline; /* Muestra el botón de hamburguesa */
+        margin-bottom: 1rem; /* Añade margen inferior para separación */
+    }
+
+    footer {
+        min-width: 250px;
+        flex-direction: column; /* Cambia la dirección del flex a columna */
+        align-items: center; /* Centra los elementos en el eje horizontal */
+        padding: 1rem; /* Ajusta el padding para dispositivos móviles */
+        width: 100%; /* Asegura que el footer ocupe todo el ancho de la pantalla */
+    }
+
+    #footer-follow {
+
+        flex-direction: column; /* Cambia la dirección del flex a columna */
+        align-items: center; /* Centra los elementos en el eje horizontal */
+        margin-left: 0; /* Elimina el margen izquierdo */
+        margin-top: 1rem; /* Añade margen superior para separación */
+    }
+
+    footer ul {
+        flex-direction: column; /* Cambia la dirección del flex a columna */
+        gap: 3vw; /* Ajusta el espacio entre los elementos de la lista */
+        align-items: center; /* Centra los elementos en el eje horizontal */
+    }
+
+    footer ul li img {
+        width: 2rem; /* Ajusta el tamaño de los iconos para pantallas pequeñas */
+    }
+}
+
+
+/*Añadir menu toggle*/
+/* Menú oculto por defecto en pantallas pequeñas */
+#menuToggle {
+    display: none; /* Oculta las tres rayas en pantallas grandes */
+}
+
+
+@media (max-width: 769px) {
+    #menuToggle {
+        display: block; /* Oculta las tres rayas en pantallas grandes */
+    }
+}
+
