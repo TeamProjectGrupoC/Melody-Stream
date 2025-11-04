@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Upload Podcast — MelodyStream</title>
+<style>
+body { font-family: Arial, sans-serif; margin:20px; }
+input, textarea { display:block; margin:8px 0; padding:8px; width:260px; }
+button { padding:8px 12px; margin-right:8px; cursor:pointer; }
+#msg { margin-top:12px; font-weight:600; }
+#formContainer { display:none; } /* ocultar formulario hasta que haya sesión */
+</style>
+</head>
+<body>
+<h1>Upload Podcast</h1>
+
+<!-- Formulario -->
+<div id="formContainer">
+  <label>Podcast name</label>
+  <input id="podcastName" type="text" placeholder="Enter podcast name" required>
+
+  <label>Description</label>
+  <textarea id="podcastDesc" placeholder="Enter podcast description" required></textarea>
+
+  <label>Link</label>
+  <input id="podcastLink" type="url" placeholder="https://example.com" required>
+
+  <label>Cover (carátula)</label>
+  <input id="podcastCover" type="text" placeholder="Image name or URL" required>
+
+  <div style="margin-top:10px;">
+      <button id="uploadBtn">Save Podcast</button>
+      <button id="backBtn">Back to Home</button>
+  </div>
+</div>
+
+<!-- Mensajes -->
+<p id="msg"></p>
+
+<!-- Botón visible solo si no hay sesión -->
+<button id="loginBtn" style="display:none;">Go to Login</button>
+
+<!-- Firebase -->
+<script type="module">
+// Initialize
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+// Authentication
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+// Database
+import { getDatabase, ref, push, set } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+// Id of the firebase project
+const firebaseConfig = {
+  apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
+  authDomain: "melodystream123.firebaseapp.com",
+  databaseURL: "https://melodystream123-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "melodystream123",
+  storageBucket: "melodystream123.firebasestorage.app",
+  messagingSenderId: "640160988809",
+  appId: "1:640160988809:web:d0995d302123ccf0431058",
+  measurementId: "G-J97KEDLYMB"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+const auth = getAuth(app);
+
+const nameInput = document.getElementById('podcastName');
+const descInput = document.getElementById('podcastDesc');
+const linkInput = document.getElementById('podcastLink');
+const coverInput = document.getElementById('podcastCover');
+const uploadBtn = document.getElementById('uploadBtn');
+const backBtn = document.getElementById('backBtn');
+const msg = document.getElementById('msg');
+const formContainer = document.getElementById('formContainer');
+const loginBtn = document.getElementById('loginBtn');
+
+let currentUser = null;
+
+// Detect active session
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    msg.textContent = `✅ Logged in as ${user.email}`;
+    formContainer.style.display = 'block';
+    loginBtn.style.display = 'none';
+  } else {
+    currentUser = null;
+    msg.textContent = "⚠️ You must be logged in to upload a podcast.";
+    formContainer.style.display = 'none';
+    loginBtn.style.display = 'inline-block';
+  }
+});
+
+// Save podcast
+uploadBtn.addEventListener('click', async () => {
+  if (!currentUser) {
+    msg.textContent = "❌ Error: You are not logged in.";
+    return;
+  }
+
+  const nombre = nameInput.value.trim();
+  const descripcion = descInput.value.trim();
+  const link = linkInput.value.trim();
+  const caratula = coverInput.value.trim();
+
+  if (!nombre || !descripcion || !link || !caratula) {
+    msg.textContent = "All fields are required.";
+    return;
+  }
+
+  try {
+    const podcastsRef = ref(db, 'podcasts');
+    const newPodcastRef = push(podcastsRef); // creates a new entry and an unique ID
+    await set(newPodcastRef, {
+      nombre: nombre,
+      Descripcion: descripcion,
+      link: link,
+      carátula: caratula,
+      idcreador: currentUser.uid
+    });
+    msg.textContent = "✅ Podcast saved successfully!";
+    nameInput.value = '';
+    descInput.value = '';
+    linkInput.value = '';
+    coverInput.value = '';
+  } catch (err) {
+    console.error(err);
+    msg.textContent = `❌ Error saving podcast: ${err.message}`;
+  }
+});
+
+// Botones de navegación
+backBtn.addEventListener('click', () => window.location.href='index.html');
+loginBtn.addEventListener('click', () => window.location.href='login.html');
+</script>
+</body>
+</html>

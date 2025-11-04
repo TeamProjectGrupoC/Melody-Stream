@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Search podcasts</title>
+  </head>
+
+  <body>
+    <h1>Search Podcasts</h1>
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="What do you want to listen?"
+    />
+    <button id="searchButton">Search</button>
+
+    <h2>Available Podcasts</h2>
+    <ul id="podcastList"></ul>
+
+    <!-- Botón para volver al index -->
+    <button id="backToIndex" style="margin-top: 20px;">Home Page</button>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+      import {
+        getStorage,
+        ref,
+        listAll,
+        getDownloadURL,
+        deleteObject,
+      } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+      import {
+        getAuth,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
+        authDomain: "melodystream123.firebaseapp.com",
+        databaseURL:
+          "https://melodystream123-default-rtdb.europe-west1.firebasedatabase.app",
+        projectId: "melodystream123",
+        storageBucket: "melodystream123.firebasestorage.app",
+        messagingSenderId: "640160988809",
+        appId: "1:640160988809:web:d0995d302123ccf0431058",
+        measurementId: "G-J97KEDLYMB",
+      };
+
+      // Firebase Initialization
+      const app = initializeApp(firebaseConfig);
+      const storage = getStorage(app);
+      const auth = getAuth(app);
+
+      // Path reference to "podcast" folder
+      const podcastRef = ref(storage, "podcast");
+
+      // Get the podcast list container
+      const podcastList = document.getElementById("podcastList");
+
+      let currentUser = null;
+
+      // Check if user is logged in
+      onAuthStateChanged(auth, (user) => {
+        if (user) {
+          currentUser = user;
+          console.log(`Logged in as: ${user.email}`);
+        } else {
+          currentUser = null;
+          console.log("No user logged in");
+        }
+      });
+
+      // List podcasts
+      async function listPodcasts() {
+        try {
+          const res = await listAll(podcastRef);
+          const files = res.items;
+
+          // Iterate through each file and get its download URL
+          for (const file of files) {
+            const url = await getDownloadURL(file);
+
+            // Remove the .mp3 extension from the file name
+            const fileName = file.name.replace(".mp3", "");
+
+            // Create list item with audio player and delete button
+            const li = document.createElement("li");
+            const audio = document.createElement("audio");
+            audio.controls = true; // Add audio controls
+            audio.src = url; // Set the audio source to the file URL
+            li.textContent = fileName + " "; // Add the file name
+            li.appendChild(audio);
+
+            // Add delete button (only visible if user is logged in)
+            if (currentUser) {
+              const deleteButton = document.createElement("button");
+              deleteButton.textContent = "Delete";
+              deleteButton.style.marginLeft = "10px";
+              deleteButton.addEventListener("click", async () => {
+                const confirmDelete = confirm(
+                  `Are you sure you want to delete "${fileName}"?`
+                );
+                if (confirmDelete) {
+                  try {
+                    // Delete the file from storage
+                    await deleteObject(file);
+
+                    alert(`Podcast "${fileName}" deleted successfully.`);
+                    li.remove(); // Remove the item from the list
+                  } catch (error) {
+                    console.error("Error deleting podcast:", error);
+                    alert("Failed to delete the podcast.");
+                  }
+                }
+              });
+              li.appendChild(deleteButton);
+            }
+
+            podcastList.appendChild(li);
+          }
+        } catch (error) {
+          console.error("Error listing podcasts:", error);
+        }
+      }
+
+      // Call the function to list podcasts on page load
+      listPodcasts();
+
+      // Add event listener to the "Back to Index" button
+      const backToIndexButton = document.getElementById("backToIndex");
+      backToIndexButton.addEventListener("click", () => {
+        window.location.href = "index.html"; // Redirect to index.html
+      });
+    </script>
+  </body>
+</html>
