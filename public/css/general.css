@@ -62,7 +62,7 @@ body {
 
 #headerPrincipal figure img {
     height: 70px;
-    width: 70px;
+    width: 80px;
     transition: transform 1s linear; /* Transición suave */
 }
 

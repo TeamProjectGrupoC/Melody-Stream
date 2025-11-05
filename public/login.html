@@ -1,164 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Login — MelodyStream</title>
-<style>
-body { font-family: Arial, sans-serif; margin:20px; }
-input { display:block; margin:8px 0; padding:8px; width:260px; }
-button { padding:8px 12px; margin-right:8px; cursor:pointer; }
-#msg { margin-top:12px; font-weight:600; }
-#data, #extraInfoForm { margin-top:14px; padding:10px; background:#eef9ff; border-left:4px solid #007bff; display:none; }
-label { margin-top:8px; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login — MelodyStream</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/general.css">
+    <link rel="stylesheet" href="css/login.css">
+
+    <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg">
 </head>
+
 <body>
-<h1>Login</h1>
+    <header id="headerPrincipal">
+        <figure>
+            <img src="images/logos/logo.png" alt="Webpage logo">
+        </figure>
+        <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
+        <nav id="NavPrincipal">
+            <ul>
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="test_register_spotify.html">MUSIC</a></li>
+                <li><a href="podcast_upload.html">UPLOAD A PODCAST</a></li>
+                <li><a href="podcast.html">SEARCH A PODCAST</a></li>
+                <li><a href="profile.html">MY PROFILE</a></li>
+                <li><a href="login.html">LOG IN</a></li>
+            </ul>
+        </nav>
+    </header>
 
-<label>Email</label>
-<input id="emailLogin" type="email" placeholder="email@example.com">
+    <main class="d-flex align-items-center justify-content-center min-vh-100">
+        <div id="loginContainer" class="container text-light">
+            <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-5 bg-dark bg-opacity-75 p-4 p-md-5 rounded-4 shadow-lg border border-secondary">
+                
+                <h1 class="text-center mb-4">Login</h1>
 
-<label>Password</label>
-<input id="passwordLogin" type="password" placeholder="••••••">
+                <!-- Email -->
+                <div class="mb-3">
+                <label for="emailLogin" class="form-label fw-semibold">Email</label>
+                <input id="emailLogin" type="email" class="form-control bg-dark text-light border-secondary" placeholder="email@example.com">
+                </div>
 
-<div style="margin-top:10px;">
-    <button id="signInBtn">Login</button>
-    <button id="toRegisterBtn">Go to Register</button>
-    <button id="signOutBtn" style="display:none;">Sign Out</button>
-</div>
+                <!-- Password -->
+                <div class="mb-4">
+                <label for="passwordLogin" class="form-label fw-semibold">Password</label>
+                <input id="passwordLogin" type="password" class="form-control bg-dark text-light border-secondary" placeholder="••••••">
+                </div>
 
-<p id="msg"></p>
+                <!-- Buttons -->
+                <div class="d-grid gap-2">
+                <button id="signInBtn" class="btn btn-primary fw-semibold">Login</button>
+                <button id="toRegisterBtn" class="btn btn-outline-light fw-semibold">Go to Register</button>
+                <button id="signOutBtn" class="btn btn-danger fw-semibold" style="display:none;">Sign Out</button>
+                </div>
 
-<!-- Form for entering username/phone if first verified login -->
-<div id="extraInfoForm">
-    <h3>Complete Your Profile</h3>
-    <label>Username</label>
-    <input id="usernameInput" type="text" placeholder="Username">
-    <label>Phone</label>
-    <input id="phoneInput" type="text" placeholder="+1 ...">
-    <button id="saveExtraBtn">Save</button>
-</div>
+                <!-- Message -->
+                <p id="msg" class="mt-3 text-center fw-semibold text-info"></p>
 
-<div id="data"></div>
+                <!-- Extra info form -->
+                <div id="extraInfoForm" class="mt-4 border-top border-secondary pt-3" style="display:none;">
+                <h3 class="h5 text-center mb-3">Complete Your Profile</h3>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+                <div class="mb-3">
+                    <label for="usernameInput" class="form-label fw-semibold">Username</label>
+                    <input id="usernameInput" type="text" class="form-control bg-dark text-light border-secondary" placeholder="Username">
+                </div>
 
-const firebaseConfig = {
-    apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
-    authDomain: "melodystream123.firebaseapp.com",
-    databaseURL: "https://melodystream123-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "melodystream123",
-    storageBucket: "melodystream123.firebasestorage.app",
-    messagingSenderId: "640160988809",
-    appId: "1:640160988809:web:d0995d302123ccf0431058",
-    measurementId: "G-J97KEDLYMB"
-};
+                <div class="mb-3">
+                    <label for="phoneInput" class="form-label fw-semibold">Phone</label>
+                    <input id="phoneInput" type="text" class="form-control bg-dark text-light border-secondary" placeholder="+1 ...">
+                </div>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getDatabase(app);
+                <button id="saveExtraBtn" class="btn btn-success w-100 fw-semibold">Save</button>
+                </div>
 
-const emailLogin = document.getElementById('emailLogin');
-const passwordLogin = document.getElementById('passwordLogin');
-const signInBtn = document.getElementById('signInBtn');
-const toRegisterBtn = document.getElementById('toRegisterBtn');
-const signOutBtn = document.getElementById('signOutBtn');
-const msg = document.getElementById('msg');
-const dataDiv = document.getElementById('data');
-const extraInfoForm = document.getElementById('extraInfoForm');
-const usernameInput = document.getElementById('usernameInput');
-const phoneInput = document.getElementById('phoneInput');
-const saveExtraBtn = document.getElementById('saveExtraBtn');
+                <!-- User data -->
+                <div id="data" class="mt-4 p-3 bg-dark bg-opacity-50 rounded-3" style="display:none;">
+                <!-- Populated dynamically -->
+                </div>
 
-async function saveToDB(uid, email, username, phone) {
-    return set(ref(db, 'users/' + uid), { email, username, phone, favorite_songs:{}, spotify:{} });
-}
+            </div>
+            </div>
+        </div>
+    </main>
 
-async function fetchUserData(uid) {
-    try {
-        const rootRef = ref(db);
-        const snap = await get(child(rootRef, `users/${uid}`));
-        return snap.exists() ? snap.val() : null;
-    } catch(e){ console.error(e); return null; }
-}
 
-function showUserData(ud, uid){
-    dataDiv.style.display='block';
-    dataDiv.innerHTML = `
-        <h3>My Data (${uid})</h3>
-        <p><strong>Username:</strong> ${ud.username}</p>
-        <p><strong>Phone:</strong> ${ud.phone}</p>
-        <p><strong>Email:</strong> ${ud.email}</p>
-        <p><strong>Favorite Songs:</strong> ${JSON.stringify(ud.favorite_songs,null,2)}</p>
-    `;
-    signOutBtn.style.display='inline-block';
-}
+    <footer id="footerPrincipal">
+        <h2 id="footer-title">MELODY STREAM</h2>
+        <div id="footer-follow">
+            <p>FOLLOW US</p>
+            <ul>
+                <!-- Logo 1 (Spotify) -->
+                <li>
+                    <figure>
+                        <a href="https://www.spotify.com" target="_blank">
+                            <img src="images/logos/Spotify.svg" alt="Spotify">
+                        </a>
+                    </figure>
+                </li>
+                <!-- Logo 2 (Facebook) -->
+                <li>
+                    <figure>
+                        <a href="https://www.facebook.com" target="_blank">
+                            <img src="images/logos/Facebook.svg" alt="Facebook">
+                        </a>
+                    </figure>
+                </li>
+                <!-- Logo 3 (Instagram) -->
+                <li>
+                    <figure>
+                        <a href="https://www.instagram.com" target="_blank">
+                            <img src="images/logos/Instagram.svg" alt="Instagram">
+                        </a>
+                    </figure>
+                </li>
+                <!-- Logo 4 (Twitter) -->
+                <li>
+                    <figure>
+                        <a href="https://www.twitter.com" target="_blank">
+                            <img src="images/logos/Twitter.svg" alt="Twitter">
+                        </a>
+                    </figure>
+                </li>
+                <!-- Logo 5 (YouTube) -->
+                <li>
+                    <figure>
+                        <a href="https://www.youtube.com" target="_blank">
+                            <img src="images/logos/Youtube.svg" alt="YouTube">
+                        </a>
+                    </figure>
+                </li>
+            </ul>
+        </div>
+    </footer>
 
-// Login
-signInBtn.addEventListener('click', async () => {
-    msg.textContent = '';
-    dataDiv.style.display='none';
-    extraInfoForm.style.display='none';
+    <script type="module" src="js/login.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    const email = emailLogin.value.trim();
-    const password = passwordLogin.value;
-
-    if(!email || !password){ msg.textContent='Email and password required.'; return; }
-
-    try{
-        const cred = await signInWithEmailAndPassword(auth,email,password);
-        const user = cred.user;
-
-        if(!user.emailVerified){
-            msg.textContent='Your email is not verified yet. Check your inbox.';
-            await signOut(auth);
-            return;
-        }
-
-        let ud = await fetchUserData(user.uid);
-
-        if(!ud){
-            // Show extra info form to complete profile
-            extraInfoForm.style.display='block';
-            msg.textContent='Please complete your profile to save your info.';
-            return;
-        }
-
-        // Show data if already exists
-        showUserData(ud, user.uid);
-    } catch(err){ msg.textContent=`Login error: ${err.message}`; console.error(err);}
-});
-
-// Save extra info
-saveExtraBtn.addEventListener('click', async () => {
-    const user = auth.currentUser;
-    const username = usernameInput.value.trim();
-    const phone = phoneInput.value.trim();
-
-    if(!username || !phone){ msg.textContent='Username and phone required.'; return; }
-
-    try{
-        await saveToDB(user.uid, user.email, username, phone);
-        extraInfoForm.style.display='none';
-        const ud = await fetchUserData(user.uid);
-        showUserData(ud, user.uid);
-        msg.textContent = `Profile saved! Logged in as ${user.email}.`;
-    } catch(err){ msg.textContent=`Error saving profile: ${err.message}`; console.error(err);}
-});
-
-toRegisterBtn.addEventListener('click',()=>window.location.href='register.html');
-
-signOutBtn.addEventListener('click', async ()=>{
-    await signOut(auth);
-    msg.textContent='Signed out.';
-    dataDiv.style.display='none';
-    extraInfoForm.style.display='none';
-    signOutBtn.style.display='none';
-});
-</script>
 </body>
 </html>

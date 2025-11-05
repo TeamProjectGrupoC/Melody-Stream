@@ -1,73 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Register — MelodyStream</title>
-<style>
-body { font-family: Arial, sans-serif; margin:20px; }
-input { display:block; margin:8px 0; padding:8px; width:260px; }
-button { padding:8px 12px; margin-right:8px; cursor:pointer; }
-#msg { margin-top:12px; font-weight:600; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register — MelodyStream</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="css/general.css">
+    <link rel="stylesheet" href="css/login.css">
+
+    <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg">
 </head>
+
+
 <body>
-<h1>Register</h1>
+    <header id="headerPrincipal">
+        <figure>
+            <img src="images/logos/logo.png" alt="Webpage logo">
+        </figure>
+        <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
+        <nav id="NavPrincipal">
+            <ul>
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="test_register_spotify.html">MUSIC</a></li>
+                <li><a href="podcast_upload.html">UPLOAD A PODCAST</a></li>
+                <li><a href="podcast.html">SEARCH A PODCAST</a></li>
+                <li><a href="profile.html">MY PROFILE</a></li>
+                <li><a href="login.html">LOG IN</a></li>
+            </ul>
+        </nav>
+    </header>
 
-<label>Email</label>
-<input id="emailRegister" type="email" placeholder="email@example.com" required>
+    <main class="d-flex align-items-center justify-content-center min-vh-100">
+        <div id="loginContainer" class="container text-light">
+            <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-5 bg-dark bg-opacity-75 p-4 p-md-5 rounded-4 shadow-lg border border-secondary">
+                
+                <h1 class="text-center mb-4">Register</h1>
 
-<label>Password</label>
-<input id="passwordRegister" type="password" placeholder="••••••" required>
+                <!-- Email -->
+                <div class="mb-3">
+                <label for="emailRegister" class="form-label fw-semibold">Email</label>
+                <input id="emailRegister" type="email" class="form-control bg-dark text-light border-secondary" placeholder="email@example.com">
+                </div>
 
-<div style="margin-top:10px;">
-    <button id="signUpBtn">Register</button>
-    <button id="goLoginBtn">Go to Login</button>
-</div>
+                <!-- Password -->
+                <div class="mb-4">
+                <label for="passwordRegister" class="form-label fw-semibold">Password</label>
+                <input id="passwordRegister" type="password" class="form-control bg-dark text-light border-secondary" placeholder="••••••">
+                </div>
 
-<p id="msg"></p>
+                <!-- Buttons -->
+                <div class="d-grid gap-2">
+                <button id="signUpBtn" class="btn btn-primary fw-semibold">Register</button>
+                <button id="goLoginBtn" class="btn btn-outline-light fw-semibold">Go to Login</button>
+                </div>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+                <!-- Message -->
+                <p id="msg" class="mt-3 text-center fw-semibold text-info"></p>
 
-const firebaseConfig = {
-    apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
-    authDomain: "melodystream123.firebaseapp.com",
-    databaseURL: "https://melodystream123-default-rtdb.europe-west1.firebasedatabase.app",
-    projectId: "melodystream123",
-    storageBucket: "melodystream123.firebasestorage.app",
-    messagingSenderId: "640160988809",
-    appId: "1:640160988809:web:d0995d302123ccf0431058",
-    measurementId: "G-J97KEDLYMB"
-};
+            </div>
+            </div>
+        </div>
+    </main>
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 
-const emailInput = document.getElementById('emailRegister');
-const passwordInput = document.getElementById('passwordRegister');
-const signUpBtn = document.getElementById('signUpBtn');
-const goLoginBtn = document.getElementById('goLoginBtn');
-const msg = document.getElementById('msg');
+    <footer id="footerPrincipal">
+        <h2 id="footer-title">MELODY STREAM</h2>
+        <div id="footer-follow">
+            <p>FOLLOW US</p>
+            <ul>
+                <!-- Logo 1 (Spotify) -->
+                <li>
+                    <figure>
+                        <a href="https://www.spotify.com" target="_blank">
+                            <img src="images/logos/Spotify.svg" alt="Spotify">
+                        </a>
+                    </figure>
+                </li>
+                <!-- Logo 2 (Facebook) -->
+                <li>
+                    <figure>
+                        <a href="https://www.facebook.com" target="_blank">
+                            <img src="images/logos/Facebook.svg" alt="Facebook">
+                        </a>
+                    </figure>
+                </li>
+                <!-- Logo 3 (Instagram) -->
+                <li>
+                    <figure>
+                        <a href="https://www.instagram.com" target="_blank">
+                            <img src="images/logos/Instagram.svg" alt="Instagram">
+                        </a>
+                    </figure>
+                </li>
+                <!-- Logo 4 (Twitter) -->
+                <li>
+                    <figure>
+                        <a href="https://www.twitter.com" target="_blank">
+                            <img src="images/logos/Twitter.svg" alt="Twitter">
+                        </a>
+                    </figure>
+                </li>
+                <!-- Logo 5 (YouTube) -->
+                <li>
+                    <figure>
+                        <a href="https://www.youtube.com" target="_blank">
+                            <img src="images/logos/Youtube.svg" alt="YouTube">
+                        </a>
+                    </figure>
+                </li>
+            </ul>
+        </div>
+    </footer>
 
-signUpBtn.addEventListener('click', async () => {
-    const email = emailInput.value.trim();
-    const password = passwordInput.value;
-    if(!email || !password){ msg.textContent = 'Email and password are required.'; return; }
+    <script type="module" src="js/register.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    try {
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        const user = cred.user;
-        await sendEmailVerification(user);
-        msg.textContent = `Registration successful! Verification email sent to ${user.email}. Please verify before logging in.`;
-    } catch(err) {
-        msg.textContent = `Registration error: ${err.message}`;
-        console.error(err);
-    }
-});
-
-goLoginBtn.addEventListener('click', () => window.location.href='login.html');
-</script>
 </body>
 </html>
