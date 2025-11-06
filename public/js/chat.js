@@ -1,31 +1,32 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, get, child, set, push, onValue, off } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, get, child, set, push, onValue, off, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-// This function will run the entire application
 async function main() {
     
-    // --- Step 1: Get config securely from Firebase Hosting ---
     let firebaseConfig;
     try {
         const response = await fetch('/__/firebase/init.json');
         firebaseConfig = await response.json();
     } catch (e) {
         console.error("Could not load Firebase config. Are you running this on Firebase Hosting or using 'firebase serve'?");
-        return; // Stop the app
+        return;
     }
     
-    // --- Step 2: Initialize Firebase ---
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // --- DOM Selectors ---
+    // --- DOM Selectors (Nuevos y actualizados) ---
     const statusMessage = document.getElementById('statusMessage');
     const userListDiv = document.getElementById('userList');
+    const searchInput = document.getElementById('searchInput');
+    
+    const chatPlaceholder = document.getElementById('chatPlaceholder');
     const chatBox = document.getElementById('chatBox');
     const chatWith = document.getElementById('chatWith');
     const messagesDiv = document.getElementById('messages');
+    
     const messageInput = document.getElementById('msgInput');
     const sendButton = document.getElementById('sendBtn');
 
@@ -33,6 +34,7 @@ async function main() {
     let currentUser = null;
     let selectedUser = null;
     let currentMessagesRef = null; 
+    let usersMap = {}; // Almacenará los datos de todos los usuarios (uid -> userData)
 
     function getChatId(uid1, uid2) {
         return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
@@ -41,41 +43,29 @@ async function main() {
     // --- Main Logic ---
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
-            statusMessage.textContent = "You must be logged in to see other users.";
+            statusMessage.textContent = "You must be logged in.";
+            // Opcional: redirigir a login
+            // window.location.href = '/login.html'; 
             return;
         }
         currentUser = user;
 
         try {
-            const dbRef = ref(db);
-            const usersNode = await get(child(dbRef, "users"));
-
-            if (!usersNode.exists()) {
+            // 1. Obtener todos los usuarios UNA VEZ y guardarlos en el Map
+            const usersNode = await get(child(ref(db), "users"));
+            if (usersNode.exists()) {
+                usersMap = usersNode.val();
+            } else {
                 statusMessage.textContent = "No users found.";
                 return;
             }
 
-            const users = usersNode.val();
-            statusMessage.textContent = "Online Users:";
-            userListDiv.innerHTML = ""; 
-
-            const fragment = document.createDocumentFragment();
-
-            for (const uid in users) {
-                if (uid === user.uid) continue;
-                
-                const u = users[uid];
-                const username = u.username || "(no username)";
-                
-                const li = document.createElement("li");
-                li.className = "user";
-                li.dataset.uid = uid;
-                li.dataset.username = username;
-                li.textContent = `${username} — ${u.email}`; 
-                
-                fragment.appendChild(li);
-            }
-            userListDiv.appendChild(fragment);
+            // 2. Escuchar TODOS los chats en tiempo real
+            const chatsRef = ref(db, 'chats');
+            onValue(chatsRef, (snapshot) => {
+                const allChats = snapshot.val() || {};
+                renderUserList(allChats);
+            });
 
         } catch (e) {
             console.error(e);
@@ -83,17 +73,86 @@ async function main() {
         }
     });
 
-    // Listener for selecting a user
+    /**
+     * Procesa los chats, los ordena y los muestra en la lista
+     */
+    function renderUserList(allChats) {
+        if (!currentUser) return;
+
+        let usersToRender = [];
+        
+        // 1. Combinar datos de usuarios con datos de chats
+        for (const uid in usersMap) {
+            if (uid === currentUser.uid) continue;
+
+            const userData = usersMap[uid];
+            const chatId = getChatId(currentUser.uid, uid);
+            const chatData = allChats[chatId];
+
+            const lastMessage = chatData?.lastMessage;
+            const timestamp = lastMessage?.timestamp || 0; // 0 si no hay chat
+            const lastMessageText = lastMessage?.text || "No messages yet";
+
+            usersToRender.push({
+                uid: uid,
+                username: userData.username || "(no username)",
+                email: userData.email,
+                lastMessageTimestamp: timestamp,
+                lastMessageText: lastMessageText
+            });
+        }
+
+        // 2. Ordenar: más reciente primero
+        usersToRender.sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
+
+        // 3. Mostrar en el DOM
+        userListDiv.innerHTML = ""; // Limpiar lista
+        const fragment = document.createDocumentFragment();
+
+        usersToRender.forEach(user => {
+            const li = document.createElement("li");
+            li.className = "user";
+            li.dataset.uid = user.uid;
+            li.dataset.username = user.username; // Para la búsqueda
+
+            // Crear estructura interna segura (previene XSS)
+            const usernameSpan = document.createElement("span");
+            usernameSpan.className = "username";
+            usernameSpan.textContent = user.username;
+
+            const lastMessageSpan = document.createElement("span");
+            lastMessageSpan.className = "last-message";
+            // Acortar texto del último mensaje si es muy largo
+            lastMessageSpan.textContent = user.lastMessageText.length > 30 
+                ? user.lastMessageText.substring(0, 30) + "..." 
+                : user.lastMessageText;
+
+            li.appendChild(usernameSpan);
+            li.appendChild(lastMessageSpan);
+            fragment.appendChild(li);
+        });
+
+        userListDiv.appendChild(fragment);
+        statusMessage.style.display = 'none'; // Ocultar "Loading"
+    }
+
+    // Listener para seleccionar un usuario
     userListDiv.addEventListener("click", async (e) => {
         const userLi = e.target.closest(".user");
         if (!userLi) return;
 
+        // Quitar "active" de cualquier otro usuario
+        document.querySelectorAll('#userList .user.active').forEach(el => {
+            el.classList.remove('active');
+        });
+        // Añadir "active" al clickeado
+        userLi.classList.add('active');
+
         selectedUser = userLi.dataset.uid;
         const selectedUsername = userLi.dataset.username;
         const chatId = getChatId(currentUser.uid, selectedUser);
-
-        statusMessage.textContent = `Chat started with ${selectedUsername}`;
         
+        // Apagar listener de mensajes anterior
         if (currentMessagesRef) {
             off(currentMessagesRef); 
         }
@@ -101,16 +160,20 @@ async function main() {
         const messagesRef = ref(db, `chats/${chatId}/messages`);
         currentMessagesRef = messagesRef; 
 
+        // Asegurarse de que el chat existe (aunque ahora no es tan necesario)
         const chatRef = ref(db, `chats/${chatId}`);
         const chatSnap = await get(chatRef);
         if (!chatSnap.exists()) {
             await set(chatRef, { createdAt: Date.now() });
         }
 
-        chatBox.style.display = "block";
+        // Mostrar el chat y ocultar el placeholder
+        chatPlaceholder.style.display = "none";
+        chatBox.style.display = "flex"; // Usamos flex para la estructura interna
         chatWith.textContent = selectedUsername;
         messagesDiv.innerHTML = ""; 
 
+        // Cargar mensajes del chat seleccionado
         onValue(messagesRef, (snapshot) => {
             messagesDiv.innerHTML = ""; 
             if (!snapshot.exists()) return; 
@@ -132,18 +195,31 @@ async function main() {
         });
     });
 
-    // --- Message Sending Logic ---
+    // --- Message Sending Logic (ACTUALIZADO) ---
     const sendMessage = async () => {
         const text = messageInput.value.trim();
         if (!text || !selectedUser || !currentUser) return;
 
+        const chatId = getChatId(currentUser.uid, selectedUser);
+        const messagesRef = ref(db, `chats/${chatId}/messages`);
+        const chatRef = ref(db, `chats/${chatId}`); // Referencia a la raíz del chat
+        
         try {
-            const chatId = getChatId(currentUser.uid, selectedUser);
-            const messagesRef = ref(db, `chats/${chatId}/messages`);
+            // 1. Añadir el mensaje a la lista de mensajes
             await push(messagesRef, {
                 sender: currentUser.uid,
                 text: text,
+                timestamp: Date.now() // Añadimos timestamp al mensaje individual
             });
+
+            // 2. ACTUALIZAR la raíz del chat con el último mensaje (para ordenar)
+            const lastMessageData = {
+                text: text,
+                sender: currentUser.uid,
+                timestamp: Date.now()
+            };
+            await update(chatRef, { lastMessage: lastMessageData });
+
             messageInput.value = ""; 
         } catch (e) {
             console.error("Error sending message:", e);
@@ -151,7 +227,6 @@ async function main() {
     };
 
     sendButton.addEventListener("click", sendMessage);
-
     messageInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.keyCode === 13) {
             e.preventDefault(); 
@@ -159,7 +234,21 @@ async function main() {
         }
     });
 
-} // <-- End of the main() function
+    // --- Lógica de Búsqueda ---
+    searchInput.addEventListener('keyup', () => {
+        const filterText = searchInput.value.toLowerCase();
+        const users = document.querySelectorAll('#userList .user');
+        
+        users.forEach(user => {
+            const username = user.dataset.username.toLowerCase();
+            if (username.includes(filterText)) {
+                user.style.display = ""; // Mostrar
+            } else {
+                user.style.display = "none"; // Ocultar
+            }
+        });
+    });
 
-// --- Step 3: Run the app ---
+}
+
 main();

@@ -7,20 +7,43 @@
     <link rel="stylesheet" href="css/chat.css">
 </head>
 <body>
-    <h1>Chat — MelodyStream</h1>
-    <p id="statusMessage">Loading users...</p>
     
-    <ul id="userList"></ul>
+    <div class="chat-container">
+        
+        <aside class="sidebar">
+            <header class="sidebar-header">
+                <h1>MelodyStream Chat</h1>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search chats...">
+                </div>
+            </header>
+            
+            <p id="statusMessage">Loading chats...</p>
+            <ul id="userList">
+                </ul>
+        </aside>
 
-    <div id="chatBox" style="display:none; margin-top:20px;">
-        <h3 id="chatWith"></h3>
-        
-        <div id="messages" aria-live="polite"></div>
-        
-        <div id="inputContainer">
-            <input id="msgInput" type="text" placeholder="Type a message..." autocomplete="off">
-            <button id="sendBtn">Send</button>
-        </div>
+        <main class="chat-area">
+            
+            <div id="chatPlaceholder">
+                <h2>Select a chat to start messaging</h2>
+            </div>
+
+            <div id="chatBox">
+                <header class="chat-header">
+                    <h3 id="chatWith"></h3>
+                </header>
+                
+                <div id="messages" aria-live="polite">
+                    </div>
+                
+                <div id="inputContainer">
+                    <input id="msgInput" type="text" placeholder="Type a message..." autocomplete="off">
+                    <button id="sendBtn">Send</button>
+                </div>
+            </div>
+
+        </main>
     </div>
 
     <script type="module" src="js/chat.js"></script>
