@@ -1,0 +1,26 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+input, textarea {
+  display: block;
+  margin: 8px 0;
+  padding: 8px;
+  width: 260px;
+}
+
+button {
+  padding: 8px 12px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+#msg {
+  margin-top: 12px;
+  font-weight: 600;
+}
+
+#formContainer {
+  display: none; /* ocultar formulario hasta que haya sesión */
+}

@@ -1,0 +1,25 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+.podcast-item {
+  margin-bottom: 20px;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.podcast-item img {
+  max-width: 100px;
+  display: block;
+  margin-bottom: 10px;
+}
+
+.podcast-item h3 {
+  margin: 0 0 10px;
+}
+
+.podcast-item p {
+  margin: 0 0 10px;
+}
