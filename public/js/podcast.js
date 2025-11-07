@@ -57,50 +57,55 @@ async function listPodcasts() {
 
 // Function to display podcasts
 function displayPodcasts(podcasts) {
-  podcastList.innerHTML = ""; // Limpiar la lista antes de mostrar los resultados
+  podcastList.innerHTML = "";
 
   for (const podcastId in podcasts) {
     const podcast = podcasts[podcastId];
 
-    // Create a container for each podcast
     const podcastItem = document.createElement("div");
-    podcastItem.classList.add("podcast-item");
+    podcastItem.classList.add("podcast-card");
 
-    // Add the podcast icon
+    // Icono
     const img = document.createElement("img");
     img.src = podcast.iconURL;
     img.alt = `${podcast.nombre} icon`;
+    img.style.width = "100%";
+    img.style.maxHeight = "180px";
+    img.style.objectFit = "cover";
+    img.style.borderRadius = "10px";
+    img.style.marginBottom = "0.8rem";
     podcastItem.appendChild(img);
 
-    // Add the podcast name
+    // Título
     const title = document.createElement("h3");
     title.textContent = podcast.nombre;
     podcastItem.appendChild(title);
 
-    // Add the podcast description
+    // Descripción
     const description = document.createElement("p");
     description.textContent = podcast.descripcion;
     podcastItem.appendChild(description);
 
-    // Add the audio player
+    // Reproductor de audio
     const audio = document.createElement("audio");
     audio.controls = true;
     audio.src = podcast.audioURL;
+    audio.style.width = "100%";
     podcastItem.appendChild(audio);
 
-    // Add the delete button
+    // Botón Delete
     const deleteButton = document.createElement("button");
     deleteButton.textContent = "Delete";
-    deleteButton.style.marginTop = "10px";
+    deleteButton.className = "btn btn-outline-danger mt-3";
     deleteButton.addEventListener("click", () => {
       deletePodcast(podcastId, podcast.audioURL, podcast.iconURL);
     });
     podcastItem.appendChild(deleteButton);
 
-    // Append the podcast item to the list
     podcastList.appendChild(podcastItem);
   }
 }
+
 
 // Function to delete a podcast
 async function deletePodcast(podcastId, audioURL, iconURL) {
@@ -156,11 +161,15 @@ searchButton.addEventListener("click", () => {
   filterPodcasts(query);
 });
 
-// Add event listener to the "Back to Index" button
-const backToIndexButton = document.getElementById("backToIndex");
-backToIndexButton.addEventListener("click", () => {
-  window.location.href = "index.html"; // Redirect to index.html
+searchInput.addEventListener("keypress", (e) => {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    const query = searchInput.value.trim();
+    filterPodcasts(query);
+  }
 });
+
+
 
 // Add event listener to the "Upload Podcast" button
 const goToUploadButton = document.getElementById("goToUpload");

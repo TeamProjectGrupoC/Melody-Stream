@@ -1,26 +1,167 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
+/* ===============================
+   MelodyStream — Upload Podcast Page
+   =============================== */
+
+/* Fondo y layout */
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 80vh;
+  padding: 3rem 1rem;
+  gap: 2rem;
 }
 
-input, textarea {
-  display: block;
-  margin: 8px 0;
-  padding: 8px;
-  width: 260px;
+/* Título */
+main h1 {
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--color-azul2);
+  text-align: center;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-button {
-  padding: 8px 12px;
-  margin-right: 8px;
-  cursor: pointer;
-}
-
-#msg {
-  margin-top: 12px;
-  font-weight: 600;
-}
-
+/* ===============================
+   🧾 Formulario principal
+   =============================== */
 #formContainer {
-  display: none; /* ocultar formulario hasta que haya sesión */
+  width: 100%;
+  max-width: 650px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+/* Etiquetas */
+#formContainer label {
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: var(--color-blanco);
+}
+
+/* Inputs y textarea */
+#formContainer input[type="text"],
+#formContainer input[type="file"],
+#formContainer textarea {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  color: var(--color-blanco);
+  font-size: 1rem;
+  transition: 0.3s ease border-color, box-shadow;
+}
+
+/* Efectos focus */
+#formContainer input:focus,
+#formContainer textarea:focus {
+  outline: none;
+  border-color: var(--color-azul1);
+  box-shadow: 0 0 0 3px rgba(62, 154, 222, 0.3);
+}
+
+/* Placeholders visibles */
+#formContainer input::placeholder,
+#formContainer textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  opacity: 1;
+}
+
+/* Textarea */
+#formContainer textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* ===============================
+   🎛️ Botones
+   =============================== */
+#formContainer button {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.8rem;
+}
+
+/* Botón principal */
+#uploadBtn {
+  background-color: var(--color-azul1);
+  color: var(--color-blanco);
+}
+#uploadBtn:hover {
+  background-color: var(--color-azul2);
+  transform: scale(1.03);
+}
+
+/* Botón “Back to Home” */
+#backBtn {
+  background-color: transparent;
+  border: 1px solid var(--color-azul2);
+  color: var(--color-azul2);
+}
+#backBtn:hover {
+  background-color: var(--color-azul2);
+  color: var(--color-negro);
+}
+
+/* Botón “View Podcasts” */
+#viewPodcastsBtn {
+  background-color: var(--color-morado);
+  color: var(--color-blanco);
+}
+#viewPodcastsBtn:hover {
+  background-color: #4324a8;
+  transform: scale(1.03);
+}
+
+/* Botón “Go to Login” (si no hay sesión) */
+#loginBtn {
+  background-color: var(--color-morado);
+  color: var(--color-blanco);
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  font-weight: 600;
+  transition: 0.3s ease background-color, transform 0.2s;
+}
+#loginBtn:hover {
+  background-color: #4324a8;
+  transform: scale(1.05);
+}
+
+/* ===============================
+   💬 Mensaje inferior
+   =============================== */
+#msg {
+  margin-top: 1.2rem;
+  font-weight: 500;
+  text-align: center;
+  color: var(--color-azul2);
+}
+
+/* ===============================
+   📱 Responsividad
+   =============================== */
+@media (max-width: 600px) {
+  #formContainer {
+    padding: 1.5rem;
+    max-width: 90%;
+  }
+  main h1 {
+    font-size: 2rem;
+  }
 }

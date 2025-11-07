@@ -1,25 +1,163 @@
-body {
-  font-family: Arial, sans-serif;
-  margin: 20px;
+/* ===============================
+   MelodyStream — Podcast Search Page
+   =============================== */
+
+/* Fondo y disposición general */
+main {
+  min-height: 80vh;
+  padding: 3rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2rem;
 }
 
-.podcast-item {
-  margin-bottom: 20px;
-  border: 1px solid #ccc;
-  padding: 10px;
-  border-radius: 5px;
+/* Título */
+main h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-azul2);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-.podcast-item img {
-  max-width: 100px;
-  display: block;
-  margin-bottom: 10px;
+/* Subtítulo */
+main h2 {
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  color: var(--color-azul1);
+  text-align: center;
 }
 
-.podcast-item h3 {
-  margin: 0 0 10px;
+/* ===============================
+   🔍 Barra de búsqueda
+   =============================== */
+#searchInput {
+  width: min(700px, 90%);
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  color: var(--color-blanco);
+  transition: all 0.3s ease;
 }
 
-.podcast-item p {
-  margin: 0 0 10px;
+#searchInput:focus {
+  outline: none;
+  border-color: var(--color-azul1);
+  box-shadow: 0 0 0 3px rgba(62, 154, 222, 0.3);
+}
+
+#searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  opacity: 1;
+}
+
+/* Botón de búsqueda */
+#searchButton {
+  margin-top: 1rem;
+  background-color: var(--color-azul1);
+  border: none;
+  color: var(--color-blanco);
+  padding: 0.7rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: 0.3s ease background-color, transform 0.2s;
+}
+
+#searchButton:hover {
+  background-color: var(--color-azul2);
+  transform: scale(1.05);
+}
+
+/* ===============================
+   🎧 Lista de podcasts
+   =============================== */
+#podcastList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1000px;
+  margin-top: 1rem;
+}
+
+/* Cada tarjeta de podcast */
+.podcast-card {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.2rem;
+  transition: all 0.3s ease;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.podcast-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--color-azul2);
+  box-shadow: 0 6px 20px rgba(62, 154, 222, 0.25);
+}
+
+.podcast-card h3 {
+  font-size: 1.3rem;
+  color: var(--color-azul2);
+  margin-bottom: 0.5rem;
+}
+
+.podcast-card p {
+  font-size: 0.95rem;
+  color: var(--color-blanco);
+  opacity: 0.85;
+}
+
+/* ===============================
+   ⬆️ Botón "Upload Podcast"
+   =============================== */
+#goToUpload {
+  background-color: var(--color-morado);
+  border: none;
+  color: var(--color-blanco);
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s;
+}
+
+#goToUpload:hover {
+  background-color: #4324a8;
+  transform: scale(1.05);
+}
+
+#searchButton {
+  background-color: var(--color-azul1);
+  border: none;
+  color: var(--color-blanco);
+  border-radius: 10px;
+  padding: 0.7rem 1.5rem;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s;
+}
+
+#searchButton:hover {
+  background-color: var(--color-azul2);
+  transform: scale(1.05);
+}
+
+
+/* ===============================
+   🖥️ Responsividad
+   =============================== */
+@media (max-width: 600px) {
+  #searchInput {
+    width: 100%;
+  }
+
+  #podcastList {
+    grid-template-columns: 1fr;
+  }
 }
