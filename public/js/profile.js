@@ -1,9 +1,18 @@
-// Importaciones de módulos
-import { app } from './firebase-config.js'; 
+// --- IMPORTACIONES ---
+// Módulos de App y Autenticación (como los tenías)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
-// ***** CAMBIO CLAVE: Importar Realtime Database *****
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+// Módulos de Realtime Database (RTDB)
+// ¡CAMBIO! Importamos 'set' para poder escribir en la base de datos
+// y renombramos 'ref' a 'databaseRef' para evitar conflictos
+import { getDatabase, ref as databaseRef, onValue, set } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+
+// Módulos de Storage (¡NUEVO!)
+// Importamos todo lo necesario para subir archivos y obtener la URL
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
+
+// --- CONFIGURACIÓN DE FIREBASE ---
 const firebaseConfig = {
   apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
   authDomain: "melodystream123.firebaseapp.com",
@@ -15,79 +24,101 @@ const firebaseConfig = {
   measurementId: "G-J97KEDLYMB"
 };
 
-
+// --- INICIALIZACIÓN DE SERVICIOS ---
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
-let currentUser = null;
+let currentUser = null; // Guardaremos el usuario aquí para que la función de subida lo vea
 
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUser = user;
-    msg.textContent = `✅ Logged in as ${user.email}`;
-    formContainer.style.display = 'block';
-    loginBtn.style.display = 'none';
-  } else {
-    currentUser = null;
-    msg.textContent = "⚠️ You must be logged in to see your profile.";
-    formContainer.style.display = 'none';
-    loginBtn.style.display = 'inline-block';
-  }
-});
-
-/**
- * Verifica la autenticación y carga la foto de perfil desde Realtime Database.
- */
-function cargarFotoDePerfil() {
-    
+// --- FUNCIÓN DE CARGA DE DATOS (LA QUE TENÍAS) ---
+function cargarDatosDePerfil() {
     const imagenElemento = document.getElementById('fotoPerfilUsuario');
+    const msgElemento = document.getElementById('msg');
     
-    if (!imagenElemento) {
+    if (!imagenElemento || !msgElemento) {
+        console.error("Faltan elementos HTML (msg o fotoPerfilUsuario)");
         return;
     }
 
     onAuthStateChanged(auth, (user) => {
+        currentUser = user; // ¡IMPORTANTE! Guardamos el usuario actual
         if (user) {
-            // USUARIO CONECTADO
+            msgElemento.textContent = `✅ Logged in as ${user.email}`;
             
-            // ***** LÓGICA DE RTDB AQUÍ *****
-            // 1. Referencia a la ubicación de los datos del usuario: usuarios/[uid]
-            const userRef = ref(db, 'usuarios/' + user.uid);
-
-            // 2. Lee los datos una sola vez desde esa ubicación
+            const userRef = databaseRef(db, 'users/' + user.uid); // Usamos databaseRef
             onValue(userRef, (snapshot) => {
-                
-                // 3. Obtiene el objeto de datos del usuario
                 const userData = snapshot.val();
-                
-                // ***** LA LÓGICA IF/ELSE CON RTDB *****
-                
-                // 4. Chequea si hay datos Y si existe el campo 'urlFotoPerfil'
                 if (userData && userData.urlFotoPerfil) {
-                    
-                    const urlGuardada = userData.urlFotoPerfil;
-                    
-                    // 5. ACTUALIZAR EL HTML: Cambia el 'src' de la imagen
-                    imagenElemento.src = urlGuardada;
+                    imagenElemento.src = userData.urlFotoPerfil;
                     imagenElemento.alt = "Foto de perfil del usuario";
-                    
                 } else {
-                    // 6. NO HAY FOTO: Se mantiene la silueta por defecto del HTML
                     console.log("No se encontró una URL de foto de perfil en RTDB. Se usa la silueta.");
                 }
-            }, {
-                // Configuración para leer una sola vez si solo te interesa el estado inicial
-                onlyOnce: true 
-            });
-
+            }, { onlyOnce: true });
 
         } else {
-            // USUARIO DESCONECTADO
+            msgElemento.textContent = "⚠️ You must be logged in to see your profile.";
             console.log("Usuario no autenticado, asegurando que se muestra la silueta.");
+            imagenElemento.src = "images/logos/silueta.png";
         }
     });
 }
 
-// Ejecuta la función principal tan pronto como el HTML esté completamente cargado
-document.addEventListener('DOMContentLoaded', cargarFotoDePerfil);
+// --- ¡NUEVA FUNCIÓN! MANEJAR LA SUBIDA DEL FORMULARIO ---
+function setupFormUploadListener() {
+    const form = document.getElementById('uploadForm');
+    const fileInput = document.getElementById('fotoArchivo');
+    
+    if (!form) return;
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault(); // ¡CLAVE! Detiene el envío normal del formulario
+
+        // 1. Validaciones
+        if (!currentUser) {
+            alert("Debes estar logueado para subir una foto.");
+            return;
+        }
+        const file = fileInput.files[0];
+        if (!file) {
+            alert("Por favor, selecciona un archivo.");
+            return;
+        }
+
+        // 2. Crear la ruta de subida en Firebase Storage
+        // Ej: 'profile_images/UID_DEL_USUARIO/nombre_del_archivo.jpg'
+        const filePath = `profile_images/${currentUser.uid}/${file.name}`;
+        const sRef = storageRef(storage, filePath); // Usamos storageRef
+
+        try {
+            // 3. Subir el archivo
+            alert("Subiendo foto...");
+            const snapshot = await uploadBytes(sRef, file);
+            console.log('¡Foto subida!', snapshot);
+
+            // 4. Obtener la URL de descarga
+            const downloadURL = await getDownloadURL(snapshot.ref);
+            console.log('URL del archivo:', downloadURL);
+
+            // 5. Guardar la URL en Realtime Database
+            const userDbRef = databaseRef(db, 'users/' + currentUser.uid + '/urlFotoPerfil');
+            await set(userDbRef, downloadURL);
+            
+            // 6. Actualizar la imagen en la página (la silueta)
+            document.getElementById('fotoPerfilUsuario').src = downloadURL;
+            alert("¡Foto de perfil actualizada!");
+
+        } catch (error) {
+            console.error("Error al subir el archivo:", error);
+            alert("Error al subir la foto. Revisa la consola.");
+        }
+    });
+}
+
+// --- INICIAR LAS FUNCIONES ---
+// Cuando el HTML esté cargado, ejecuta ambas funciones
+document.addEventListener('DOMContentLoaded', () => {
+    cargarDatosDePerfil(); // Carga el email y la foto existente
+    setupFormUploadListener(); // Prepara el formulario de subida
+});
