@@ -4,12 +4,37 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 
 // ***** CAMBIO CLAVE: Importar Realtime Database *****
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
+  authDomain: "melodystream123.firebaseapp.com",
+  databaseURL: "https://melodystream123-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "melodystream123",
+  storageBucket: "melodystream123.firebasestorage.app",
+  messagingSenderId: "640160988809",
+  appId: "1:640160988809:web:d0995d302123ccf0431058",
+  measurementId: "G-J97KEDLYMB"
+};
 
-// Inicializa los servicios
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 const auth = getAuth(app);
-// ***** CAMBIO CLAVE: Inicializar RTDB *****
-const db = getDatabase(app); 
+const storage = getStorage(app);
+let currentUser = null;
 
+onAuthStateChanged(auth, (user) => {
+  if (user) {
+    currentUser = user;
+    msg.textContent = `✅ Logged in as ${user.email}`;
+    formContainer.style.display = 'block';
+    loginBtn.style.display = 'none';
+  } else {
+    currentUser = null;
+    msg.textContent = "⚠️ You must be logged in to see your profile.";
+    formContainer.style.display = 'none';
+    loginBtn.style.display = 'inline-block';
+  }
+});
 
 /**
  * Verifica la autenticación y carga la foto de perfil desde Realtime Database.
