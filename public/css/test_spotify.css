@@ -1,0 +1,133 @@
+/* ===============================
+   MelodyStream — Search Songs (Spotify)
+   Compatible con header/footer
+   =============================== */
+
+
+/* Centrado del contenido principal */
+main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2rem;
+  text-align: center;
+  animation: fadeIn 1s ease-in-out;
+  padding: 3rem 1rem;
+}
+
+/* Título */
+main h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: --color-blanco;
+}
+
+/* ===============================
+   🎵 Buscador
+   =============================== */
+#searchInput {
+  width: min(600px, 90%);
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  color: var(--color-blanco);
+  transition: 0.3s ease all;
+}
+
+#searchInput:focus {
+  outline: none;
+  border-color: var(--color-azul1);
+  box-shadow: 0 0 0 3px rgba(62, 154, 222, 0.3);
+}
+
+#searchInput::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  opacity: 1;
+}
+
+/* Botón de búsqueda */
+#searchBtn {
+  margin-top: 0.5rem;
+  background-color: var(--color-azul1);
+  color: var(--color-blanco);
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem 2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s;
+  box-shadow: 0 0 10px rgba(62, 154, 222, 0.3);
+}
+
+#searchBtn:hover {
+  background-color: var(--color-azul2);
+  transform: scale(1.05);
+}
+
+/* ===============================
+   🎧 Resultado de búsqueda
+   =============================== */
+#trackInfo {
+  margin-top: 2rem;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 2rem;
+  width: min(500px, 90%);
+  text-align: center;
+  color: var(--color-blanco);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+#trackInfo h2 {
+  color: var(--color-azul2);
+  margin-bottom: 0.5rem;
+  font-size: 1.6rem;
+}
+
+#trackInfo p {
+  margin: 0.3rem 0;
+  color: var(--color-blanco);
+  font-size: 1rem;
+}
+
+#trackInfo img {
+  margin-top: 1rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+#trackInfo audio {
+  margin-top: 1rem;
+  width: 100%;
+}
+
+/* ===============================
+   ✨ Animación y responsivo
+   =============================== */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+  main h1 {
+    font-size: 2rem;
+  }
+
+  #searchBtn {
+    width: 80%;
+  }
+
+  #trackInfo {
+    padding: 1.5rem;
+  }
+}
