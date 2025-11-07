@@ -42,26 +42,50 @@ function cargarDatosDePerfil() {
     }
 
     onAuthStateChanged(auth, (user) => {
-        currentUser = user; // ¡IMPORTANTE! Guardamos el usuario actual
-        if (user) {
-            msgElemento.textContent = `✅ Logged in as ${user.email}`;
-            
-            const userRef = databaseRef(db, 'users/' + user.uid); // Usamos databaseRef
-            onValue(userRef, (snapshot) => {
-                const userData = snapshot.val();
-                if (userData && userData.urlFotoPerfil) {
-                    imagenElemento.src = userData.urlFotoPerfil;
-                    imagenElemento.alt = "Foto de perfil del usuario";
-                } else {
-                    console.log("No se encontró una URL de foto de perfil en RTDB. Se usa la silueta.");
-                }
-            }, { onlyOnce: true });
+    currentUser = user; // Guardamos el usuario actual
 
+    const msgElemento = document.getElementById('msg');
+    const imagenElemento = document.getElementById('fotoPerfilUsuario');
+    const userDataDiv = document.getElementById('userData');
+
+    if (user) {
+        msgElemento.textContent = `✅ Logged in as ${user.email}`;
+
+        // Referencia al usuario en la base de datos
+        const userRef = databaseRef(db, 'users/' + user.uid);
+
+        onValue(userRef, (snapshot) => {
+        const userData = snapshot.val();
+
+        if (userData) {
+            // Mostrar datos de perfil
+            userDataDiv.style.display = 'block';
+            userDataDiv.innerHTML = `
+            <h3>Profile Information</h3>
+            <p><strong>Username:</strong> ${userData.username || "—"}</p>
+            <p><strong>Phone:</strong> ${userData.phone || "—"}</p>
+            <p><strong>Email:</strong> ${user.email}</p>
+            <p><strong>Favorite Songs:</strong> ${
+                userData.favorite_songs
+                ? Object.keys(userData.favorite_songs).join(", ")
+                : "—"
+            }</p>
+            `;
+
+            // Mostrar foto de perfil si existe
+            if (userData.urlFotoPerfil) {
+            imagenElemento.src = userData.urlFotoPerfil;
+            }
         } else {
-            msgElemento.textContent = "⚠️ You must be logged in to see your profile.";
-            console.log("Usuario no autenticado, asegurando que se muestra la silueta.");
-            imagenElemento.src = "images/logos/silueta.png";
+            userDataDiv.style.display = 'none';
         }
+        });
+
+    } else {
+        msgElemento.textContent = "⚠️ You must be logged in to see your profile.";
+        imagenElemento.src = "images/logos/silueta.png";
+        userDataDiv.style.display = 'none';
+    }
     });
 }
 
@@ -121,4 +145,8 @@ function setupFormUploadListener() {
 document.addEventListener('DOMContentLoaded', () => {
     cargarDatosDePerfil(); // Carga el email y la foto existente
     setupFormUploadListener(); // Prepara el formulario de subida
+});
+
+document.getElementById('goToChatBtn').addEventListener('click', () => {
+  window.location.href = 'chat.html';
 });

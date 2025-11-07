@@ -1,0 +1,222 @@
+/* ===============================
+   MelodyStream — Profile Page
+   =============================== */
+
+/* Layout general */
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 80vh;
+  padding: 3rem 1rem;
+  gap: 2rem;
+}
+
+/* Título */
+main h1 {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-azul2);
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Mensaje */
+#msg {
+  font-size: 1rem;
+  font-weight: 500;
+  text-align: center;
+  color: var(--color-azul1);
+}
+
+/* ===============================
+   🧍‍♀️ Foto de perfil
+   =============================== */
+.perfil-foto-contenedor {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 50%;
+  padding: 0.7rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  width: 210px;
+  height: 210px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.perfil-foto-contenedor:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 20px rgba(62, 154, 222, 0.3);
+}
+
+.perfil-foto-contenedor img {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-azul2);
+}
+
+/* ===============================
+   📤 Formulario de subida
+   =============================== */
+#uploadForm {
+  width: 100%;
+  max-width: 500px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+#uploadForm h2 {
+  color: var(--color-azul2);
+  margin-bottom: 1rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+}
+
+#uploadForm label {
+  display: block;
+  font-weight: 500;
+  color: var(--color-blanco);
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+  text-align: left;
+}
+
+#uploadForm input[type="file"] {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0.6rem;
+  color: var(--color-blanco);
+  cursor: pointer;
+  transition: 0.3s ease border-color, box-shadow;
+}
+
+#uploadForm input[type="file"]:hover {
+  border-color: var(--color-azul2);
+}
+
+#uploadForm button {
+  margin-top: 1.2rem;
+  width: 100%;
+  background-color: var(--color-azul1);
+  border: none;
+  color: var(--color-blanco);
+  border-radius: 10px;
+  padding: 0.7rem 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#uploadForm button:hover {
+  background-color: var(--color-azul2);
+  transform: scale(1.03);
+}
+
+/* ===============================
+   🔗 Enlace al chat
+   =============================== */
+main a {
+  color: var(--color-azul2);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+main a:hover {
+  color: var(--color-morado);
+  text-decoration: underline;
+}
+
+/* ===============================
+   📱 Responsividad
+   =============================== */
+@media (max-width: 600px) {
+  main {
+    padding: 2rem 1rem;
+  }
+
+  .perfil-foto-contenedor {
+    width: 160px;
+    height: 160px;
+  }
+
+  .perfil-foto-contenedor img {
+    width: 140px;
+    height: 140px;
+  }
+
+  #uploadForm {
+    padding: 1.5rem;
+  }
+
+  main h1 {
+    font-size: 2rem;
+  }
+}
+
+/* ===============================
+   🧾 Datos del perfil (como en login)
+   =============================== */
+#userData {
+  display: none; /* se mostrará cuando se carguen los datos */
+  margin-top: 2rem;
+  width: 100%;
+  max-width: 500px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1.5rem 2rem;
+  color: var(--color-blanco);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+#userData h3 {
+  color: var(--color-azul2);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+#userData p {
+  margin: 0.4rem 0;
+  font-size: 1rem;
+  color: var(--color-blanco);
+}
+
+#userData p strong {
+  color: var(--color-azul1);
+}
+
+/* ===============================
+   💬 Botón de ir a chat
+   =============================== */
+
+#goToChatBtn {
+  background-color: var(--color-morado);
+  border: none;
+  color: var(--color-blanco);
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s;
+  width: 100%;
+  max-width: 500px;
+}
+
+#goToChatBtn:hover {
+  background-color: #4324a8;
+  transform: scale(1.05);
+}
+

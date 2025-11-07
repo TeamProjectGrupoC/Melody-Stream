@@ -25,7 +25,6 @@ const descInput = document.getElementById('podcastDesc');
 const iconInput = document.getElementById('podcastIcon');
 const fileInput = document.getElementById('podcastFile');
 const uploadBtn = document.getElementById('uploadBtn');
-const backBtn = document.getElementById('backBtn');
 const msg = document.getElementById('msg');
 const formContainer = document.getElementById('formContainer');
 const loginBtn = document.getElementById('loginBtn');
@@ -103,7 +102,6 @@ uploadBtn.addEventListener('click', async () => {
 });
 
 // Botones de navegación
-backBtn.addEventListener('click', () => window.location.href = 'index.html');
 loginBtn.addEventListener('click', () => window.location.href = 'login.html');
 
 // Nuevo botón para ir a la pestaña de ver podcasts

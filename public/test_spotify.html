@@ -1,69 +1,91 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Buscar canciones en Spotify</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="Carolina Alba García, Celtia Castelo Gajino, Guillermo Arcos Salgado, Ines Vilariño, Mario Seoane, Francisco">
+    <meta name="description" content="Melody Stream: listen to music; upload your own podcast; and chat and share your favourite songs with your friends">
+    <meta name="keywords" content="Melody Stream, music, podcast, friends">
+    <title>Search songs with Spotify</title>
+
+    <link rel="stylesheet" href="css/general.css">
+    <link rel="stylesheet" href="css/test_spotify.css">
+    <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg">
 </head>
+
 <body>
-  <h1>Buscar canciones</h1>
+  <header id="headerPrincipal">
+        <figure>
+            <img src="images/logos/logo.png" alt="Webpage logo">
+        </figure>
+        <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
+        <nav id="NavPrincipal">
+            <ul>
+                <li><a href="index.html">HOME</a></li>
+                <li><a href="test_register_spotify.html">MUSIC</a></li>
+                <li><a href="podcast_upload.html">UPLOAD A PODCAST</a></li>
+                <li><a href="podcast.html">SEARCH A PODCAST</a></li>
+                <li><a href="profile.html">MY PROFILE</a></li>
+                <li><a href="login.html">LOG IN</a></li>
+            </ul>
+        </nav>
+  </header>
+
+  <main>
+  <h1>Search for a Song</h1>
   <input type="text" id="searchInput" placeholder="Nombre de la canción">
-  <button id="searchBtn">Buscar</button>
+  <button id="searchBtn">Search</button>
   <div id="trackInfo"></div>
+  </main>
 
-  <script>
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
+  <footer id="footerPrincipal">
+        <h2 id="footer-title">MELODY STREAM</h2>
+        <div id="footer-follow">
+            <p>FOLLOW US</p>
+            <ul>
+                <!-- Logo 1 (Spotify) -->
+                <li>
+                    <figure>
+                        <a href="https://www.spotify.com" target="_blank">
+                            <img src="images/logos/Spotify.svg" alt="Spotify">
+                        </a>
+                    </figure>
+                </li>
+                <!-- Logo 2 (Facebook) -->
+                <li>
+                    <figure>
+                        <a href="https://www.facebook.com" target="_blank">
+                            <img src="images/logos/Facebook.svg" alt="Facebook">
+                        </a>
+                    </figure>
+                </li>
+                <!-- Logo 3 (Instagram) -->
+                <li>
+                    <figure>
+                        <a href="https://www.instagram.com" target="_blank">
+                            <img src="images/logos/Instagram.svg" alt="Instagram">
+                        </a>
+                    </figure>
+                </li>
+                <!-- Logo 4 (Twitter) -->
+                <li>
+                    <figure>
+                        <a href="https://www.twitter.com" target="_blank">
+                            <img src="images/logos/Twitter.svg" alt="Twitter">
+                        </a>
+                    </figure>
+                </li>
+                <!-- Logo 5 (YouTube) -->
+                <li>
+                    <figure>
+                        <a href="https://www.youtube.com" target="_blank">
+                            <img src="images/logos/Youtube.svg" alt="YouTube">
+                        </a>
+                    </figure>
+                </li>
+            </ul>
+        </div>
+ </footer>
 
-    let accessToken = null;
-
-    async function getToken() {
-      if (!code) {
-        document.getElementById("trackInfo").innerHTML = "<p>No se encontró código. Vuelve a iniciar sesión.</p>";
-        return;
-      }
-
-      try {
-        const res = await fetch(`https://us-central1-melodystream123.cloudfunctions.net/getSpotifyToken?code=${code}`);
-        const data = await res.json();
-        accessToken = data.access_token;
-      } catch (err) {
-        console.error(err);
-        document.getElementById("trackInfo").innerHTML = "<p>Error obteniendo el token.</p>";
-      }
-    }
-
-    async function searchTrack() {
-      const query = document.getElementById("searchInput").value.trim();
-      if (!query) return alert("Introduce el nombre de una canción.");
-      if (!accessToken) return alert("Token no disponible.");
-
-      try {
-        const res = await fetch(`https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=1`, {
-          headers: { Authorization: `Bearer ${accessToken}` }
-        });
-        const data = await res.json();
-        const track = data.tracks?.items[0];
-        if (!track) {
-          document.getElementById("trackInfo").innerHTML = "<p>No se encontró ninguna canción.</p>";
-          return;
-        }
-
-        document.getElementById("trackInfo").innerHTML = `
-          <h2>${track.name}</h2>
-          <p>${track.artists[0].name}</p>
-          <img src="${track.album.images[0].url}" width="150">
-          ${track.preview_url ? `<audio controls src="${track.preview_url}"></audio>` : "<p>No hay preview disponible.</p>"}
-        `;
-      } catch (err) {
-        console.error(err);
-        document.getElementById("trackInfo").innerHTML = "<p>Error al buscar canción.</p>";
-      }
-    }
-
-    document.getElementById("searchBtn").addEventListener("click", searchTrack);
-
-    // Llamar al backend al cargar
-    getToken();
-  </script>
 </body>
 </html>
