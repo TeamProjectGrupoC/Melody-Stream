@@ -30,18 +30,33 @@
     </header>
 
  
-    <h1>My profile</h1>
-    <p><a href="chat.html">Go to Chat</a></p>
-    <form action="/ruta-donde-procesas-la-subida" method="POST" enctype="multipart/form-data">
-    
-    <h2>Sube tu Foto</h2>
-    
-    <label for="fotoArchivo">Selecciona un archivo:</label>
-    <input type="file" id="fotoArchivo" name="imagen_subida" accept="image/*" required>
-    
-    <button type="submit">Subir Foto</button>
 
-</form>
+
+
+
+<main>
+    <h1>My profile</h1>
+    <div class="perfil-foto-contenedor">
+        <img id="fotoPerfilUsuario" src="images/logos/silueta.png" alt="Profile photo" width="200" height="150">
+    </div>
+    
+    
+    
+    <form action="/ruta-donde-procesas-la-subida" method="POST" enctype="multipart/form-data">
+        <h2>Upload your photo</h2>
+        <label for="fotoArchivo">Select a file:</label>
+        <input type="file" id="fotoArchivo" name="imagen_subida" accept="image/*" required>
+        <button type="submit">Upload</button>
+    </form>
+    <p><a href="chat.html">Go to Chat</a></p>
+</main>
+
+
+
+
+
+
+
     <footer id="footerPrincipal">
         <h2 id="footer-title">MELODY STREAM</h2>
         <div id="footer-follow">
