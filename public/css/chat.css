@@ -1,155 +1,144 @@
-/* --- Variables y Reseteo --- */
-:root {
-    --primary-color: #007bff;
-    --primary-hover: #0056b3;
-    --bg-light: #f8f9fa;
-    --bg-hover: #e9ecef;
-    --bg-chat: #ffffff;
-    --bg-chat-container: #f0f2f5;
-    --border-color: #dee2e6;
-    
-    --msg-you-bg: #dcf8c6;
-    --msg-you-text: #303030;
-    --msg-other-bg: #ffffff;
-    --msg-other-text: #303030;
-    --text-secondary: #6c757d;
-}
+/*
+ * Este archivo (chat.css) se carga DESPUÉS de general.css
+ * y adapta el estilo del chat al tema oscuro.
+ */
 
-*, *::before, *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
+/* 1. Layout del Body (Específico para esta página)
+   general.css define el fondo, pero este CSS define el layout.
+*/
 body {
-    font-family: Arial, sans-serif;
-    background-color: var(--bg-chat-container);
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column; /* Apila el header y el chat */
     height: 100vh;
     overflow: hidden;
 }
 
-/* --- Contenedor Principal --- */
+/* 2. Contenedor Principal del Chat
+   Ocupa el espacio restante debajo del header.
+*/
 .chat-container {
     display: flex;
-    width: 90vw;
-    height: 95vh;
-    max-width: 1600px;
-    background: var(--bg-chat);
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    width: 100%;
+    flex: 1; /* Regla clave: ocupa el espacio restante */
+    background: #0C0C14; /* Un negro un poco más claro que el fondo */
     overflow: hidden;
 }
 
-/* --- Columna Izquierda (Sidebar) --- */
+/* 3. Sidebar (Columna Izquierda)
+   Usa las variables de general.css
+*/
 .sidebar {
     display: flex;
     flex-direction: column;
-    flex: 0 0 30%; /* Ocupa el 30% del ancho, sin crecer ni encogerse */
+    flex: 0 0 30%; 
     min-width: 300px;
-    border-right: 1px solid var(--border-color);
+    background: #101018; /* Fondo oscuro para el sidebar */
+    border-right: 1px solid var(--color-gris);
 }
 
 .sidebar-header {
     padding: 16px;
-    background: var(--bg-light);
-    border-bottom: 1px solid var(--border-color);
+    background: #191922; /* Fondo de header oscuro */
+    border-bottom: 1px solid var(--color-gris);
 }
 
+/* Anula los estilos H1 de general.css (centrado) */
 .sidebar-header h1 {
     font-size: 20px;
     margin-bottom: 12px;
-    color: var(--primary-color);
+    color: var(--color-azul1);
+    text-align: left;
 }
 
 .search-container input {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--color-azul1);
+    background: var(--color-gris);
+    color: var(--color-blanco);
     border-radius: 20px;
     font-size: 14px;
+}
+.search-container input::placeholder {
+    color: #ccc;
 }
 
 #statusMessage {
     padding: 16px;
-    color: var(--text-secondary);
+    color: #aaa; /* Texto secundario */
 }
 
 #userList {
     list-style-type: none;
     overflow-y: auto;
-    flex: 1; /* Ocupa el espacio restante */
+    flex: 1;
 }
 
 .user {
     display: flex;
-    flex-direction: column; /* Apila username y last message */
+    flex-direction: column;
     padding: 12px 16px;
-    border-bottom: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--color-gris);
     cursor: pointer;
     transition: background-color 0.2s ease;
 }
 
-.user:hover {
-    background: var(--bg-hover);
-}
-
-.user.active {
-    background: var(--bg-hover);
+.user:hover, .user.active {
+    background: var(--color-gris);
 }
 
 .user .username {
     font-weight: bold;
     font-size: 16px;
-    color: #000;
+    color: var(--color-blanco);
     margin-bottom: 4px;
 }
 
 .user .last-message {
     font-size: 14px;
-    color: var(--text-secondary);
+    color: #aaa;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
 
-/* --- Columna Derecha (Chat Area) --- */
+/* 4. Área del Chat (Columna Derecha) */
 .chat-area {
     display: flex;
     flex-direction: column;
-    flex: 1; /* Ocupa el 70% restante */
-    background: var(--bg-chat-container);
+    flex: 1;
+    /* El fondo del body (con degradado) se verá aquí */
+    background: transparent; 
 }
 
-#chatPlaceholder {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100%;
-    color: var(--text-secondary);
+/* Anula los estilos H2 de general.css */
+#chatPlaceholder h2 {
+    color: #aaa;
     text-align: center;
+    font-weight: normal;
 }
 
 #chatBox {
-    display: none; /* Oculto por defecto, JS lo cambia a 'flex' */
+    display: none; /* JS lo cambia a 'flex' */
     flex-direction: column;
     height: 100%;
 }
 
 .chat-header {
     padding: 16px;
-    background: var(--bg-light);
-    border-bottom: 1px solid var(--border-color);
+    background: #191922;
+    border-bottom: 1px solid var(--color-gris);
 }
 
+/* Anula los estilos H3 de general.css */
 #chatWith {
     font-size: 18px;
+    color: var(--color-blanco);
+    text-align: left; /* Lo alineamos a la izquierda */
 }
 
 #messages {
-    flex: 1; /* Ocupa todo el espacio disponible */
+    flex: 1;
     padding: 16px;
     overflow-y: auto;
     display: flex;
@@ -164,51 +153,65 @@ body {
     font-size: 15px;
     line-height: 1.4;
     word-wrap: break-word;
-    box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+    box-shadow: 0 1px 1px rgba(0,0,0,0.2);
 }
 
 .message.you {
     align-self: flex-end;
-    background-color: var(--msg-you-bg);
-    color: var(--msg-you-text);
+    background-color: var(--color-morado); /* Color de tu tema */
+    color: var(--color-blanco);
     border-bottom-right-radius: 2px;
 }
 
 .message.other {
     align-self: flex-start;
-    background-color: var(--msg-other-bg);
-    color: var(--msg-other-text);
+    background-color: var(--color-gris); /* Color de tu tema */
+    color: var(--color-blanco);
     border-bottom-left-radius: 2px;
 }
 
-/* Input container */
+/* 5. Input del Chat (Abajo) */
 #inputContainer {
     display: flex;
     gap: 10px;
     padding: 16px;
-    background: var(--bg-light);
-    border-top: 1px solid var(--border-color);
+    background: #191922; /* Fondo oscuro */
+    border-top: 1px solid var(--color-gris);
 }
 
 #msgInput {
     flex: 1;
     padding: 10px 16px;
-    border: 1px solid var(--border-color);
+    border: 1px solid var(--color-azul1);
+    background: var(--color-gris);
+    color: var(--color-blanco);
     border-radius: 20px;
     font-size: 15px;
 }
-
-#sendBtn {
-    padding: 10px 20px;
-    cursor: pointer;
-    border: none;
-    background-color: var(--primary-color);
-    color: white;
-    border-radius: 20px;
-    font-weight: bold;
-    transition: background-color 0.2s ease;
+#msgInput::placeholder {
+    color: #ccc;
 }
 
-#sendBtn:hover {
-    background-color: var(--primary-hover);
+/* El botón #sendBtn usará los estilos de "button" de general.css */
+/* Solo añadimos lo específico */
+#sendBtn {
+    border-radius: 20px;
+    font-weight: bold;
+    padding: 10px 20px;
+}
+
+/* 6. Estilos Responsive (Solo para el layout del chat) */
+@media (max-width: 800px) {
+    .chat-container {
+        flex-direction: column; /* Apila el sidebar encima del chat */
+    }
+    .sidebar {
+        flex: 0 0 40%; /* Elige la altura que prefieras */
+        min-width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--color-gris);
+    }
+    .chat-area {
+        flex: 1;
+    }
 }
