@@ -197,8 +197,59 @@ async function main() {
                 const data = childSnap.val();
                 const div = document.createElement("div");
                 div.classList.add("message");
-                div.textContent = data.text;
                 div.classList.add(data.sender === currentUser.uid ? "you" : "other");
+
+                if (data.attachment) {
+                    // Render rich attachment card
+                    const card = document.createElement('div');
+                    card.className = 'attachment-card';
+
+                    const img = document.createElement('img');
+                    img.src = data.attachment.imageURL || 'images/logos/logo.png';
+                    img.alt = data.attachment.title || 'shared';
+                    img.style.width = '80px';
+                    img.style.height = '80px';
+                    img.style.objectFit = 'cover';
+                    img.style.marginRight = '10px';
+
+                    const meta = document.createElement('div');
+                    meta.className = 'attachment-meta';
+
+                    const title = document.createElement('div');
+                    title.className = 'attachment-title';
+                    title.textContent = data.attachment.title || 'Untitled';
+
+                    const author = document.createElement('div');
+                    author.className = 'attachment-author';
+                    author.textContent = data.attachment.author || '';
+
+                    meta.appendChild(title);
+                    meta.appendChild(author);
+
+                    if (data.attachment.audioURL) {
+                        const audio = document.createElement('audio');
+                        audio.controls = true;
+                        audio.src = data.attachment.audioURL;
+                        audio.style.width = '100%';
+                        meta.appendChild(audio);
+                    }
+
+                    card.appendChild(img);
+                    card.appendChild(meta);
+
+                    if (data.text) {
+                        const textDiv = document.createElement('div');
+                        textDiv.className = 'message-text';
+                        textDiv.textContent = data.text;
+                        card.appendChild(textDiv);
+                    }
+
+                    div.appendChild(card);
+                } else {
+                    // simple text message
+                    div.textContent = data.text || '';
+                }
+
                 messagesDiv.appendChild(div);
             });
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
@@ -206,9 +257,9 @@ async function main() {
     });
 
     // --- Send message ---
-    const sendMessage = async () => {
+    const sendMessage = async (attachment = null) => {
         const text = messageInput.value.trim();
-        if (!text || !selectedUser || !currentUser) return;
+        if ((!text && !attachment) || !selectedUser || !currentUser) return;
 
         const chatId = getChatId(currentUser.uid, selectedUser);
         const messagesRef = ref(db, `chats/${chatId}/messages`);
@@ -222,14 +273,15 @@ async function main() {
             timestamp: newTimestamp
         };
 
+        if (attachment) newMessage.attachment = attachment;
+
         const lastMessageData = {
             sender: currentUser.uid,
-            text,
+            text: attachment ? `[Compartido] ${attachment.title}` : text,
             timestamp: newTimestamp
         };
 
         try {
-            // Step 1: push message and create chat if it doesn't exist
             const newMessageKey = push(messagesRef).key;
             await update(chatRef, {
                 [`messages/${newMessageKey}`]: newMessage,
@@ -240,12 +292,8 @@ async function main() {
                 }
             });
 
-            // Step 2: update /userChats for both users (used for UI)
-            const userChatsCurrentRef = ref(db, `userChats/${currentUser.uid}/${chatId}`);
-            const userChatsSelectedRef = ref(db, `userChats/${selectedUser}/${chatId}`);
-
-            await update(userChatsCurrentRef, { lastMessage: lastMessageData });
-            await update(userChatsSelectedRef, { lastMessage: lastMessageData });
+            await update(ref(db, `userChats/${currentUser.uid}/${chatId}`), { lastMessage: lastMessageData });
+            await update(ref(db, `userChats/${selectedUser}/${chatId}`), { lastMessage: lastMessageData });
 
             // --- Clear input box ---
             messageInput.value = "";

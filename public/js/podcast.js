@@ -4,7 +4,10 @@ import {
   ref,
   get,
   remove,
+  push,
+  update,
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import {
   getStorage,
   ref as storageRef,
@@ -35,6 +38,13 @@ const searchInput = document.getElementById("searchInput");
 const searchButton = document.getElementById("searchButton");
 
 let allPodcasts = {}; // Variable para almacenar todos los podcasts
+let currentUser = null;
+
+// Auth listener to get current user
+const auth = getAuth(app);
+onAuthStateChanged(auth, (user) => {
+  currentUser = user;
+});
 
 // Function to list podcasts
 async function listPodcasts() {
@@ -102,6 +112,15 @@ function displayPodcasts(podcasts) {
     });
     podcastItem.appendChild(deleteButton);
 
+    // Share button
+    const shareButton = document.createElement("button");
+    shareButton.textContent = "Share";
+    shareButton.className = "btn btn-outline-primary mt-2";
+    shareButton.addEventListener("click", () => {
+      promptSharePodcast(podcastId, podcast);
+    });
+    podcastItem.appendChild(shareButton);
+
     podcastList.appendChild(podcastItem);
   }
 }
@@ -136,6 +155,179 @@ async function deletePodcast(podcastId, audioURL, iconURL) {
     console.error("Error deleting podcast:", error);
     alert("Failed to delete the podcast.");
   }
+}
+
+// Prompt user for recipient and share podcast as attachment
+// Open a modal listing users and call onSelect(selectedUid)
+async function promptSharePodcast(podcastId, podcast) {
+  if (!currentUser) return alert("Debes iniciar sesión para compartir.");
+
+  try {
+    const usersRef = ref(db, "users");
+    const snap = await get(usersRef);
+    if (!snap.exists()) return alert("No users found.");
+    const users = snap.val();
+
+    // Build array of { uid, username, email }
+    const usersArray = [];
+    for (const uid in users) {
+      if (uid === currentUser.uid) continue; // don't show self
+      usersArray.push({ uid, username: users[uid].username || users[uid].email || '(no name)', email: users[uid].email || '' });
+    }
+
+    if (usersArray.length === 0) return alert('No hay otros usuarios para compartir.');
+
+    // show modal and wait for selection
+    openUserSelectModal(usersArray, async (recipientUid) => {
+      if (!recipientUid) return; // cancelled
+
+      const attachment = {
+        type: "podcast",
+        id: podcastId,
+        title: podcast.nombre,
+        author: podcast.autor || '',
+        imageURL: podcast.iconURL,
+        audioURL: podcast.audioURL,
+        source: "melodystream"
+      };
+
+      try {
+        await shareToUser(recipientUid, attachment);
+        alert("Podcast compartido correctamente.");
+      } catch (err) {
+        console.error(err);
+        alert("Error compartiendo podcast.");
+      }
+    });
+
+  } catch (err) {
+    console.error(err);
+    alert("Error compartiendo podcast.");
+  }
+}
+
+// Create and show a lightweight user selection modal. Calls onSelect(uid) or onSelect(null) if cancelled.
+function openUserSelectModal(usersArray, onSelect) {
+  // modal elements
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed';
+  overlay.style.left = 0;
+  overlay.style.top = 0;
+  overlay.style.right = 0;
+  overlay.style.bottom = 0;
+  overlay.style.background = 'rgba(0,0,0,0.5)';
+  overlay.style.display = 'flex';
+  overlay.style.alignItems = 'center';
+  overlay.style.justifyContent = 'center';
+  overlay.style.zIndex = 9999;
+
+  const box = document.createElement('div');
+  box.style.width = '360px';
+  box.style.maxHeight = '70vh';
+  box.style.overflow = 'auto';
+  box.style.background = '#fff';
+  box.style.borderRadius = '8px';
+  box.style.padding = '12px';
+  box.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
+
+  const title = document.createElement('h3');
+  title.textContent = 'Selecciona un usuario';
+  title.style.marginTop = 0;
+  box.appendChild(title);
+
+  const list = document.createElement('ul');
+  list.style.listStyle = 'none';
+  list.style.padding = 0;
+  list.style.margin = '8px 0 12px 0';
+
+  usersArray.forEach(u => {
+    const li = document.createElement('li');
+    li.style.display = 'flex';
+    li.style.justifyContent = 'space-between';
+    li.style.alignItems = 'center';
+    li.style.padding = '8px';
+    li.style.borderBottom = '1px solid #eee';
+
+    const info = document.createElement('div');
+    info.innerHTML = `<strong>${escapeHtml(u.username)}</strong><div style="font-size:0.85rem;color:#666">${escapeHtml(u.email)}</div>`;
+
+    const btn = document.createElement('button');
+    btn.textContent = 'Compartir';
+    btn.className = 'btn';
+    btn.style.marginLeft = '8px';
+    btn.addEventListener('click', () => {
+      document.body.removeChild(overlay);
+      onSelect(u.uid);
+    });
+
+    li.appendChild(info);
+    li.appendChild(btn);
+    list.appendChild(li);
+  });
+
+  box.appendChild(list);
+
+  const cancel = document.createElement('button');
+  cancel.textContent = 'Cancelar';
+  cancel.className = 'btn';
+  cancel.style.marginTop = '8px';
+  cancel.addEventListener('click', () => {
+    document.body.removeChild(overlay);
+    onSelect(null);
+  });
+  box.appendChild(cancel);
+
+  overlay.appendChild(box);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) {
+      document.body.removeChild(overlay);
+      onSelect(null);
+    }
+  });
+
+  document.body.appendChild(overlay);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>"']/g, function (m) { return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[m]); });
+}
+
+// Write the message with attachment to DB
+async function shareToUser(recipientUid, attachment) {
+  if (!currentUser) return alert("Debes iniciar sesión.");
+  const senderUid = currentUser.uid;
+  const chatId = senderUid < recipientUid ? `${senderUid}_${recipientUid}` : `${recipientUid}_${senderUid}`;
+
+  const messagesRef = ref(db, `chats/${chatId}/messages`);
+  const chatRef = ref(db, `chats/${chatId}`);
+  const timestamp = Date.now();
+
+  const newMessage = {
+    sender: senderUid,
+    text: '',
+    timestamp,
+    attachment
+  };
+
+  const newKey = push(messagesRef).key;
+  await update(chatRef, {
+    [`messages/${newKey}`]: newMessage,
+    createdAt: timestamp,
+    users: {
+      [senderUid]: true,
+      [recipientUid]: true
+    }
+  });
+
+  const lastMessageData = {
+    sender: senderUid,
+    text: `[Compartido] ${attachment.title}`,
+    timestamp
+  };
+
+  await update(ref(db, `userChats/${senderUid}/${chatId}`), { lastMessage: lastMessageData });
+  await update(ref(db, `userChats/${recipientUid}/${chatId}`), { lastMessage: lastMessageData });
 }
 
 // Function to filter podcasts based on the search query
