@@ -1,24 +1,67 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"; 
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-// No necesitamos 'query' ni 'orderByChild' en esta versión
-import { getDatabase, ref, get, child, set, push, onValue, off, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { 
+    getDatabase, ref, get, child, set, push, onValue, off, update 
+} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+/*
+DATABASE STRUCTURE AND LOGIC:
+
+/users/{uid} 
+    - Stores user profiles.
+    - Each user can read the list of users.
+    - Each user can write only their own profile (and only if email verified).
+
+/chats/{chatId} 
+    - Stores the actual chat conversation between two users.
+    - chatId = combination of both user IDs (lexicographical order).
+    - Fields:
+        - createdAt: timestamp of when the chat was created.
+        - users: { [uid]: true } → participants of the chat.
+        - messages/{msgId}: 
+            - Each message pushed into this node.
+            - Fields:
+                - sender: UID of the sender.
+                - text: message content.
+                - timestamp: when the message was sent.
+
+/userChats/{uid}/{chatId} 
+    - Stores chat summaries for each user to render chat list.
+    - Fields:
+        - lastMessage: object with
+            - sender: UID of the last message sender.
+            - text: last message content.
+            - timestamp: timestamp of the last message.
+    - Purpose: Used by the UI to show last message in the chat list and sort chats by recent activity.
+
+LOGIC WHEN SENDING A MESSAGE:
+1. Compute chatId using currentUser.uid and selectedUser.uid.
+2. Push the new message under /chats/{chatId}/messages/{msgId}.
+3. If chat does not exist, create /chats/{chatId} with createdAt and users.
+4. Update /userChats/{currentUser.uid}/{chatId}/lastMessage and /userChats/{selectedUser}/{chatId}/lastMessage.
+   - This ensures each user's chat list reflects the last message and ordering.
+5. Clear the input box in the UI.
+6. Messages are displayed in real-time via onValue listener on /chats/{chatId}/messages.
+*/
+
 
 async function main() {
-    
+
+    // --- Load Firebase config ---
     let firebaseConfig;
     try {
         const response = await fetch('/__/firebase/init.json');
         firebaseConfig = await response.json();
     } catch (e) {
-        console.error("Could not load Firebase config. Are you running this on Firebase Hosting or using 'firebase serve'?");
+        console.error("Could not load Firebase config.", e);
         return;
     }
-    
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getDatabase(app);
 
-    // --- DOM Selectors ---
+    // --- DOM selectors ---
     const statusMessage = document.getElementById('statusMessage');
     const userListDiv = document.getElementById('userList');
     const searchInput = document.getElementById('searchInput');
@@ -29,17 +72,18 @@ async function main() {
     const messageInput = document.getElementById('msgInput');
     const sendButton = document.getElementById('sendBtn');
 
-    // --- App State ---
+    // --- App state ---
     let currentUser = null;
     let selectedUser = null;
-    let currentMessagesRef = null; 
-    let usersMap = {}; // Caches all user data locally
+    let currentMessagesRef = null;
+    let usersMap = {}; // cache all users
 
+    // --- Helper: generate chatId ---
     function getChatId(uid1, uid2) {
         return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
     }
 
-    // --- Main Logic ---
+    // --- Auth listener ---
     onAuthStateChanged(auth, async (user) => {
         if (!user) {
             statusMessage.textContent = "You must be logged in.";
@@ -48,7 +92,7 @@ async function main() {
         currentUser = user;
 
         try {
-            // 1. Fetch and cache all user data
+            // Load all users for display
             const usersNode = await get(child(ref(db), "users"));
             if (usersNode.exists()) {
                 usersMap = usersNode.val();
@@ -57,12 +101,11 @@ async function main() {
                 return;
             }
 
-            // 2. ▼▼ ESTA ES LA LÓGICA ANTIGUA ▼▼
-            // Escucha TODOS los chats
-            const chatsRef = ref(db, 'chats');
-            onValue(chatsRef, (snapshot) => {
-                const allChats = snapshot.val() || {};
-                renderUserList(allChats); // Renderiza usando la lista completa
+            // Listen only to the user's chats (userChats/{uid})
+            const userChatsRef = ref(db, `userChats/${currentUser.uid}`);
+            onValue(userChatsRef, (snapshot) => {
+                const chatIds = snapshot.val() || {};
+                renderUserList(chatIds);
             });
 
         } catch (e) {
@@ -71,53 +114,35 @@ async function main() {
         }
     });
 
-    /**
-     * Renders the user list (usando allChats)
-     */
-    function renderUserList(allChats) {
-        if (!currentUser || !usersMap) return; 
+    // --- Render user list based on userChats ---
+    function renderUserList(userChats) {
+        if (!currentUser || !usersMap) return;
 
-        let usersToRender = [];
-        
-        // 1. Itera sobre TODOS los usuarios (de usersMap)
+        const usersToRender = [];
+
         for (const uid in usersMap) {
             if (uid === currentUser.uid) continue;
-
             const userData = usersMap[uid];
             const chatId = getChatId(currentUser.uid, uid);
-            
-            // 2. Comprueba si existe un chat en la lista 'allChats'
-            const chatData = allChats[chatId]; 
-            const lastMessage = chatData?.lastMessage;
 
-            let timestamp;
-            let lastMessageText;
-
-            if (lastMessage) {
-                timestamp = lastMessage.timestamp;
-                lastMessageText = lastMessage.text || "No messages yet";
-            } else {
-                // Es un chat nuevo sin mensajes
-                timestamp = 0; 
-                lastMessageText = "Click to start a conversation";
-            }
+            const lastMessage = userChats[chatId]?.lastMessage;
+            const timestamp = lastMessage?.timestamp || 0;
+            const lastMessageText = lastMessage?.text || "Click to start a conversation";
 
             usersToRender.push({
-                uid: uid,
+                uid,
                 username: userData.username || "(no username)",
-                email: userData.email,
                 lastMessageTimestamp: timestamp,
-                lastMessageText: lastMessageText
+                lastMessageText
             });
         }
 
-        // 3. Ordena en el cliente
+        // Sort by last message
         usersToRender.sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
 
-        // 4. Renderiza en el DOM
+        // Render
         userListDiv.innerHTML = "";
         const fragment = document.createDocumentFragment();
-
         usersToRender.forEach(user => {
             const li = document.createElement("li");
             li.className = "user";
@@ -130,55 +155,49 @@ async function main() {
 
             const lastMessageSpan = document.createElement("span");
             lastMessageSpan.className = "last-message";
-            
-            const text = user.lastMessageText;
-            lastMessageSpan.textContent = text.length > 30 ? text.substring(0, 30) + "..." : text;
+            lastMessageSpan.textContent = user.lastMessageText.length > 30
+                ? user.lastMessageText.substring(0,30) + "..."
+                : user.lastMessageText;
 
             li.appendChild(usernameSpan);
             li.appendChild(lastMessageSpan);
             fragment.appendChild(li);
         });
-
         userListDiv.appendChild(fragment);
-        statusMessage.style.display = 'none'; 
+        statusMessage.style.display = 'none';
     }
 
-    // Listener para seleccionar un usuario
-    userListDiv.addEventListener("click", (e) => { // No necesita 'async'
+    // --- Select user ---
+    userListDiv.addEventListener("click", (e) => {
         const userLi = e.target.closest(".user");
         if (!userLi) return;
 
-        document.querySelectorAll('#userList .user.active').forEach(el => {
-            el.classList.remove('active');
-        });
+        document.querySelectorAll('#userList .user.active').forEach(el => el.classList.remove('active'));
         userLi.classList.add('active');
 
         selectedUser = userLi.dataset.uid;
         const selectedUsername = userLi.dataset.username;
         const chatId = getChatId(currentUser.uid, selectedUser);
-        
-        if (currentMessagesRef) {
-            off(currentMessagesRef); 
-        }
+
+        if (currentMessagesRef) off(currentMessagesRef);
 
         const messagesRef = ref(db, `chats/${chatId}/messages`);
-        currentMessagesRef = messagesRef; 
+        currentMessagesRef = messagesRef;
 
         chatPlaceholder.style.display = "none";
         chatBox.style.display = "flex";
         chatWith.textContent = selectedUsername;
-        messagesDiv.innerHTML = ""; 
+        messagesDiv.innerHTML = "";
 
-        // Listener que carga todo el historial de mensajes
+        // Listen to messages
         onValue(messagesRef, (snapshot) => {
-            messagesDiv.innerHTML = ""; 
-            if (!snapshot.exists()) return; 
-
-            snapshot.forEach((childSnap) => {
+            messagesDiv.innerHTML = "";
+            if (!snapshot.exists()) return;
+            snapshot.forEach(childSnap => {
                 const data = childSnap.val();
                 const div = document.createElement("div");
                 div.classList.add("message");
-                div.textContent = data.text; 
+                div.textContent = data.text;
                 div.classList.add(data.sender === currentUser.uid ? "you" : "other");
                 messagesDiv.appendChild(div);
             });
@@ -186,63 +205,71 @@ async function main() {
         });
     });
 
-    // --- Message Sending Logic (Versión ANTIGUA, sin "buzones") ---
+    // --- Send message ---
     const sendMessage = async () => {
         const text = messageInput.value.trim();
         if (!text || !selectedUser || !currentUser) return;
 
         const chatId = getChatId(currentUser.uid, selectedUser);
         const messagesRef = ref(db, `chats/${chatId}/messages`);
-        const chatRef = ref(db, `chats/${chatId}`); // Referencia a la raíz del chat
+        const chatRef = ref(db, `chats/${chatId}`);
+
         const newTimestamp = Date.now();
 
         const newMessage = {
             sender: currentUser.uid,
-            text: text,
+            text,
             timestamp: newTimestamp
         };
 
         const lastMessageData = {
-            text: text,
             sender: currentUser.uid,
+            text,
             timestamp: newTimestamp
         };
 
-        // Solo actualiza el chat, no los "buzones"
-        const updates = {};
-        const newMessageKey = push(messagesRef).key;
-        updates[`chats/${chatId}/messages/${newMessageKey}`] = newMessage;
-        updates[`chats/${chatId}/lastMessage`] = lastMessageData;
-
         try {
-            await update(ref(db), updates);
-            messageInput.value = ""; 
+            // Step 1: push message and create chat if it doesn't exist
+            const newMessageKey = push(messagesRef).key;
+            await update(chatRef, {
+                [`messages/${newMessageKey}`]: newMessage,
+                createdAt: newTimestamp,
+                users: {
+                    [currentUser.uid]: true,
+                    [selectedUser]: true
+                }
+            });
+
+            // Step 2: update /userChats for both users (used for UI)
+            const userChatsCurrentRef = ref(db, `userChats/${currentUser.uid}/${chatId}`);
+            const userChatsSelectedRef = ref(db, `userChats/${selectedUser}/${chatId}`);
+
+            await update(userChatsCurrentRef, { lastMessage: lastMessageData });
+            await update(userChatsSelectedRef, { lastMessage: lastMessageData });
+
+            // --- Clear input box ---
+            messageInput.value = "";
+
         } catch (e) {
             console.error("Error sending message:", e);
         }
     };
 
-    // --- Event Listeners ---
     sendButton.addEventListener("click", sendMessage);
     messageInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.keyCode === 13) {
-            e.preventDefault(); 
+            e.preventDefault();
             sendMessage();
         }
     });
 
-    // --- Search Logic ---
+    // --- Search ---
     searchInput.addEventListener('keyup', () => {
         const filterText = searchInput.value.toLowerCase();
         const users = document.querySelectorAll('#userList .user');
-        
         users.forEach(user => {
             const username = user.dataset.username.toLowerCase();
-            if (username.includes(filterText)) {
-                user.style.display = "";
-            } else {
-                user.style.display = "none";
-            }
+            user.style.display = username.includes(filterText) ? "" : "none";
         });
     });
 }
