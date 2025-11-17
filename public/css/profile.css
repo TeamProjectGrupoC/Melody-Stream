@@ -220,3 +220,20 @@ main a:hover {
   transform: scale(1.05);
 }
 
+/* Botón log out*/
+#logOutBtn {
+  background-color: var(--color-morado);
+  border: none;
+  color: var(--color-blanco);
+  padding: 0.8rem 1.5rem;
+  border-radius: 10px;
+  font-weight: 600;
+  transition: background-color 0.3s ease, transform 0.2s;
+  width: 100%;
+  max-width: 500px;
+}
+
+#logOutBtn:hover {
+  background-color: #4324a8;
+  transform: scale(1.05);
+}

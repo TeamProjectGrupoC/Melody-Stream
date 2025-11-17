@@ -1,7 +1,7 @@
 // --- IMPORTACIONES ---
 // Módulos de App y Autenticación (como los tenías)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
 // Módulos de Realtime Database (RTDB)
 // ¡CAMBIO! Importamos 'set' para poder escribir en la base de datos
@@ -149,4 +149,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
 document.getElementById('goToChatBtn').addEventListener('click', () => {
   window.location.href = 'chat.html';
+});
+
+document.getElementById('logOutBtn').addEventListener('click', async () => {
+    const msgElemento = document.getElementById('msg');
+    const fotoElemento = document.getElementById('fotoPerfilUsuario');
+
+    try {
+        await signOut(auth);
+
+        msgElemento.textContent = "You have successfully logged out.";
+
+        if (fotoElemento) {
+            fotoElemento.src = "images/logos/silueta.png";
+        }
+
+        const userDataDiv = document.getElementById('userData');
+        if (userDataDiv) userDataDiv.style.display = "none";
+
+    } catch (error) {
+        console.error("Log out error:", error);
+        msgElemento.textContent = "Error logging out.";
+    }
 });
