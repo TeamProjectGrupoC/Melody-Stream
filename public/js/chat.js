@@ -277,7 +277,7 @@ async function main() {
 
         const lastMessageData = {
             sender: currentUser.uid,
-            text: attachment ? `[Compartido] ${attachment.title}` : text,
+            text: attachment ? `[Shared] ${attachment.title}` : text,
             timestamp: newTimestamp
         };
 
