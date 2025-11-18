@@ -257,7 +257,6 @@ async function main() {
     });
 
     // --- Send message ---
-    // --- Send message ---
     const sendMessage = async (fileAttachment = null) => {
         const text = messageInput.value.trim();
         if ((!text && !fileAttachment) || !selectedUser || !currentUser) return;
