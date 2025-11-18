@@ -52,6 +52,8 @@ body {
     padding: 0.5rem 3rem; /* Añade padding alrededor del header */
     width: 100%; /* Asegura que el header ocupe todo el ancho de la pantalla */
     box-sizing: border-box; /* Incluye el padding y el borde en el ancho total del header */
+
+    align-items: center; 
 }
 
 #headerPrincipal figure {
@@ -99,6 +101,20 @@ body {
 
 #headerPrincipal nav ul li a:hover {
     color: var(--color-azul2); 
+}
+
+#headerProfileIm img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+#headerProfileIm {
+    display: flex;           
+    align-items: center;    
+    margin-right: 20px;
 }
 
 /* Footer */

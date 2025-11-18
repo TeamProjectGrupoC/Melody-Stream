@@ -51,6 +51,20 @@ main h1 {
   opacity: 1;
 }
 
+#headerProfileIm img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+#headerProfileIm {
+    display: flex;           
+    align-items: center;    
+    margin-right: 20px;
+}
+
 /* Botón de búsqueda */
 #searchBtn {
   margin-top: 0.5rem;

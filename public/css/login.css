@@ -8,6 +8,19 @@ main {
   min-height: 80vh;
 }
 
+#headerPrincipal {
+    display: flex;
+    align-items: center;  
+    justify-content: space-between;
+    padding: 0.5rem 3rem; 
+    border-bottom: 0.1rem solid var(--color-blanco);
+    box-sizing: border-box;
+}
+
+main {
+    padding-top: 100px; /* deja espacio desde el header */
+}
+
 /* Contenedor del formulario */
 #loginContainer {
   background-color: rgba(255, 255, 255, 0.05);
@@ -26,6 +39,10 @@ main {
   color: var(--color-azul2);
   font-weight: 700;
   margin-bottom: 1.5rem;
+}
+
+#loginContainer {
+  margin-top: 120px; /* separa desde el header */
 }
 
 /* Etiquetas */
@@ -148,4 +165,18 @@ main {
 }
 #loginContainer input::-ms-input-placeholder {
   color: rgba(255, 255, 255, 0.6);
+}
+
+#headerProfileIm img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+#headerProfileIm {
+    display: flex;           
+    align-items: center;    
+    margin-right: 20px;
 }

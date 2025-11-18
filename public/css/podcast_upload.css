@@ -153,6 +153,20 @@ main h1 {
   color: var(--color-azul2);
 }
 
+#headerProfileIm img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+#headerProfileIm {
+    display: flex;           
+    align-items: center;    
+    margin-right: 20px;
+}
+
 /* ===============================
    📱 Responsividad
    =============================== */

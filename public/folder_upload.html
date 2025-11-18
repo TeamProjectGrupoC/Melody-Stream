@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Create Folder — MelodyStream</title>
+    <link rel="stylesheet" href="css/general.css" />
+    <link rel="stylesheet" href="css/podcast_upload.css" />
+  </head>
+  <body>
+    <header id="headerPrincipal">
+      <figure>
+        <img src="images/logos/logo.png" alt="Webpage logo" />
+      </figure>
+      <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
+      <nav id="NavPrincipal">
+        <ul>
+          <li><a href="index.html">HOME</a></li>
+          <li><a href="test_register_spotify.html">MUSIC</a></li>
+          <li><a href="podcast.html">PODCAST</a></li>
+          <li><a href="login.html">LOG IN</a></li>
+        </ul>
+      </nav>
+
+      <div id="headerProfileIm">
+        <a href="profile.html">
+          <img
+            id="headerUserPic"
+            src="images/logos/silueta.png"
+            alt="User Profile Icon"
+          />
+        </a>
+      </div>
+    </header>
+
+    <main>
+      <h1>Create Folder</h1>
+
+      <div id="folderForm">
+        <label for="folderName">Folder name</label>
+        <input id="folderName" type="text" placeholder="e.g. ENTREVISTAS" />
+
+        <label for="folderIcon">Folder icon (optional)</label>
+        <input id="folderIcon" type="file" accept="image/*" />
+
+        <div style="margin-top: 10px">
+          <button id="saveFolderBtn">Create Folder</button>
+          <button id="cancelFolderBtn">Cancel</button>
+        </div>
+
+        <p id="folderMsg"></p>
+      </div>
+    </main>
+
+    <footer id="footerPrincipal">
+      <!-- ...existing footer... -->
+    </footer>
+
+    <script type="module" src="js/folder_upload.js"></script>
+  </body>
+</html>

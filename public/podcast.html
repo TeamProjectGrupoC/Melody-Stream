@@ -1,102 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Search Podcasts</title>
 
-    <link rel="stylesheet" href="css/general.css">
-    <link rel="stylesheet" href="css/podcast.css">
+    <link rel="stylesheet" href="css/general.css" />
+    <link rel="stylesheet" href="css/podcast.css" />
 
-    <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg">
-</head>
+    <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg" />
+  </head>
 
   <body>
     <header id="headerPrincipal">
-        <figure>
-            <img src="images/logos/logo.png" alt="Webpage logo">
-        </figure>
-        <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
-        <nav id="NavPrincipal">
-            <ul>
-                <li><a href="index.html">HOME</a></li>
-                <li><a href="test_register_spotify.html">MUSIC</a></li>
-                <li><a href="podcast_upload.html">UPLOAD A PODCAST</a></li>
-                <li><a href="podcast.html">SEARCH A PODCAST</a></li>
-                <li><a href="profile.html">MY PROFILE</a></li>
-                <li><a href="login.html">LOG IN</a></li>
-            </ul>
-        </nav>
+      <figure>
+        <img src="images/logos/logo.png" alt="Webpage logo" />
+      </figure>
+      <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
+      <nav id="NavPrincipal">
+        <ul>
+          <li><a href="index.html">HOME</a></li>
+          <li><a href="test_register_spotify.html">MUSIC</a></li>
+          <li><a href="podcast.html">PODCAST</a></li>
+          <li><a href="login.html">LOG IN</a></li>
+        </ul>
+      </nav>
+
+      <div id="headerProfileIm">
+        <a href="profile.html">
+          <img
+            id="headerUserPic"
+            src="images/logos/silueta.png"
+            alt="User Profile Icon"
+          />
+        </a>
+      </div>
     </header>
 
     <main>
-    <h1>Search Podcasts</h1>
-    <input
-      type="text"
-      id="searchInput"
-      placeholder="What do you want to listen?"
-    />
-    <button id="searchButton">Search</button>
+      <h1>Search Podcasts</h1>
 
-    <h2>Available Podcasts</h2>
-    <div id="podcastList"></div>
+      <div class="search-row">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="What do you want to listen?"
+        />
+        <button id="searchButton">Search</button>
+        <button id="uploadPodcastBtn">Upload Podcast</button>
+        <button id="createFolderBtn">Create Folder</button>
+      </div>
 
-    <!-- Botón para ir a podcast_upload.html -->
-    <button id="goToUpload" style="margin-top: 20px;">Upload Podcast</button>
+      <h2>Available Podcasts</h2>
+      <div id="podcastList"></div>
     </main>
 
-
     <footer id="footerPrincipal">
-        <h2 id="footer-title">MELODY STREAM</h2>
-        <div id="footer-follow">
-            <p>FOLLOW US</p>
-            <ul>
-                <!-- Logo 1 (Spotify) -->
-                <li>
-                    <figure>
-                        <a href="https://www.spotify.com" target="_blank">
-                            <img src="images/logos/Spotify.svg" alt="Spotify">
-                        </a>
-                    </figure>
-                </li>
-                <!-- Logo 2 (Facebook) -->
-                <li>
-                    <figure>
-                        <a href="https://www.facebook.com" target="_blank">
-                            <img src="images/logos/Facebook.svg" alt="Facebook">
-                        </a>
-                    </figure>
-                </li>
-                <!-- Logo 3 (Instagram) -->
-                <li>
-                    <figure>
-                        <a href="https://www.instagram.com" target="_blank">
-                            <img src="images/logos/Instagram.svg" alt="Instagram">
-                        </a>
-                    </figure>
-                </li>
-                <!-- Logo 4 (Twitter) -->
-                <li>
-                    <figure>
-                        <a href="https://www.twitter.com" target="_blank">
-                            <img src="images/logos/Twitter.svg" alt="Twitter">
-                        </a>
-                    </figure>
-                </li>
-                <!-- Logo 5 (YouTube) -->
-                <li>
-                    <figure>
-                        <a href="https://www.youtube.com" target="_blank">
-                            <img src="images/logos/Youtube.svg" alt="YouTube">
-                        </a>
-                    </figure>
-                </li>
-            </ul>
-        </div>
+      <h2 id="footer-title">MELODY STREAM</h2>
+      <div id="footer-follow">
+        <p>FOLLOW US</p>
+        <ul>
+          <!-- Logo 1 (Spotify) -->
+          <li>
+            <figure>
+              <a href="https://www.spotify.com" target="_blank">
+                <img src="images/logos/Spotify.svg" alt="Spotify" />
+              </a>
+            </figure>
+          </li>
+          <!-- Logo 2 (Facebook) -->
+          <li>
+            <figure>
+              <a href="https://www.facebook.com" target="_blank">
+                <img src="images/logos/Facebook.svg" alt="Facebook" />
+              </a>
+            </figure>
+          </li>
+          <!-- Logo 3 (Instagram) -->
+          <li>
+            <figure>
+              <a href="https://www.instagram.com" target="_blank">
+                <img src="images/logos/Instagram.svg" alt="Instagram" />
+              </a>
+            </figure>
+          </li>
+          <!-- Logo 4 (Twitter) -->
+          <li>
+            <figure>
+              <a href="https://www.twitter.com" target="_blank">
+                <img src="images/logos/Twitter.svg" alt="Twitter" />
+              </a>
+            </figure>
+          </li>
+          <!-- Logo 5 (YouTube) -->
+          <li>
+            <figure>
+              <a href="https://www.youtube.com" target="_blank">
+                <img src="images/logos/Youtube.svg" alt="YouTube" />
+              </a>
+            </figure>
+          </li>
+        </ul>
+      </div>
     </footer>
 
     <script type="module" src="js/podcast.js"></script>
   </body>
-
 </html>

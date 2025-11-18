@@ -122,9 +122,16 @@ async function main() {
         dataDiv.style.display='none';
         extraInfoForm.style.display='none';
         signOutBtn.style.display='none';
+
+        // Limpiar foto guardada
+        localStorage.removeItem('profilePic');
+
+        // Restaurar la silueta
+        const headerPic = document.getElementById('headerUserPic');
+        if (headerPic) headerPic.src = "images/logos/silueta.png";
     });
 
-} // --- End of main() function ---
+} 
 
 
 // --- Step 4: Call main() to start the app ---

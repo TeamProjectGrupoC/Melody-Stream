@@ -6,7 +6,7 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 // Módulos de Realtime Database (RTDB)
 // ¡CAMBIO! Importamos 'set' para poder escribir en la base de datos
 // y renombramos 'ref' a 'databaseRef' para evitar conflictos
-import { getDatabase, ref as databaseRef, onValue, set } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+import { getDatabase, ref as databaseRef, onValue, set, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
 // Módulos de Storage (¡NUEVO!)
 // Importamos todo lo necesario para subir archivos y obtener la URL
@@ -31,7 +31,7 @@ const auth = getAuth(app);
 const storage = getStorage(app);
 let currentUser = null; // Guardaremos el usuario aquí para que la función de subida lo vea
 
-// --- FUNCIÓN DE CARGA DE DATOS (LA QUE TENÍAS) ---
+// --- FUNCIÓN DE CARGA DE DATOS
 function cargarDatosDePerfil() {
     const imagenElemento = document.getElementById('fotoPerfilUsuario');
     const msgElemento = document.getElementById('msg');
@@ -41,7 +41,7 @@ function cargarDatosDePerfil() {
         return;
     }
 
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
     currentUser = user; // Guardamos el usuario actual
 
     const msgElemento = document.getElementById('msg');
@@ -74,39 +74,219 @@ function cargarDatosDePerfil() {
 
             // Mostrar foto de perfil si existe
             if (userData.urlFotoPerfil) {
-            imagenElemento.src = userData.urlFotoPerfil;
+                imagenElemento.src = userData.urlFotoPerfil;
+                const headerPic = document.getElementById('headerUserPic');
+                if (headerPic) headerPic.src = userData.urlFotoPerfil;
             }
         } else {
             userDataDiv.style.display = 'none';
         }
         });
 
+        // Cargar y mostrar los podcasts subidos por este usuario
+        loadUserPodcasts(user.uid);
+        loadUserFolders(user.uid);
+
     } else {
         msgElemento.textContent = "⚠️ You must be logged in to see your profile.";
         imagenElemento.src = "images/logos/silueta.png";
+
+        const headerPic = document.getElementById('headerUserPic');
+        if (headerPic) headerPic.src = "images/logos/silueta.png";
         userDataDiv.style.display = 'none';
+
+        // Limpiar lista de podcasts al cerrar sesión
+        const existingContainer = document.getElementById('userPodcasts');
+        if (existingContainer) existingContainer.innerHTML = '';
     }
     });
 }
 
-// --- ¡NUEVA FUNCIÓN! MANEJAR LA SUBIDA DEL FORMULARIO ---
+async function loadUserPodcasts(uid) {
+    // Asegurarse de que exista un contenedor en el HTML para mostrar los podcasts
+    let container = document.getElementById('userPodcasts');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'userPodcasts';
+        const heading = document.createElement('h3');
+        heading.textContent = 'My Podcasts';
+        const profileMain = document.querySelector('main') || document.body;
+        profileMain.appendChild(heading);
+        profileMain.appendChild(container);
+    }
+
+    container.innerHTML = 'Loading your podcasts...';
+
+    try {
+        const podcastsRef = databaseRef(db, 'podcasts');
+        const snapshot = await get(podcastsRef);
+
+        if (!snapshot.exists()) {
+            container.innerHTML = '<p>You have not uploaded any podcasts.</p>';
+            return;
+        }
+
+        const podcasts = snapshot.val();
+        const list = document.createElement('div');
+        let found = false;
+
+        for (const pid in podcasts) {
+            const p = podcasts[pid];
+            if (p.idcreador === uid) {
+                found = true;
+                const item = document.createElement('div');
+                item.className = 'podcast-item';
+                item.style.border = '1px solid #ccc';
+                item.style.padding = '8px';
+                item.style.marginBottom = '10px';
+                item.style.borderRadius = '6px';
+
+                const title = document.createElement('h4');
+                title.textContent = p.nombre || '(no title)';
+                item.appendChild(title);
+
+                if (p.iconURL) {
+                    const img = document.createElement('img');
+                    img.src = p.iconURL;
+                    img.alt = (p.nombre || '') + ' icon';
+                    img.style.maxWidth = '120px';
+                    img.style.display = 'block';
+                    img.style.marginBottom = '8px';
+                    item.appendChild(img);
+                }
+
+                if (p.descripcion) {
+                    const desc = document.createElement('p');
+                    desc.textContent = p.descripcion;
+                    item.appendChild(desc);
+                }
+
+                if (p.audioURL) {
+                    const audio = document.createElement('audio');
+                    audio.controls = true;
+                    audio.src = p.audioURL;
+                    audio.style.width = '100%';
+                    item.appendChild(audio);
+                }
+
+                // Opcional: botón para ir al detalle o editar
+                const viewBtn = document.createElement('button');
+                viewBtn.textContent = 'View';
+                viewBtn.style.marginRight = '8px';
+                viewBtn.addEventListener('click', () => {
+                    // si tienes una página de detalle, redirigir con pid
+                    // window.location.href = `podcast_detail.html?id=${pid}`;
+                });
+                item.appendChild(viewBtn);
+
+                list.appendChild(item);
+            }
+        }
+
+        container.innerHTML = '';
+        if (found) {
+            container.appendChild(list);
+        } else {
+            container.innerHTML = '<p>You have not uploaded any podcasts.</p>';
+        }
+
+    } catch (err) {
+        console.error('Error loading user podcasts:', err);
+        container.innerHTML = '<p>Failed to load your podcasts.</p>';
+    }
+}
+
+// add this function near loadUserPodcasts or where appropriate
+async function loadUserFolders(uid) {
+  let container = document.getElementById("userFolders");
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "userFolders";
+    const heading = document.createElement("h3");
+    heading.textContent = "My Folders";
+    const profileMain = document.querySelector("main") || document.body;
+    profileMain.appendChild(heading);
+    profileMain.appendChild(container);
+  }
+
+  container.innerHTML = "Loading your folders...";
+
+  try {
+    const foldersRef = databaseRef(db, "folders");
+    const snap = await get(foldersRef);
+    if (!snap.exists()) {
+      container.innerHTML = "<p>You have not created any folders.</p>";
+      return;
+    }
+
+    const folders = snap.val();
+    const list = document.createElement("div");
+    let found = false;
+    for (const fid in folders) {
+      const f = folders[fid];
+      if (f.createdBy === uid) {
+        found = true;
+        const item = document.createElement("div");
+        item.className = "folder-item";
+        item.style.border = "1px solid #ccc";
+        item.style.padding = "8px";
+        item.style.marginBottom = "10px";
+        item.style.borderRadius = "6px";
+
+        const title = document.createElement("h4");
+        title.textContent = f.name || "(no name)";
+        item.appendChild(title);
+
+        if (f.iconURL) {
+          const img = document.createElement("img");
+          img.src = f.iconURL;
+          img.alt = f.name + " icon";
+          img.style.maxWidth = "120px";
+          img.style.display = "block";
+          img.style.marginBottom = "8px";
+          item.appendChild(img);
+        }
+
+        // optional: view folder button (go to podcast.html?folder=fid)
+        const viewBtn = document.createElement("button");
+        viewBtn.textContent = "View";
+        viewBtn.style.marginRight = "8px";
+        viewBtn.addEventListener("click", () => {
+          window.location.href = `podcast.html?folder=${fid}`;
+        });
+        item.appendChild(viewBtn);
+
+        list.appendChild(item);
+      }
+    }
+
+    container.innerHTML = "";
+    if (found) container.appendChild(list);
+    else container.innerHTML = "<p>You have not created any folders.</p>";
+  } catch (err) {
+    console.error("Error loading user folders:", err);
+    container.innerHTML = "<p>Failed to load your folders.</p>";
+  }
+}
+
 function setupFormUploadListener() {
+
     const form = document.getElementById('uploadForm');
     const fileInput = document.getElementById('fotoArchivo');
     
     if (!form) return;
 
     form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // ¡CLAVE! Detiene el envío normal del formulario
+        e.preventDefault();
 
         // 1. Validaciones
         if (!currentUser) {
-            alert("Debes estar logueado para subir una foto.");
+            alert("You must be logged in to upload a photo.");
             return;
         }
         const file = fileInput.files[0];
         if (!file) {
-            alert("Por favor, selecciona un archivo.");
+            alert("Please select a file.");
             return;
         }
 
@@ -117,13 +297,13 @@ function setupFormUploadListener() {
 
         try {
             // 3. Subir el archivo
-            alert("Subiendo foto...");
+            alert("Uploading photo...");
             const snapshot = await uploadBytes(sRef, file);
-            console.log('¡Foto subida!', snapshot);
+            console.log('Photo uploaded!', snapshot);
 
             // 4. Obtener la URL de descarga
             const downloadURL = await getDownloadURL(snapshot.ref);
-            console.log('URL del archivo:', downloadURL);
+            console.log('File URL:', downloadURL);
 
             // 5. Guardar la URL en Realtime Database
             const userDbRef = databaseRef(db, 'users/' + currentUser.uid + '/urlFotoPerfil');
@@ -131,11 +311,16 @@ function setupFormUploadListener() {
             
             // 6. Actualizar la imagen en la página (la silueta)
             document.getElementById('fotoPerfilUsuario').src = downloadURL;
-            alert("¡Foto de perfil actualizada!");
+            const headerPic = document.getElementById('headerUserPic');
+            if (headerPic) headerPic.src = downloadURL;
+
+            localStorage.setItem('profilePic', downloadURL);
+
+            alert("¡Profile picture updated!");
 
         } catch (error) {
             console.error("Error al subir el archivo:", error);
-            alert("Error al subir la foto. Revisa la consola.");
+            alert("Error uploading photo. Check your console.");
         }
     });
 }
