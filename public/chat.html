@@ -1,70 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Chat — MelodyStream</title>
-    
-    <link rel="stylesheet" href="css/general.css">
-    
-    <link rel="stylesheet" href="css/chat.css">
-</head>
-<body>
-    
-    <header id="headerPrincipal">
-        <figure>
-            <img src="images/logos/logo.png" alt="Webpage logo">
-        </figure>
-        <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
-        <nav id="NavPrincipal">
-            <ul>
-                <li><a href="index.html">HOME</a></li>
-                <li><a href="test_register_spotify.html">MUSIC</a></li>
-                <li><a href="podcast_upload.html">UPLOAD A PODCAST</a></li>
-                <li><a href="podcast.html">SEARCH A PODCAST</a></li>
-                <li><a href="login.html">LOG IN</a></li>
-            </ul>
-        </nav>
 
-        <div id="headerProfileIm">
-            <a href="profile.html">
-                <img id="headerUserPic" src="images/logos/silueta.png" alt="User Profile Icon">
-            </a>
-        </div>
+    <link rel="stylesheet" href="css/general.css" />
+
+    <link rel="stylesheet" href="css/chat.css" />
+  </head>
+  <body>
+    <header id="headerPrincipal">
+      <figure>
+        <img src="images/logos/logo.png" alt="Webpage logo" />
+      </figure>
+      <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
+      <nav id="NavPrincipal">
+        <ul>
+          <li><a href="index.html">HOME</a></li>
+          <li><a href="test_register_spotify.html">MUSIC</a></li>
+          <li><a href="podcast.html">PODCAST</a></li>
+          <li><a href="login.html">LOG IN</a></li>
+        </ul>
+      </nav>
+
+      <div id="headerProfileIm">
+        <a href="profile.html">
+          <img
+            id="headerUserPic"
+            src="images/logos/silueta.png"
+            alt="User Profile Icon"
+          />
+        </a>
+      </div>
     </header>
 
-
     <div class="chat-container">
-        
-        <aside class="sidebar">
-            <header class="sidebar-header">
-                <div class="search-container">
-                    <input type="text" id="searchInput" placeholder="Search chats...">
-                </div>
-            </header>
-            
-            <p id="statusMessage">Loading chats...</p>
-            <ul id="userList">
-                </ul>
-        </aside>
+      <aside class="sidebar">
+        <header class="sidebar-header">
+          <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search chats..." />
+          </div>
+        </header>
 
-        <main class="chat-area">
-            <div id="chatPlaceholder">
-                <h2>Select a chat to start messaging</h2>
-            </div>
-            <div id="chatBox">
-                <header class="chat-header">
-                    <h3 id="chatWith"></h3>
-                </header>
-                <div id="messages" aria-live="polite"></div>
-                <div id="inputContainer">
-                    <input id="msgInput" type="text" placeholder="Type a message..." autocomplete="off">
-                    <button id="sendBtn">Send</button>
-                </div>
-            </div>
-        </main>
+        <p id="statusMessage">Loading chats...</p>
+        <ul id="userList"></ul>
+      </aside>
+
+      <main class="chat-area">
+        <div id="chatPlaceholder">
+          <h2>Select a chat to start messaging</h2>
+        </div>
+        <div id="chatBox">
+          <header class="chat-header">
+            <h3 id="chatWith"></h3>
+          </header>
+          <div id="messages" aria-live="polite"></div>
+          <div id="inputContainer">
+            <input
+              id="msgInput"
+              type="text"
+              placeholder="Type a message..."
+              autocomplete="off"
+            />
+            <button id="sendBtn">Send</button>
+          </div>
+        </div>
+      </main>
     </div>
 
     <script type="module" src="js/chat.js"></script>
-</body>
+  </body>
 </html>

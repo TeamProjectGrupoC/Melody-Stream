@@ -39,16 +39,44 @@ const searchButton = document.getElementById("searchButton");
 
 let allPodcasts = {}; // Variable para almacenar todos los podcasts
 let currentUser = null;
+let usersMap = {}; // nuevo: mapa uid -> user data
 
 // Auth listener to get current user
 const auth = getAuth(app);
 onAuthStateChanged(auth, (user) => {
   currentUser = user;
+  const uploadBtn = document.getElementById("uploadPodcastBtn") || document.getElementById("goToUpload");
+  if (uploadBtn) {
+    if (user) {
+      uploadBtn.title = "Upload a new podcast";
+      uploadBtn.disabled = false;
+      uploadBtn.style.opacity = "";
+    } else {
+      uploadBtn.title = "You must log in to upload";
+      uploadBtn.disabled = false;
+      uploadBtn.style.opacity = "1";
+    }
+  }
 });
+
+// carga todos los usuarios para poder mostrar nombres
+async function loadUsersMap() {
+  try {
+    const usersRef = ref(db, 'users');
+    const snap = await get(usersRef);
+    usersMap = snap.exists() ? snap.val() : {};
+  } catch (err) {
+    console.error('Error loading users map:', err);
+    usersMap = {};
+  }
+}
 
 // Function to list podcasts
 async function listPodcasts() {
   try {
+    // cargar mapa de usuarios antes de mostrar podcasts
+    await loadUsersMap();
+
     // Reference to the "podcasts" node in the database
     const podcastsRef = ref(db, "podcasts");
     const snapshot = await get(podcastsRef);
@@ -91,6 +119,23 @@ function displayPodcasts(podcasts) {
     title.textContent = podcast.nombre;
     podcastItem.appendChild(title);
 
+    // Show uploader name if available (uploaderName preferred, fallback to idcreador)
+    let displayName = null;
+    if (podcast.uploaderName) displayName = podcast.uploaderName;
+    else if (podcast.idcreador && usersMap[podcast.idcreador]) {
+      const u = usersMap[podcast.idcreador];
+      displayName = u.username || u.displayName || u.email || podcast.idcreador;
+    } else if (podcast.idcreador) {
+      displayName = podcast.idcreador;
+    }
+    if (displayName) {
+      const uploader = document.createElement("div");
+      uploader.className = "podcast-uploader";
+      uploader.style.fontSize = "0.9rem";
+      uploader.style.color = "#555";
+      uploader.textContent = `Uploaded by: ${displayName}`;
+      podcastItem.appendChild(uploader);
+    }
     // Descripción
     const description = document.createElement("p");
     description.textContent = podcast.descripcion;
@@ -364,7 +409,28 @@ searchInput.addEventListener("keypress", (e) => {
 
 
 // Add event listener to the "Upload Podcast" button
-const goToUploadButton = document.getElementById("goToUpload");
-goToUploadButton.addEventListener("click", () => {
-  window.location.href = "podcast_upload.html"; // Redirect to podcast_upload.html
-});
+const uploadButton = document.getElementById("uploadPodcastBtn") || document.getElementById("goToUpload");
+if (uploadButton) {
+  uploadButton.addEventListener("click", (e) => {
+    if (currentUser) {
+      window.location.href = "podcast_upload.html";
+    } else {
+      // opción: mostrar mensaje antes de redirigir
+      // alert('You must be logged in to upload a podcast.');
+      window.location.href = "login.html";
+    }
+  });
+}
+
+// After existing upload button handler add navigation to folder creation page
+const createFolderBtn = document.getElementById("createFolderBtn");
+if (createFolderBtn) {
+  createFolderBtn.addEventListener("click", () => {
+    // require login: if you have currentUser via onAuthStateChanged use it; otherwise redirect to login
+    if (currentUser) {
+      window.location.href = "folder_upload.html";
+    } else {
+      window.location.href = "login.html";
+    }
+  });
+}
