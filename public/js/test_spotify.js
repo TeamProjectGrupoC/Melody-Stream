@@ -40,7 +40,7 @@
           <h2>${track.name}</h2>
           <p>${track.artists[0].name}</p>
           <img src="${track.album.images[0].url}" width="150">
-          ${track.preview_url ? `<audio controls src="${track.preview_url}"></audio>` : "<p>No preview aviable.</p>"}
+          ${track.preview_url ? `<audio controls src="${track.preview_url}"></audio>` : "<p>No preview available.</p>"}
         `;
       } catch (err) {
         console.error(err);
