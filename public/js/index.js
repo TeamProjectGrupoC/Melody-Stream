@@ -50,4 +50,24 @@ document.addEventListener("DOMContentLoaded", () => {
             h2.textContent = "Hello, guest!";
         }
     });
+
+// Crear un h3 debajo del h2
+/*let h3 = document.getElementById("subMessage");
+if (!h3) {
+    h3 = document.createElement("h3");
+    h3.id = "subMessage";
+    h2.parentNode.insertBefore(h3, h2.nextSibling); // coloca debajo del h2
+}
+
+const pruebaRef = databaseRef(db, "prueba2");
+onValue(pruebaRef, (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+        h3.textContent = data;   
+    } else {
+        h3.textContent = "problem";
+    }
+});
+*/
+
 });

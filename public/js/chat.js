@@ -1,7 +1,7 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js"; 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { 
-    getDatabase, ref, get, child, set, push, onValue, off, update 
+import {
+    getDatabase, ref, get, child, set, push, onValue, off, update
 } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 /*
@@ -156,7 +156,7 @@ async function main() {
             const lastMessageSpan = document.createElement("span");
             lastMessageSpan.className = "last-message";
             lastMessageSpan.textContent = user.lastMessageText.length > 30
-                ? user.lastMessageText.substring(0,30) + "..."
+                ? user.lastMessageText.substring(0, 30) + "..."
                 : user.lastMessageText;
 
             li.appendChild(usernameSpan);
@@ -257,9 +257,10 @@ async function main() {
     });
 
     // --- Send message ---
-    const sendMessage = async (attachment = null) => {
+    // --- Send message ---
+    const sendMessage = async (fileAttachment = null) => {
         const text = messageInput.value.trim();
-        if ((!text && !attachment) || !selectedUser || !currentUser) return;
+        if ((!text && !fileAttachment) || !selectedUser || !currentUser) return;
 
         const chatId = getChatId(currentUser.uid, selectedUser);
         const messagesRef = ref(db, `chats/${chatId}/messages`);
@@ -273,12 +274,14 @@ async function main() {
             timestamp: newTimestamp
         };
 
-        if (attachment) newMessage.attachment = attachment;
+        if (fileAttachment) {
+            newMessage.attachment = fileAttachment;
+        }
 
         const lastMessageData = {
             sender: currentUser.uid,
-            text: attachment ? `[Shared] ${attachment.title}` : text,
-            timestamp: newTimestamp
+            text: fileAttachment ? `[Shared] ${fileAttachment.title}` : text,
+            timestamp: newTimestamp,
         };
 
         try {
@@ -292,10 +295,14 @@ async function main() {
                 }
             });
 
-            await update(ref(db, `userChats/${currentUser.uid}/${chatId}`), { lastMessage: lastMessageData });
-            await update(ref(db, `userChats/${selectedUser}/${chatId}`), { lastMessage: lastMessageData });
+            await update(ref(db, `userChats/${currentUser.uid}/${chatId}`), {
+                lastMessage: lastMessageData
+            });
 
-            // --- Clear input box ---
+            await update(ref(db, `userChats/${selectedUser}/${chatId}`), {
+                lastMessage: lastMessageData
+            });
+
             messageInput.value = "";
 
         } catch (e) {
@@ -303,13 +310,15 @@ async function main() {
         }
     };
 
-    sendButton.addEventListener("click", sendMessage);
+    sendButton.addEventListener("click", () => sendMessage());
     messageInput.addEventListener("keydown", (e) => {
         if (e.key === "Enter" || e.keyCode === 13) {
             e.preventDefault();
             sendMessage();
         }
     });
+
+
 
     // --- Search ---
     searchInput.addEventListener('keyup', () => {

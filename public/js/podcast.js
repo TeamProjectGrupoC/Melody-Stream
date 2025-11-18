@@ -160,7 +160,7 @@ async function deletePodcast(podcastId, audioURL, iconURL) {
 // Prompt user for recipient and share podcast as attachment
 // Open a modal listing users and call onSelect(selectedUid)
 async function promptSharePodcast(podcastId, podcast) {
-  if (!currentUser) return alert("Debes iniciar sesión para compartir.");
+  if (!currentUser) return alert("Log in to share.");
 
   try {
     const usersRef = ref(db, "users");
@@ -175,7 +175,7 @@ async function promptSharePodcast(podcastId, podcast) {
       usersArray.push({ uid, username: users[uid].username || users[uid].email || '(no name)', email: users[uid].email || '' });
     }
 
-    if (usersArray.length === 0) return alert('No hay otros usuarios para compartir.');
+    if (usersArray.length === 0) return alert('No other users to share with.');
 
     // show modal and wait for selection
     openUserSelectModal(usersArray, async (recipientUid) => {
@@ -193,16 +193,16 @@ async function promptSharePodcast(podcastId, podcast) {
 
       try {
         await shareToUser(recipientUid, attachment);
-        alert("Podcast compartido correctamente.");
+        alert("Podcast shared successfully.");
       } catch (err) {
         console.error(err);
-        alert("Error compartiendo podcast.");
+        alert("Error sharing podcast.");
       }
     });
 
   } catch (err) {
     console.error(err);
-    alert("Error compartiendo podcast.");
+    alert("Error sharing podcast.");
   }
 }
 
@@ -231,7 +231,7 @@ function openUserSelectModal(usersArray, onSelect) {
   box.style.boxShadow = '0 8px 24px rgba(0,0,0,0.2)';
 
   const title = document.createElement('h3');
-  title.textContent = 'Selecciona un usuario';
+  title.textContent = 'Select a user';
   title.style.marginTop = 0;
   box.appendChild(title);
 
@@ -252,7 +252,7 @@ function openUserSelectModal(usersArray, onSelect) {
     info.innerHTML = `<strong>${escapeHtml(u.username)}</strong><div style="font-size:0.85rem;color:#666">${escapeHtml(u.email)}</div>`;
 
     const btn = document.createElement('button');
-    btn.textContent = 'Compartir';
+    btn.textContent = 'Share';
     btn.className = 'btn';
     btn.style.marginLeft = '8px';
     btn.addEventListener('click', () => {
@@ -268,7 +268,7 @@ function openUserSelectModal(usersArray, onSelect) {
   box.appendChild(list);
 
   const cancel = document.createElement('button');
-  cancel.textContent = 'Cancelar';
+  cancel.textContent = 'Cancel';
   cancel.className = 'btn';
   cancel.style.marginTop = '8px';
   cancel.addEventListener('click', () => {
@@ -295,7 +295,7 @@ function escapeHtml(str) {
 
 // Write the message with attachment to DB
 async function shareToUser(recipientUid, attachment) {
-  if (!currentUser) return alert("Debes iniciar sesión.");
+  if (!currentUser) return alert("you must log in.");
   const senderUid = currentUser.uid;
   const chatId = senderUid < recipientUid ? `${senderUid}_${recipientUid}` : `${recipientUid}_${senderUid}`;
 
@@ -322,7 +322,7 @@ async function shareToUser(recipientUid, attachment) {
 
   const lastMessageData = {
     sender: senderUid,
-    text: `[Compartido] ${attachment.title}`,
+    text: `[Shared] ${attachment.title}`,
     timestamp
   };
 
