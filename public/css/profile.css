@@ -237,3 +237,17 @@ main a:hover {
   background-color: #4324a8;
   transform: scale(1.05);
 }
+
+#headerProfileIm img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+#headerProfileIm {
+    display: flex;           
+    align-items: center;    
+    margin-right: 20px;
+}

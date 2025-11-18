@@ -200,6 +200,20 @@ body {
     padding: 10px 20px;
 }
 
+#headerProfileIm img {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+}
+
+#headerProfileIm {
+    display: flex;           
+    align-items: center;    
+    margin-right: 20px;
+}
+
 /* 6. Estilos Responsive (Solo para el layout del chat) */
 @media (max-width: 800px) {
     .chat-container {

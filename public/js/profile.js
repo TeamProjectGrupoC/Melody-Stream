@@ -74,7 +74,9 @@ function cargarDatosDePerfil() {
 
             // Mostrar foto de perfil si existe
             if (userData.urlFotoPerfil) {
-            imagenElemento.src = userData.urlFotoPerfil;
+                imagenElemento.src = userData.urlFotoPerfil;
+                const headerPic = document.getElementById('headerUserPic');
+                if (headerPic) headerPic.src = userData.urlFotoPerfil;
             }
         } else {
             userDataDiv.style.display = 'none';
@@ -84,6 +86,9 @@ function cargarDatosDePerfil() {
     } else {
         msgElemento.textContent = "⚠️ You must be logged in to see your profile.";
         imagenElemento.src = "images/logos/silueta.png";
+
+        const headerPic = document.getElementById('headerUserPic');
+        if (headerPic) headerPic.src = "images/logos/silueta.png";
         userDataDiv.style.display = 'none';
     }
     });
@@ -101,12 +106,12 @@ function setupFormUploadListener() {
 
         // 1. Validaciones
         if (!currentUser) {
-            alert("Debes estar logueado para subir una foto.");
+            alert("You must be logged in to upload a photo.");
             return;
         }
         const file = fileInput.files[0];
         if (!file) {
-            alert("Por favor, selecciona un archivo.");
+            alert("Please select a file.");
             return;
         }
 
@@ -117,13 +122,13 @@ function setupFormUploadListener() {
 
         try {
             // 3. Subir el archivo
-            alert("Subiendo foto...");
+            alert("Uploading photo...");
             const snapshot = await uploadBytes(sRef, file);
-            console.log('¡Foto subida!', snapshot);
+            console.log('Photo uploaded!', snapshot);
 
             // 4. Obtener la URL de descarga
             const downloadURL = await getDownloadURL(snapshot.ref);
-            console.log('URL del archivo:', downloadURL);
+            console.log('File URL:', downloadURL);
 
             // 5. Guardar la URL en Realtime Database
             const userDbRef = databaseRef(db, 'users/' + currentUser.uid + '/urlFotoPerfil');
@@ -131,11 +136,14 @@ function setupFormUploadListener() {
             
             // 6. Actualizar la imagen en la página (la silueta)
             document.getElementById('fotoPerfilUsuario').src = downloadURL;
-            alert("¡Foto de perfil actualizada!");
+            const headerPic = document.getElementById('headerUserPic');
+            if (headerPic) headerPic.src = downloadURL;
+
+            alert("¡Foto de Profile picture updated! actualizada!");
 
         } catch (error) {
             console.error("Error al subir el archivo:", error);
-            alert("Error al subir la foto. Revisa la consola.");
+            alert("Error uploading photo. Check your console.");
         }
     });
 }
