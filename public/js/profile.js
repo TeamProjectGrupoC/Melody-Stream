@@ -94,15 +94,15 @@ function cargarDatosDePerfil() {
     });
 }
 
-// --- ¡NUEVA FUNCIÓN! MANEJAR LA SUBIDA DEL FORMULARIO ---
 function setupFormUploadListener() {
+
     const form = document.getElementById('uploadForm');
     const fileInput = document.getElementById('fotoArchivo');
     
     if (!form) return;
 
     form.addEventListener('submit', async (e) => {
-        e.preventDefault(); // ¡CLAVE! Detiene el envío normal del formulario
+        e.preventDefault();
 
         // 1. Validaciones
         if (!currentUser) {
@@ -139,7 +139,9 @@ function setupFormUploadListener() {
             const headerPic = document.getElementById('headerUserPic');
             if (headerPic) headerPic.src = downloadURL;
 
-            alert("¡Foto de Profile picture updated! actualizada!");
+            localStorage.setItem('profilePic', downloadURL);
+
+            alert("¡Profile picture updated!");
 
         } catch (error) {
             console.error("Error al subir el archivo:", error);
