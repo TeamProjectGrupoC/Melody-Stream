@@ -9,6 +9,7 @@ let isPremium = false;
 let deviceId = null; // For Web Playback SDK (premium)
 let userName = null;
 let userEmail = null;
+let lastDuration = 0;
 
 /***********************
  *  1. OBTAIN TOKEN
@@ -74,96 +75,44 @@ async function getUserProfile() {
  *  3. WEB PLAYBACK SDK (premium)
  ***********************/
 function loadWebPlaybackSDK() {
+  const script = document.createElement("script");
+  script.src = "https://sdk.scdn.co/spotify-player.js";
+  document.body.appendChild(script);
+
   window.onSpotifyWebPlaybackSDKReady = () => {
-    // Referencias a los nuevos elementos de la barra
-    const playerBar = document.getElementById('playerBar');
-    const currentTrackDisplay = document.getElementById('currentTrackDisplay');
-    const togglePlayPause = document.getElementById('togglePlayPause');
-    const progressBar = document.getElementById('progressBar');
-    const currentTimeSpan = document.getElementById('currentTime');
-    const trackDurationSpan = document.getElementById('trackDuration');
-
     const player = new Spotify.Player({
-      name: "Melody Stream Player",
-      getOAuthToken: (cb) => {
-        cb(accessToken);
-      },
-      volume: 0.5,
+      name: "MelodyStream Player",
+      getOAuthToken: (cb) => cb(accessToken),
+      volume: 0.8,
     });
 
-    // Error handling
-    player.on("initialization_error", ({ message }) => {
-      console.error(message);
-    });
-    player.on("authentication_error", ({ message }) => {
-      console.error(message);
-    });
-    player.on("account_error", ({ message }) => {
-      console.error(message);
-    });
-    player.on("playback_error", ({ message }) => {
-      console.error(message);
-    });
-
-    // Player State Changed: Actualiza la barra de reproducción
-    player.on('player_state_changed', state => {
-      if (!state) {
-        playerBar.style.display = 'none'; // Oculta si no hay estado
-        return;
-      }
-
-      playerBar.style.display = 'block'; // Muestra la barra
-
-      // Control Play/Pause
-      togglePlayPause.innerHTML = state.paused ? '&#9658;' : '&#10074;&#10074;';
-
-      // Actualizar información de la canción
-      const currentTrack = state.track_window.current_track;
-      currentTrackDisplay.textContent = `${currentTrack.name} – ${currentTrack.artists.map(a => a.name).join(', ')}`;
-      
-      // Actualizar barra de progreso y tiempos
-      const position = state.position;
-      const duration = state.duration;
-
-      currentTimeSpan.textContent = formatTime(position);
-      trackDurationSpan.textContent = formatTime(duration);
-      progressBar.max = duration; // El máximo es la duración total en milisegundos
-      progressBar.value = position; // El valor actual es la posición
-
-      // Si la reproducción termina, restablecer la barra
-      if (state.position === 0 && !state.paused && !state.loading && state.restrictions.disallow_resuming_playback) {
-          playerBar.style.display = 'none';
-      }
-    });
-
-    // Ready
-    player.on("ready", ({ device_id }) => {
-      console.log("Ready with Device ID", device_id);
+    // When ready
+    player.addListener("ready", ({ device_id }) => {
+      console.log("Device ready:", device_id);
       deviceId = device_id;
-      // Una vez listo, forzamos la transferencia de reproducción
-      transferPlayback(deviceId); 
+      document.getElementById("playerControls").style.display = "block";
     });
 
-    // Not Ready
-    player.on("not_ready", ({ device_id }) => {
-      console.log("Device ID has gone offline", device_id);
-      deviceId = null;
-      playerBar.style.display = 'none'; // Oculta si el dispositivo se desconecta
-    });
+    // MAIN STATE LISTENER → update progress bar
+    player.addListener("player_state_changed", (state) => {
+      if (!state) return;
 
-    // Listeners para los controles de la barra (NUEVO)
-    togglePlayPause.addEventListener('click', () => {
-        player.togglePlay();
-    });
-    
-    // Funcionalidad de Seek (avanzar/retroceder en la barra)
-    progressBar.addEventListener('change', () => {
-        player.seek(Number(progressBar.value));
+      lastDuration = state.duration;
+      const position = state.position;
+
+      document.getElementById("progressBar").value = (position / lastDuration) * 100;
+      document.getElementById("currentTime").textContent = formatTime(position);
+      document.getElementById("totalTime").textContent = formatTime(lastDuration);
+
+      const track = state.track_window.current_track;
+      document.getElementById("currentTrack").textContent =
+        `${track.name} - ${track.artists[0].name}`;
     });
 
     player.connect();
   };
 }
+
 
 /***********************
  *  4. SEARCH 5 SONGS
@@ -298,6 +247,20 @@ function formatTime(ms) {
  *  EVENTS
  ***********************/
 document.getElementById("searchBtn").addEventListener("click", searchTrack);
+document.getElementById("progressBar").addEventListener("input", async (e) => {
+  const percent = e.target.value;
+  const newPosition = (percent / 100) * lastDuration;
+
+  await fetch(
+    `https://api.spotify.com/v1/me/player/seek?position_ms=${Math.floor(newPosition)}&device_id=${deviceId}`,
+    {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${accessToken}`
+      }
+    }
+  );
+});
 
 // Start getting token
 getToken();
