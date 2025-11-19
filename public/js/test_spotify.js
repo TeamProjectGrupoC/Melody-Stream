@@ -185,3 +185,8 @@ document.getElementById("searchBtn").addEventListener("click", searchTrack);
 
 // Start getting token
 getToken();
+
+
+// Exponer funciones al scope global
+window.playTrack = playTrack;
+window.searchTrack = searchTrack;
