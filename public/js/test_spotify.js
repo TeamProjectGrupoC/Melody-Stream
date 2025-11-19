@@ -36,7 +36,7 @@ async function getToken() {
     await checkUserProduct();
 
     displayUserStatus();
-
+    console.log("pasa1");
     // If premium : initialize Web Playback SDK
     if (isPremium) loadWebPlaybackSDK();
   } catch (err) {
@@ -194,7 +194,7 @@ function displayUserStatus() {
     message = "❌ Usuario Spotify Free/Normal: Solo disponible la previsualización (30s).";
     color = "#FF9800"; // Naranja
   }
-
+console.log("pasa2");
   statusDiv.innerHTML = message;
   statusDiv.style.backgroundColor = color;
   statusDiv.style.color = "white";
