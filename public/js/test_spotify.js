@@ -142,13 +142,19 @@ async function searchTrack() {
       .map(
         (track, i) => `
       <div style="border:1px solid #ccc; padding:10px; margin:10px;">
-        <h3>${track.name}</h3>
-        <p>${track.artists[0].name}</p>
-        <img src="${track.album.images[0].url}" width="120">
-        <br><br>
-        <button onclick="playTrack('${track.uri}', '${track.preview_url}')">
-          ▶ Play
-        </button>
+        <h2>${i + 1}. ${track.name}</h2>
+        <p>Artist: ${track.artists.map((artist) => artist.name).join(", ")}</p>
+        <p>Album: ${track.album.name}</p>
+        
+        ${track.preview_url ? 
+          // Si hay preview_url, muestra el botón de Play
+          `<button onclick="playTrack('${track.uri}', '${track.preview_url}')">
+            ▶ Previsualización (30s)
+          </button>`
+          : 
+          // Si es null, muestra un mensaje de no disponible
+          `<p style="color: red;">❌ Previsualización no disponible.</p>`
+        }
       </div>
     `
       )
@@ -166,10 +172,6 @@ async function searchTrack() {
 async function playTrack(uri, previewUrl) {
   if (!isPremium) {
     // USERS NOT PREMIUM : use preview_url
-    if (!previewUrl) {
-      alert("No preview available.");
-      return;
-    }
 
     console.log(previewUrl);
     const audio = new Audio(previewUrl);
