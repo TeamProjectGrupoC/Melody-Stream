@@ -17,7 +17,7 @@ async function getToken() {
       "<p>Code not found. Try logging in again.</p>";
     return;
   }
-
+  console.log("pasa1");
   try {
     const res = await fetch(
       `https://us-central1-melodystream123.cloudfunctions.net/getSpotifyToken?code=${code}`
@@ -36,7 +36,6 @@ async function getToken() {
     await checkUserProduct();
 
     displayUserStatus();
-    console.log("pasa1");
     // If premium : initialize Web Playback SDK
     if (isPremium) loadWebPlaybackSDK();
   } catch (err) {
