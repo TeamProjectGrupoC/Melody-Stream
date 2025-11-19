@@ -71,22 +71,6 @@ async function getUserProfile() {
 }
 
 /***********************
- *  2. CHECK THE STATUS OF THE USER
- ***********************/
-/*async function checkUserProduct() {
-  try {
-    const res = await fetch("https://api.spotify.com/v1/me", {
-      headers: { Authorization: "Bearer " + accessToken },
-    });
-
-    const data = await res.json();
-    isPremium = data.product === "premium";
-  } catch (err) {
-    console.error("Error checking user product", err);
-  }
-}
-
-/***********************
  *  3. WEB PLAYBACK SDK (premium)
  ***********************/
 function loadWebPlaybackSDK() {
@@ -139,26 +123,27 @@ async function searchTrack() {
 
     // Render the list
     document.getElementById("trackInfo").innerHTML = tracks
-      .map(
-        (track, i) => `
-      <div style="border:1px solid #ccc; padding:10px; margin:10px;">
-        <h2>${i + 1}. ${track.name}</h2>
-        <p>Artist: ${track.artists.map((artist) => artist.name).join(", ")}</p>
-        <p>Album: ${track.album.name}</p>
-        
-        ${track.preview_url ? 
-          // Si hay preview_url, muestra el botón de Play
-          `<button onclick="playTrack('${track.uri}', '${track.preview_url}')">
-            ▶ Previsualización (30s)
-          </button>`
-          : 
-          // Si es null, muestra un mensaje de no disponible
-          `<p style="color: red;">❌ Previsualización no disponible.</p>`
-        }
-      </div>
-    `
-      )
-      .join("");
+    .map(
+      (track, i) => `
+        <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+          <img src="${track.album.images[0].url}" alt="Album Art" style="width: 100px; height: 100px;">
+          <h2>${i + 1}. ${track.name}</h2>
+          <p>Artista: ${track.artists.map((artist) => artist.name).join(", ")}</p>
+          <p>Álbum: ${track.album.name}</p>
+          
+          ${isPremium ? 
+            // Si es Premium, se muestra el botón.
+            `<button onclick="playTrack('${track.uri}')">
+              ▶ Reproducir Canción Completa
+            </button>`
+            : 
+            // Si no es Premium, no se muestra nada de reproducción (ni preview, ni error).
+            ''
+          }
+        </div>
+      `
+    )
+    .join("");
   } catch (err) {
     console.error(err);
     document.getElementById("trackInfo").innerHTML =
@@ -169,25 +154,24 @@ async function searchTrack() {
 /***********************
  *  5. Reproduce song
  ***********************/
-async function playTrack(uri, previewUrl) {
+async function playTrack(uri) {
+  // Si no es Premium, simplemente salimos de la función sin hacer nada.
   if (!isPremium) {
-    // USERS NOT PREMIUM : use preview_url
-
-    console.log(previewUrl);
-    const audio = new Audio(previewUrl);
-    audio.play();
+    console.warn("Intento de reproducción bloqueado. Se requiere cuenta Premium.");
+    alert("Para reproducir la canción completa, necesitas una cuenta Spotify Premium y que tu aplicación esté autorizada.");
     return;
   }
 
   // PREMIUM : COMPLETE PLAYBACK 
   if (!deviceId) {
-    alert("Player not ready yet. Try again.");
+    alert("El reproductor web aún no está listo. Inténtalo de nuevo en unos segundos.");
     return;
   }
 
   try {
+    // Usando el endpoint /v1/me/player/play
     await fetch(
-      `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+      `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, 
       {
         method: "PUT",
         headers: {
@@ -202,7 +186,7 @@ async function playTrack(uri, previewUrl) {
 
     console.log("Playing full track on Premium device.");
   } catch (err) {
-    console.error("Error playing track", err);
+    console.error("Error playing full track:", err);
   }
 }
 
@@ -214,23 +198,22 @@ function displayUserStatus() {
   let message = "";
   let color = "";
   
-  // Usamos el email si está disponible, si no, el nombre
   const userIdentifier = userEmail || userName || "Usuario Desconocido";
 
   if (isPremium) {
-    message = `✅ Conectado como: **${userIdentifier}**. Eres Spotify Premium: Reproducción completa activada.`;
+    message = `✅ Conectado como: **${userIdentifier}**. Eres Spotify Premium: Reproducción de canción completa activada.`;
     color = "#4CAF50"; 
   } else {
-    message = `❌ Conectado como: **${userIdentifier}**. Eres Spotify Free: Solo disponible la previsualización (30s).`;
+    // Mensaje para usuarios Free, sin mencionar previews
+    message = `❌ Conectado como: **${userIdentifier}**. Eres Spotify Free: La reproducción de música no está disponible.`;
     color = "#FF9800"; 
   }
 
   statusDiv.innerHTML = message;
   statusDiv.style.backgroundColor = color;
   statusDiv.style.color = "white";
-  statusDiv.style.padding = "10px"; // Aseguramos el padding
+  statusDiv.style.padding = "10px";
 }
-
 /***********************
  *  EVENTS
  ***********************/
