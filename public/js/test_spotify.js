@@ -38,6 +38,7 @@ async function getToken() {
     await getUserProfile();
 
     displayUserStatus();
+
     // If premium : initialize Web Playback SDK
     if (isPremium) loadWebPlaybackSDK();
   } catch (err) {
@@ -170,7 +171,7 @@ async function playTrack(uri, previewUrl) {
       return;
     }
 
-    console.log("pasa3");
+    console.log(previewUrl);
     const audio = new Audio(previewUrl);
     audio.play();
     return;
@@ -234,9 +235,7 @@ function displayUserStatus() {
 document.getElementById("searchBtn").addEventListener("click", searchTrack);
 
 // Start getting token
-console.log("funciona1");
 getToken();
-console.log("funciona1");
 
 
 // Exponer funciones al scope global
