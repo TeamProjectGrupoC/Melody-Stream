@@ -170,6 +170,7 @@ async function playTrack(uri, previewUrl) {
       return;
     }
 
+    console.log("pasa3");
     const audio = new Audio(previewUrl);
     audio.play();
     return;
