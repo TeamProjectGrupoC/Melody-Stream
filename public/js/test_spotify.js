@@ -35,6 +35,8 @@ async function getToken() {
     // Check user type (premium or not)
     await checkUserProduct();
 
+    displayUserStatus();
+
     // If premium : initialize Web Playback SDK
     if (isPremium) loadWebPlaybackSDK();
   } catch (err) {
@@ -175,6 +177,27 @@ async function playTrack(uri, previewUrl) {
   } catch (err) {
     console.error("Error playing track", err);
   }
+}
+
+/***********************
+ * SHOW THE STATUS
+ ***********************/
+function displayUserStatus() {
+  const statusDiv = document.getElementById("userStatus");
+  let message = "";
+  let color = "";
+
+  if (isPremium) {
+    message = "✅ Usuario Spotify Premium: Reproducción completa activada.";
+    color = "#4CAF50"; // Verde
+  } else {
+    message = "❌ Usuario Spotify Free/Normal: Solo disponible la previsualización (30s).";
+    color = "#FF9800"; // Naranja
+  }
+
+  statusDiv.innerHTML = message;
+  statusDiv.style.backgroundColor = color;
+  statusDiv.style.color = "white";
 }
 
 /***********************
