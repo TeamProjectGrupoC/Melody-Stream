@@ -7,6 +7,8 @@ const code = params.get("code");
 let accessToken = null;
 let isPremium = false;
 let deviceId = null; // For Web Playback SDK (premium)
+let userName = null;
+let userEmail = null;
 
 /***********************
  *  1. OBTENER TOKEN
@@ -33,7 +35,7 @@ async function getToken() {
     accessToken = data.access_token;
 
     // Check user type (premium or not)
-    await checkUserProduct();
+    await getUserProfile();
 
     displayUserStatus();
     // If premium : initialize Web Playback SDK
@@ -46,9 +48,31 @@ async function getToken() {
 }
 
 /***********************
+ *  2. GET INFO OF THE USER
+ ***********************/
+
+async function getUserProfile() {
+  try {
+    const res = await fetch("https://api.spotify.com/v1/me", { // El mismo endpoint que antes usabas para /me
+      headers: { Authorization: "Bearer " + accessToken },
+    });
+
+    const data = await res.json();
+    
+    // Almacenar los datos que necesitamos
+    isPremium = data.product === "premium";
+    userName = data.display_name;
+    userEmail = data.email; 
+
+  } catch (err) {
+    console.error("Error checking user profile", err);
+  }
+}
+
+/***********************
  *  2. CHECK THE STATUS OF THE USER
  ***********************/
-async function checkUserProduct() {
+/*async function checkUserProduct() {
   try {
     const res = await fetch("https://api.spotify.com/v1/me", {
       headers: { Authorization: "Bearer " + accessToken },
@@ -179,24 +203,28 @@ async function playTrack(uri, previewUrl) {
 }
 
 /***********************
- * SHOW THE STATUS
+ * SHOW STATUS
  ***********************/
 function displayUserStatus() {
   const statusDiv = document.getElementById("userStatus");
   let message = "";
   let color = "";
+  
+  // Usamos el email si está disponible, si no, el nombre
+  const userIdentifier = userEmail || userName || "Usuario Desconocido";
 
   if (isPremium) {
-    message = "✅ Usuario Spotify Premium: Reproducción completa activada.";
-    color = "#4CAF50"; // Verde
+    message = `✅ Conectado como: **${userIdentifier}**. Eres Spotify Premium: Reproducción completa activada.`;
+    color = "#4CAF50"; 
   } else {
-    message = "❌ Usuario Spotify Free/Normal: Solo disponible la previsualización (30s).";
-    color = "#FF9800"; // Naranja
+    message = `❌ Conectado como: **${userIdentifier}**. Eres Spotify Free: Solo disponible la previsualización (30s).`;
+    color = "#FF9800"; 
   }
-console.log("pasa2");
+
   statusDiv.innerHTML = message;
   statusDiv.style.backgroundColor = color;
   statusDiv.style.color = "white";
+  statusDiv.style.padding = "10px"; // Aseguramos el padding
 }
 
 /***********************
