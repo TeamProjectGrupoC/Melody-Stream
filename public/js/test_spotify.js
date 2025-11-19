@@ -11,7 +11,7 @@ let userName = null;
 let userEmail = null;
 
 /***********************
- *  1. OBTENER TOKEN
+ *  1. OBTAIN TOKEN
  ***********************/
 async function getToken() {
   if (!code) {
@@ -19,7 +19,7 @@ async function getToken() {
       "<p>Code not found. Try logging in again.</p>";
     return;
   }
-  console.log("pasa1");
+
   try {
     const res = await fetch(
       `https://us-central1-melodystream123.cloudfunctions.net/getSpotifyToken?code=${code}`
@@ -54,13 +54,13 @@ async function getToken() {
 
 async function getUserProfile() {
   try {
-    const res = await fetch("https://api.spotify.com/v1/me", { // El mismo endpoint que antes usabas para /me
+    const res = await fetch("https://api.spotify.com/v1/me", {
       headers: { Authorization: "Bearer " + accessToken },
     });
 
     const data = await res.json();
     
-    // Almacenar los datos que necesitamos
+    // Storage data
     isPremium = data.product === "premium";
     userName = data.display_name;
     userEmail = data.email; 
@@ -107,7 +107,7 @@ async function searchTrack() {
     const res = await fetch(
       `https://api.spotify.com/v1/search?q=${encodeURIComponent(
         query
-      )}&type=track&limit=5`,
+      )}&type=track&limit=10`,
       {
         headers: { Authorization: `Bearer ${accessToken}` },
       }
@@ -125,19 +125,19 @@ async function searchTrack() {
     document.getElementById("trackInfo").innerHTML = tracks
     .map(
       (track, i) => `
-        <div style="border:1px solid #ccc; padding:10px; margin:10px;">
+        <div style="padding:10px; margin:10px;">
           <img src="${track.album.images[0].url}" alt="Album Art" style="width: 100px; height: 100px;">
           <h2>${i + 1}. ${track.name}</h2>
           <p>Artista: ${track.artists.map((artist) => artist.name).join(", ")}</p>
           <p>Álbum: ${track.album.name}</p>
           
           ${isPremium ? 
-            // Si es Premium, se muestra el botón.
+            // If it is premium, show the button
             `<button onclick="playTrack('${track.uri}')">
               ▶ Reproducir Canción Completa
             </button>`
             : 
-            // Si no es Premium, no se muestra nada de reproducción (ni preview, ni error).
+            // If not, do not show nothing
             ''
           }
         </div>
@@ -155,21 +155,21 @@ async function searchTrack() {
  *  5. Reproduce song
  ***********************/
 async function playTrack(uri) {
-  // Si no es Premium, simplemente salimos de la función sin hacer nada.
+  // Not premium -> return
   if (!isPremium) {
-    console.warn("Intento de reproducción bloqueado. Se requiere cuenta Premium.");
-    alert("Para reproducir la canción completa, necesitas una cuenta Spotify Premium y que tu aplicación esté autorizada.");
+    console.warn("Requires Premium");
+    alert("You have to be premium and be authorized.");
     return;
   }
 
   // PREMIUM : COMPLETE PLAYBACK 
   if (!deviceId) {
-    alert("El reproductor web aún no está listo. Inténtalo de nuevo en unos segundos.");
+    alert("Try again later. The device is not ready yet.");
     return;
   }
 
   try {
-    // Usando el endpoint /v1/me/player/play
+
     await fetch(
       `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, 
       {
@@ -198,14 +198,14 @@ function displayUserStatus() {
   let message = "";
   let color = "";
   
-  const userIdentifier = userEmail || userName || "Usuario Desconocido";
+  const userIdentifier = userEmail || userName || "Unknown User";
 
   if (isPremium) {
-    message = `✅ Conectado como: **${userIdentifier}**. Eres Spotify Premium: Reproducción de canción completa activada.`;
+    message = `✅ Connected as **${userIdentifier}**. You are Spotify Premium: you can listen to the songs`;
     color = "#4CAF50"; 
   } else {
     // Mensaje para usuarios Free, sin mencionar previews
-    message = `❌ Conectado como: **${userIdentifier}**. Eres Spotify Free: La reproducción de música no está disponible.`;
+    message = `❌ Connected as **${userIdentifier}**. You are Spotify Free: you can only read information`;
     color = "#FF9800"; 
   }
 
