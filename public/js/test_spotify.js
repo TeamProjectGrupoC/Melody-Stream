@@ -127,7 +127,6 @@ async function searchTrack() {
     `
       )
       .join("");
-
   } catch (err) {
     console.error(err);
     document.getElementById("trackInfo").innerHTML =
@@ -179,7 +178,7 @@ async function playTrack(uri, previewUrl) {
 }
 
 /***********************
- *  EVENTOS
+ *  EVENTS
  ***********************/
 document.getElementById("searchBtn").addEventListener("click", searchTrack);
 
