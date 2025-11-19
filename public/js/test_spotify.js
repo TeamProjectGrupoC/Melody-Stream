@@ -74,21 +74,91 @@ async function getUserProfile() {
  *  3. WEB PLAYBACK SDK (premium)
  ***********************/
 function loadWebPlaybackSDK() {
-  const script = document.createElement("script");
-  script.src = "https://sdk.scdn.co/spotify-player.js";
-  document.body.appendChild(script);
-
   window.onSpotifyWebPlaybackSDKReady = () => {
+    // Referencias a los nuevos elementos de la barra
+    const playerBar = document.getElementById('playerBar');
+    const currentTrackDisplay = document.getElementById('currentTrackDisplay');
+    const togglePlayPause = document.getElementById('togglePlayPause');
+    const progressBar = document.getElementById('progressBar');
+    const currentTimeSpan = document.getElementById('currentTime');
+    const trackDurationSpan = document.getElementById('trackDuration');
+
     const player = new Spotify.Player({
-      name: "MelodyStream Player",
-      getOAuthToken: (cb) => cb(accessToken),
-      volume: 0.8,
+      name: "Melody Stream Player",
+      getOAuthToken: (cb) => {
+        cb(accessToken);
+      },
+      volume: 0.5,
     });
 
-    // Obtener device_id
-    player.addListener("ready", ({ device_id }) => {
-      console.log("Device ready:", device_id);
+    // Error handling
+    player.on("initialization_error", ({ message }) => {
+      console.error(message);
+    });
+    player.on("authentication_error", ({ message }) => {
+      console.error(message);
+    });
+    player.on("account_error", ({ message }) => {
+      console.error(message);
+    });
+    player.on("playback_error", ({ message }) => {
+      console.error(message);
+    });
+
+    // Player State Changed: Actualiza la barra de reproducción
+    player.on('player_state_changed', state => {
+      if (!state) {
+        playerBar.style.display = 'none'; // Oculta si no hay estado
+        return;
+      }
+
+      playerBar.style.display = 'block'; // Muestra la barra
+
+      // Control Play/Pause
+      togglePlayPause.innerHTML = state.paused ? '&#9658;' : '&#10074;&#10074;';
+
+      // Actualizar información de la canción
+      const currentTrack = state.track_window.current_track;
+      currentTrackDisplay.textContent = `${currentTrack.name} – ${currentTrack.artists.map(a => a.name).join(', ')}`;
+      
+      // Actualizar barra de progreso y tiempos
+      const position = state.position;
+      const duration = state.duration;
+
+      currentTimeSpan.textContent = formatTime(position);
+      trackDurationSpan.textContent = formatTime(duration);
+      progressBar.max = duration; // El máximo es la duración total en milisegundos
+      progressBar.value = position; // El valor actual es la posición
+
+      // Si la reproducción termina, restablecer la barra
+      if (state.position === 0 && !state.paused && !state.loading && state.restrictions.disallow_resuming_playback) {
+          playerBar.style.display = 'none';
+      }
+    });
+
+    // Ready
+    player.on("ready", ({ device_id }) => {
+      console.log("Ready with Device ID", device_id);
       deviceId = device_id;
+      // Una vez listo, forzamos la transferencia de reproducción
+      transferPlayback(deviceId); 
+    });
+
+    // Not Ready
+    player.on("not_ready", ({ device_id }) => {
+      console.log("Device ID has gone offline", device_id);
+      deviceId = null;
+      playerBar.style.display = 'none'; // Oculta si el dispositivo se desconecta
+    });
+
+    // Listeners para los controles de la barra (NUEVO)
+    togglePlayPause.addEventListener('click', () => {
+        player.togglePlay();
+    });
+    
+    // Funcionalidad de Seek (avanzar/retroceder en la barra)
+    progressBar.addEventListener('change', () => {
+        player.seek(Number(progressBar.value));
     });
 
     player.connect();
@@ -213,6 +283,16 @@ function displayUserStatus() {
   statusDiv.style.backgroundColor = color;
   statusDiv.style.color = "white";
   statusDiv.style.padding = "10px";
+}
+
+/***********************
+ * HELPER: Time Format
+ ***********************/
+function formatTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }
 /***********************
  *  EVENTS
