@@ -205,7 +205,9 @@ console.log("pasa2");
 document.getElementById("searchBtn").addEventListener("click", searchTrack);
 
 // Start getting token
+console.log("funciona1");
 getToken();
+console.log("funciona1");
 
 
 // Exponer funciones al scope global
