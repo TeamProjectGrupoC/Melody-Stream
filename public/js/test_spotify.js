@@ -247,20 +247,11 @@ function formatTime(ms) {
  *  EVENTS
  ***********************/
 document.getElementById("searchBtn").addEventListener("click", searchTrack);
-document.getElementById("progressBar").addEventListener("input", async (e) => {
-  const percent = e.target.value;
-  const newPosition = (percent / 100) * lastDuration;
-
-  await fetch(
-    `https://api.spotify.com/v1/me/player/seek?position_ms=${Math.floor(newPosition)}&device_id=${deviceId}`,
-    {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${accessToken}`
-      }
-    }
-  );
+player.addListener("ready", ({ device_id }) => {
+  deviceId = device_id;
+  document.getElementById("playerBar").style.display = "block"; 
 });
+
 
 // Start getting token
 getToken();
