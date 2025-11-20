@@ -90,7 +90,7 @@ function loadWebPlaybackSDK() {
     player.addListener("ready", ({ device_id }) => {
       console.log("Device ready:", device_id);
       deviceId = device_id;
-      document.getElementById("playerControls").style.display = "block";
+      document.getElementById("playerBar").style.display = "block";
     });
 
     // MAIN STATE LISTENER → update progress bar
@@ -247,10 +247,7 @@ function formatTime(ms) {
  *  EVENTS
  ***********************/
 document.getElementById("searchBtn").addEventListener("click", searchTrack);
-player.addListener("ready", ({ device_id }) => {
-  deviceId = device_id;
-  document.getElementById("playerBar").style.display = "block"; 
-});
+
 
 
 // Start getting token
