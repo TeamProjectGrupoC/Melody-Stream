@@ -49,6 +49,9 @@
       <h1>Search for a Song</h1>
       <input type="text" id="searchInput" placeholder="Song name" />
       <button id="searchBtn">Search</button>
+      <div id="userStatus" style="padding: 10px; margin-top: 15px; border-radius: 5px; font-weight: bold;">
+        Cargando estado...
+      </div>
       <div id="trackInfo"></div>
     </main>
 
@@ -100,7 +103,60 @@
         </ul>
       </div>
     </footer>
+    <!-- PLAYER FIXED BOTTOM -->
+    <div id="playerBar">
+      <div id="playerContent">
 
-    <script type="module" src="js/test_spotify.js"></script>
+        <button id="playPauseBtn">⏸️</button>
+
+        <div id="trackInfoText">
+          <span id="currentTrack">No song playing</span><br>
+          <span id="currentTime">0:00</span> / <span id="totalTime">0:00</span>
+        </div>
+
+        <input type="range" id="progressBar" value="0" min="0" max="100" step="1">
+
+      </div>
+    </div>
+
+    <style>
+      #playerBar {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #111;
+        color: white;
+        padding: 12px 20px;
+        display: none; 
+        z-index: 99999;
+        box-shadow: 0 -3px 10px rgba(0,0,0,0.5);
+      }
+
+      #playerContent {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      #playPauseBtn {
+        background: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 6px;
+        font-size: 18px;
+        cursor: pointer;
+      }
+
+      #progressBar {
+        width: 40%;
+      }
+
+      #trackInfoText {
+        width: 40%;
+      }
+    </style>
+
+    <script src="js/test_spotify.js"></script>
   </body>
 </html>

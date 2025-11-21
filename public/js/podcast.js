@@ -409,14 +409,14 @@ searchInput.addEventListener("keypress", (e) => {
 
 
 // Add event listener to the "Upload Podcast" button
-const uploadButton = document.getElementById("uploadPodcastBtn") || document.getElementById("goToUpload");
-if (uploadButton) {
-  uploadButton.addEventListener("click", (e) => {
-    if (currentUser) {
+const goToUploadButton = document.getElementById("goToUpload") || document.getElementById("uploadPodcastBtn");
+if (goToUploadButton) {
+  goToUploadButton.addEventListener("click", (e) => {
+    // si quieres forzar login cuando no hay sesión:
+    if (typeof currentUser !== "undefined" && currentUser) {
       window.location.href = "podcast_upload.html";
     } else {
-      // opción: mostrar mensaje antes de redirigir
-      // alert('You must be logged in to upload a podcast.');
+      // redirige a login para que el usuario se autentique primero
       window.location.href = "login.html";
     }
   });

@@ -17,6 +17,12 @@ main {
   padding: 3rem 1rem;
 }
 
+#trackInfo {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
 /* Título */
 main h1 {
   font-size: 2.5rem;
