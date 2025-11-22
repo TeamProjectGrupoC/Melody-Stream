@@ -272,10 +272,29 @@ function playPauseSong() {
 }
 
 /***********************
+ * Seek
+ ***********************/
+function seekToPosition() {
+  if (!window.spotifyPlayer || !lastDuration || !isPremium) return;
+
+  const progressBar = document.getElementById("progressBar");
+  const percentage = progressBar.value / 100;
+
+  // Calcula la nueva posición en milisegundos
+  const newPositionMs = Math.round(lastDuration * percentage);
+
+  // Usa el método 'seek' del Web Playback SDK
+  window.spotifyPlayer.seek(newPositionMs).then(() => {
+    console.log(`Buscando nueva posición: ${formatTime(newPositionMs)}`);
+  });
+}
+
+/***********************
  *  EVENTS
  ***********************/
 document.getElementById("searchBtn").addEventListener("click", searchTrack);
 document.getElementById("playPauseBtn").addEventListener("click", playPauseSong);
+document.getElementById("progressBar").addEventListener("change", seekToPosition);
 
 
 
