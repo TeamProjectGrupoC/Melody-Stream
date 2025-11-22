@@ -146,7 +146,7 @@ async function searchTrack() {
           ${isPremium ? 
             // If it is premium, show the button
             `<button onclick="playTrack('${track.uri}')">
-              ▶ Reproducir Canción Completa
+              ▶ Reproducir
             </button>`
             : 
             // If not, do not show nothing
