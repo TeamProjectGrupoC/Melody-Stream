@@ -78,14 +78,14 @@ function cargarDatosDePerfil() {
       });
 
       document.getElementById("favArtistsSection").style.display = "block";
-      document.getElementById("favSongsSection").style.display = "block";
+      //document.getElementById("favSongsSection").style.display = "block";
 
 
       // Cargar y mostrar los podcasts subidos por este usuario
       loadUserPodcasts(user.uid);
       loadUserFolders(user.uid);
       loadFavouriteArtists(user.uid);
-      loadFavouriteSongs(user.uid);
+      //loadFavouriteSongs(user.uid);
 
 
     } else {
@@ -101,7 +101,7 @@ function cargarDatosDePerfil() {
       if (existingContainer) existingContainer.innerHTML = '';
 
       document.getElementById("favArtistsSection").style.display = "none";
-      document.getElementById("favSongsSection").style.display = "none";
+      //document.getElementById("favSongsSection").style.display = "none";
 
     }
   });
