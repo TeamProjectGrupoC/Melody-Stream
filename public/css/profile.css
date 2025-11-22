@@ -251,3 +251,105 @@ main a:hover {
     align-items: center;    
     margin-right: 20px;
 }
+
+/* ===============================
+   🎵 FAVOURITE ARTISTS SECTION
+   =============================== */
+
+#favArtistsSection {
+  width: 100%;
+  max-width: 700px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.8s ease-in-out;
+  margin-top: 1rem;
+}
+
+#favArtistsSection h2,
+#favArtistsSection h3 {
+  color: var(--color-azul2);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Search bar */
+#artistSearch {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-blanco);
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  transition: 0.3s ease border-color;
+}
+
+#artistSearch:focus {
+  outline: none;
+  border-color: var(--color-azul2);
+}
+
+#btnSearchArtist {
+  width: 100%;
+  background-color: var(--color-azul1);
+  border: none;
+  color: var(--color-blanco);
+  padding: 0.8rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#btnSearchArtist:hover {
+  background-color: var(--color-azul2);
+  transform: scale(1.03);
+}
+
+/* ===============================
+   🎤 Artist Cards (Resultados)
+   =============================== */
+
+#artistResults,
+#savedArtists {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.artistCard {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  backdrop-filter: blur(6px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.artistCard:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(62, 154, 222, 0.4);
+}
+
+.artistCard img {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 0.6rem;
+  border: 2px solid var(--color-azul2);
+}
+
+.artistCard p {
+  color: var(--color-blanco);
+  font-weight: 600;
+  margin: 0;
+  font-size: 1rem;
+}
+

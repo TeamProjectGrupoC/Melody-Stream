@@ -35,6 +35,10 @@ async function getToken() {
 
     accessToken = data.access_token;
 
+    //Lo guardamos para los artistas
+    localStorage.setItem("spotify_access_token", accessToken);
+
+
     // Check user type (premium or not)
     await getUserProfile();
 

@@ -616,11 +616,27 @@ document.getElementById('folder-modal')?.addEventListener('click', (e) => {
   if (e.target && e.target.id === 'folder-modal') closeModal();
 });
 
+
+
+
+
+//SECCION DE ARTISTAS FAVORITOS
+function getSpotifyUserToken() {
+  return localStorage.getItem("spotify_access_token");
+}
+
 async function searchArtist(query) {
-  const token = await getSpotifyToken(); // ya lo tienes implementado
-  const resp = await fetch(`https://api.spotify.com/v1/search?q=${query}&type=artist`, {
-    headers: { "Authorization": "Bearer " + token }
-  });
+  const token = getSpotifyUserToken();
+  if (!token) {
+    alert("Please sign in with Spotify first.");
+    return [];
+  }
+
+  const resp = await fetch(
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist`,
+    { headers: { "Authorization": "Bearer " + token } }
+  );
+
   const data = await resp.json();
   return data.artists.items;
 }
@@ -666,3 +682,46 @@ function renderSavedArtists(artists) {
   });
 }
 
+document.getElementById("btnSearchArtist").addEventListener("click", async () => {
+  const query = document.getElementById("artistSearch").value.trim();
+  const resultContainer = document.getElementById("artistResults");
+
+  resultContainer.innerHTML = ""; // limpia resultados previos
+
+  if (query === "") {
+    resultContainer.innerHTML = "<p>Please enter an artist name.</p>";
+    return;
+  }
+
+  try {
+    const artists = await searchArtist(query);
+
+    if (!artists || artists.length === 0) {
+      resultContainer.innerHTML = "<p>No artists found.</p>";
+      return;
+    }
+
+    artists.forEach(artist => {
+      const card = document.createElement("div");
+      card.classList.add("artistCard");
+
+      card.innerHTML = `
+        <img src="${artist.images?.[0]?.url || 'images/logos/silueta.png'}" />
+        <p>${artist.name}</p>
+        <button class="addFavBtn">Add to favourites</button>
+      `;
+
+      // Botón añadir a favoritos
+      card.querySelector(".addFavBtn").addEventListener("click", () => {
+        saveFavouriteArtist(currentUser.uid, artist);
+        alert(`${artist.name} added to favourites`);
+      });
+
+      resultContainer.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error("Error searching artists:", error);
+    resultContainer.innerHTML = "<p>Error searching artists.</p>";
+  }
+});
