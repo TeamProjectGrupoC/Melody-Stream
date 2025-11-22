@@ -202,7 +202,7 @@ async function playTrack(uri) {
         }),
       }
     );
-    document.getElementById("playPauseBtn").textContent = "⏸";
+    document.getElementById("playPauseBtn").textContent = "||";
     console.log("Playing full track on Premium device.");
   } catch (err) {
     console.error("Error playing full track:", err);
@@ -262,7 +262,7 @@ function playPauseSong() {
         if (state.paused) {
             // Si está pausado → Reanudar
             window.spotifyPlayer.resume();
-            button.textContent = "⏸";  // Cambiar icono a pause
+            button.textContent = "||";  // Cambiar icono a pause
         } else {
             // Si está sonando → Pausar
             window.spotifyPlayer.pause();
