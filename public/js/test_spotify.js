@@ -80,21 +80,21 @@ function loadWebPlaybackSDK() {
   document.body.appendChild(script);
 
   window.onSpotifyWebPlaybackSDKReady = () => {
-    const player = new Spotify.Player({
+    window.spotifyPlayer = new Spotify.Player({
       name: "MelodyStream Player",
       getOAuthToken: (cb) => cb(accessToken),
       volume: 0.8,
     });
 
     // When ready
-    player.addListener("ready", ({ device_id }) => {
+    spotifyPlayer.addListener("ready", ({ device_id }) => {
       console.log("Device ready:", device_id);
       deviceId = device_id;
       document.getElementById("playerBar").style.display = "block";
     });
 
     // MAIN STATE LISTENER → update progress bar
-    player.addListener("player_state_changed", (state) => {
+    spotifyPlayer.addListener("player_state_changed", (state) => {
       if (!state) return;
 
       lastDuration = state.duration;
@@ -109,7 +109,7 @@ function loadWebPlaybackSDK() {
         `${track.name} - ${track.artists[0].name}`;
     });
 
-    player.connect();
+    spotifyPlayer.connect();
   };
 }
 
@@ -243,10 +243,39 @@ function formatTime(ms) {
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }
+
+function playPauseSong() {
+    const button = document.getElementById("playPauseBtn");
+
+    // Verificar si existe el Web Playback SDK
+    if (!window.spotifyPlayer) {
+        console.warn("El reproductor todavía no está listo.");
+        return;
+    }
+
+    window.spotifyPlayer.getCurrentState().then(state => {
+        if (!state) {
+            console.warn("No hay canción reproduciéndose.");
+            return;
+        }
+
+        if (state.paused) {
+            // Si está pausado → Reanudar
+            window.spotifyPlayer.resume();
+            button.textContent = "⏸";  // Cambiar icono a pause
+        } else {
+            // Si está sonando → Pausar
+            window.spotifyPlayer.pause();
+            button.textContent = "▶";  // Cambiar icono a play
+        }
+    });
+}
+
 /***********************
  *  EVENTS
  ***********************/
 document.getElementById("searchBtn").addEventListener("click", searchTrack);
+document.getElementById("playPauseBtn").addEventListener("click", playPauseSong);
 
 
 
