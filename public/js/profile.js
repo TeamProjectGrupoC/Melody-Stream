@@ -64,11 +64,6 @@ function cargarDatosDePerfil() {
             <p><strong>Username:</strong> ${userData.username || "—"}</p>
             <p><strong>Phone:</strong> ${userData.phone || "—"}</p>
             <p><strong>Email:</strong> ${user.email}</p>
-            <p><strong>Favorite Songs:</strong> ${
-              userData.favorite_songs
-                ? Object.keys(userData.favorite_songs).join(", ")
-                : "—"
-            }</p>
           `;
 
           // Mostrar foto de perfil si existe
