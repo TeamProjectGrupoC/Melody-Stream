@@ -83,12 +83,14 @@ function cargarDatosDePerfil() {
       });
 
       document.getElementById("favArtistsSection").style.display = "block";
+      document.getElementById("favSongsSection").style.display = "block";
 
 
       // Cargar y mostrar los podcasts subidos por este usuario
       loadUserPodcasts(user.uid);
       loadUserFolders(user.uid);
       loadFavouriteArtists(user.uid);
+      loadFavouriteSongs(user.uid);
 
 
     } else {
@@ -104,6 +106,7 @@ function cargarDatosDePerfil() {
       if (existingContainer) existingContainer.innerHTML = '';
 
       document.getElementById("favArtistsSection").style.display = "none";
+      document.getElementById("favSongsSection").style.display = "none";
 
     }
   });
@@ -620,7 +623,7 @@ document.getElementById('folder-modal')?.addEventListener('click', (e) => {
 
 
 
-
+//----------------------------------------------------------------------------------------------------------------------
 //SECCION DE ARTISTAS FAVORITOS
 function getSpotifyUserToken() {
   return localStorage.getItem("spotify_access_token");
@@ -642,7 +645,6 @@ async function searchArtist(query) {
   return data.artists.items;
 }
 
-
 function saveFavouriteArtist(userId, artist) {
   const db = getDatabase();
   const favRef = ref(db, `users/${userId}/favourite_artists/`);
@@ -656,7 +658,6 @@ function saveFavouriteArtist(userId, artist) {
     genres: artist.genres
   });
 }
-
 
 function loadFavouriteArtists(userId) {
   const db = getDatabase();
@@ -726,3 +727,109 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
     resultContainer.innerHTML = "<p>Error searching artists.</p>";
   }
 });
+
+async function searchSong(query) {
+  const token = getSpotifyUserToken();
+  if (!token) {
+    alert("Please sign in with Spotify first.");
+    return [];
+  }
+
+  const resp = await fetch(
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=6`,
+    {
+      headers: { "Authorization": "Bearer " + token }
+    }
+  );
+
+  const data = await resp.json();
+  return data.tracks.items;
+}
+
+function saveFavouriteSong(userId, track) {
+  const db = getDatabase();
+  const favRef = ref(db, `users/${userId}/favourite_songs/`);
+  const newFav = push(favRef);
+
+  return set(newFav, {
+    id: track.id,
+    name: track.name,
+    artist: track.artists[0].name,
+    preview_url: track.preview_url,
+    album_image: track.album.images?.[0]?.url || ""
+  });
+}
+
+function loadFavouriteSongs(userId) {
+  const db = getDatabase();
+  const favRef = ref(db, `users/${userId}/favourite_songs`);
+
+  onValue(favRef, snapshot => {
+    const data = snapshot.val() || {};
+    renderSavedSongs(Object.values(data));
+  });
+}
+
+function renderSavedSongs(songs) {
+  const container = document.getElementById("savedSongs");
+  container.innerHTML = "";
+
+  songs.forEach(song => {
+    const div = document.createElement("div");
+    div.classList.add("artistCard");
+    div.innerHTML = `
+      <img src="${song.album_image}" style="width:80px;border-radius:10px">
+      <p><strong>${song.name}</strong></p>
+      <p>${song.artist}</p>
+      ${song.preview_url ? `<audio controls src="${song.preview_url}" style="width:100%"></audio>` : "<p>No preview available</p>"}
+    `;
+    container.appendChild(div);
+  });
+}
+
+document.getElementById("btnSearchSong").addEventListener("click", async () => {
+  const query = document.getElementById("songSearch").value.trim();
+  const resultContainer = document.getElementById("songResults");
+
+  resultContainer.innerHTML = "";
+
+  if (!query) {
+    resultContainer.innerHTML = "<p>Please enter a song name.</p>";
+    return;
+  }
+
+  try {
+    const songs = await searchSong(query);
+
+    if (!songs || songs.length === 0) {
+      resultContainer.innerHTML = "<p>No songs found.</p>";
+      return;
+    }
+
+    songs.forEach(song => {
+      const card = document.createElement("div");
+      card.classList.add("artistCard");
+
+      card.innerHTML = `
+        <img src="${song.album.images?.[0]?.url || 'images/logos/silueta.png'}" />
+        <p><strong>${song.name}</strong></p>
+        <p>${song.artists[0].name}</p>
+        <button class="addSongBtn">Add to favourites</button>
+      `;
+
+      card.querySelector(".addSongBtn").addEventListener("click", () => {
+        saveFavouriteSong(currentUser.uid, song);
+        alert(`${song.name} added to favourites`);
+      });
+
+      resultContainer.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error("Error searching songs:", error);
+    resultContainer.innerHTML = "<p>Error searching songs.</p>";
+  }
+});
+
+
+

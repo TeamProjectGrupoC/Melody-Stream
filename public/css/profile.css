@@ -353,3 +353,113 @@ main a:hover {
   font-size: 1rem;
 }
 
+
+/* ===============================
+   🎶 FAVOURITE SONGS SECTION
+   =============================== */
+
+#favSongsSection {
+  width: 100%;
+  max-width: 700px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.8s ease-in-out;
+  margin-top: 2rem;
+}
+
+#favSongsSection h2,
+#favSongsSection h3 {
+  color: var(--color-azul2);
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+/* Search bar (Songs) */
+#songSearch {
+  width: 100%;
+  padding: 0.8rem;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-blanco);
+  font-size: 1rem;
+  margin-bottom: 0.8rem;
+  transition: 0.3s ease border-color;
+}
+
+#songSearch:focus {
+  outline: none;
+  border-color: var(--color-azul2);
+}
+
+#btnSearchSong {
+  width: 100%;
+  background-color: var(--color-azul1);
+  border: none;
+  color: var(--color-blanco);
+  padding: 0.8rem;
+  border-radius: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#btnSearchSong:hover {
+  background-color: var(--color-azul2);
+  transform: scale(1.03);
+}
+
+/* ===============================
+   🎧 Song Cards (Resultados)
+   =============================== */
+
+#songResults,
+#savedSongs {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+}
+
+.songCard {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  padding: 1rem;
+  text-align: center;
+  backdrop-filter: blur(6px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.songCard:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(62, 154, 222, 0.4);
+}
+
+.songCard img {
+  width: 90px;
+  height: 90px;
+  border-radius: 12px;
+  object-fit: cover;
+  margin-bottom: 0.6rem;
+  border: 2px solid var(--color-azul2);
+}
+
+.songCard p {
+  color: var(--color-blanco);
+  font-weight: 600;
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Audio preview styling */
+.songCard audio {
+  width: 100%;
+  margin-top: 0.8rem;
+  border-radius: 6px;
+  outline: none;
+}
+
