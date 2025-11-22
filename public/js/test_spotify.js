@@ -202,7 +202,7 @@ async function playTrack(uri) {
         }),
       }
     );
-
+    document.getElementById("playPauseBtn").textContent = "⏸";
     console.log("Playing full track on Premium device.");
   } catch (err) {
     console.error("Error playing full track:", err);
