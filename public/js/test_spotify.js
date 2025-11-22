@@ -10,6 +10,8 @@ let deviceId = null; // For Web Playback SDK (premium)
 let userName = null;
 let userEmail = null;
 let lastDuration = 0;
+let currentPositionInterval = null;
+let isPlaying = false;
 
 /***********************
  *  1. OBTAIN TOKEN
@@ -98,15 +100,23 @@ function loadWebPlaybackSDK() {
       if (!state) return;
 
       lastDuration = state.duration;
-      const position = state.position;
-
-      document.getElementById("progressBar").value = (position / lastDuration) * 100;
-      document.getElementById("currentTime").textContent = formatTime(position);
-      document.getElementById("totalTime").textContent = formatTime(lastDuration);
-
       const track = state.track_window.current_track;
       document.getElementById("currentTrack").textContent =
         `${track.name} - ${track.artists[0].name}`;
+
+      const wasPlaying = isPlaying;
+      isPlaying = !state.paused;
+
+      if (isPlaying && !wasPlaying) {
+          if (!currentPositionInterval) {
+              updateProgressTick();
+          }
+      } else if (!isPlaying && wasPlaying) {
+          if (currentPositionInterval) {
+              cancelAnimationFrame(currentPositionInterval);
+              currentPositionInterval = null;
+          }
+      }
     });
 
     spotifyPlayer.connect();
@@ -286,6 +296,39 @@ function seekToPosition() {
   window.spotifyPlayer.seek(newPositionMs).then(() => {
     console.log(`Buscando nueva posición: ${formatTime(newPositionMs)}`);
   });
+}
+/***********************
+ * Progress Bar
+ ***********************/
+function updateProgressTick() {
+    if (!isPlaying || !window.spotifyPlayer || !lastDuration) {
+        // Detener si no está reproduciendo o no hay reproductor
+        if (currentPositionInterval) {
+            cancelAnimationFrame(currentPositionInterval);
+            currentPositionInterval = null;
+        }
+        return;
+    }
+    
+    // Obtener el estado actual (siempre es asíncrono)
+    window.spotifyPlayer.getCurrentState().then(state => {
+        if (!state) {
+            isPlaying = false;
+            updateProgressTick(); // Detener el tick
+            return;
+        }
+
+        const position = state.position;
+        const totalDuration = state.duration;
+
+        // Actualiza el DOM
+        document.getElementById("progressBar").value = (position / totalDuration) * 100;
+        document.getElementById("currentTime").textContent = formatTime(position);
+        document.getElementById("totalTime").textContent = formatTime(totalDuration);
+    });
+
+    // Solicitar el próximo frame
+    currentPositionInterval = requestAnimationFrame(updateProgressTick);
 }
 
 /***********************
