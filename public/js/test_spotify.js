@@ -10,8 +10,6 @@ let deviceId = null; // For Web Playback SDK (premium)
 let userName = null;
 let userEmail = null;
 let lastDuration = 0;
-let currentPositionInterval = null;
-let isPlaying = false;
 
 /***********************
  *  1. OBTAIN TOKEN
@@ -98,25 +96,10 @@ function loadWebPlaybackSDK() {
     // MAIN STATE LISTENER → update progress bar
     spotifyPlayer.addListener("player_state_changed", (state) => {
       if (!state) return;
-
       lastDuration = state.duration;
       const track = state.track_window.current_track;
       document.getElementById("currentTrack").textContent =
         `${track.name} - ${track.artists[0].name}`;
-
-      const wasPlaying = isPlaying;
-      isPlaying = !state.paused;
-
-      if (isPlaying && !wasPlaying) {
-          if (!currentPositionInterval) {
-              updateProgressTick();
-          }
-      } else if (!isPlaying && wasPlaying) {
-          if (currentPositionInterval) {
-              cancelAnimationFrame(currentPositionInterval);
-              currentPositionInterval = null;
-          }
-      }
     });
 
     spotifyPlayer.connect();
@@ -244,15 +227,6 @@ function displayUserStatus() {
   statusDiv.style.padding = "10px";
 }
 
-/***********************
- * HELPER: Time Format
- ***********************/
-function formatTime(ms) {
-    const totalSeconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
-}
 
 function playPauseSong() {
     const button = document.getElementById("playPauseBtn");
@@ -282,6 +256,16 @@ function playPauseSong() {
 }
 
 /***********************
+ * HELPER: Time Format
+ ***********************/
+function formatTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+}
+
+/***********************
  * Seek
  ***********************/
 function seekToPosition() {
@@ -291,44 +275,10 @@ function seekToPosition() {
   const percentage = progressBar.value / 100;
 
   const newPositionMs = Math.round(lastDuration * percentage);
-  document.getElementById("currentTime").textContent = formatTime(newPositionMs);
 
   window.spotifyPlayer.seek(newPositionMs).then(() => {
     console.log(`Buscando nueva posición: ${formatTime(newPositionMs)}`);
   });
-}
-/***********************
- * Progress Bar
- ***********************/
-function updateProgressTick() {
-    if (!isPlaying || !window.spotifyPlayer || !lastDuration) {
-        // Detener si no está reproduciendo o no hay reproductor
-        if (currentPositionInterval) {
-            cancelAnimationFrame(currentPositionInterval);
-            currentPositionInterval = null;
-        }
-        return;
-    }
-    
-    // Obtener el estado actual (siempre es asíncrono)
-    window.spotifyPlayer.getCurrentState().then(state => {
-        if (!state) {
-            isPlaying = false;
-            updateProgressTick(); // Detener el tick
-            return;
-        }
-
-        const position = state.position;
-        const totalDuration = state.duration;
-
-        // Actualiza el DOM
-        document.getElementById("progressBar").value = (position / totalDuration) * 100;
-        document.getElementById("currentTime").textContent = formatTime(position);
-        document.getElementById("totalTime").textContent = formatTime(totalDuration);
-    });
-
-    // Solicitar el próximo frame
-    currentPositionInterval = requestAnimationFrame(updateProgressTick);
 }
 
 /***********************
