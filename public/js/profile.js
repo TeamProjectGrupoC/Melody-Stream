@@ -5,7 +5,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
 // Módulos de Realtime Database (RTDB)
-import { getDatabase, ref as databaseRef, onValue, set, get, update, push } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+import { getDatabase, ref, onValue, set, get, update, push } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
 // Módulos de Storage
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
@@ -633,7 +633,7 @@ async function searchArtist(query) {
   }
 
   const resp = await fetch(
-    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist`,
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist&limit=6`,
     { headers: { "Authorization": "Bearer " + token } }
   );
 
