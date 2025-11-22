@@ -81,9 +81,14 @@ function cargarDatosDePerfil() {
         }
       });
 
+      document.getElementById("favArtistsSection").style.display = "block";
+
+
       // Cargar y mostrar los podcasts subidos por este usuario
       loadUserPodcasts(user.uid);
       loadUserFolders(user.uid);
+      loadFavouriteArtists(user.uid);
+
 
     } else {
       msgElemento.textContent = "⚠️ You must be logged in to see your profile.";
@@ -96,6 +101,9 @@ function cargarDatosDePerfil() {
       // Limpiar lista de podcasts al cerrar sesión
       const existingContainer = document.getElementById('userPodcasts');
       if (existingContainer) existingContainer.innerHTML = '';
+
+      document.getElementById("favArtistsSection").style.display = "none";
+
     }
   });
 }
@@ -607,3 +615,56 @@ document.getElementById('folder-form-close')?.addEventListener('click', closeMod
 document.getElementById('folder-modal')?.addEventListener('click', (e) => {
   if (e.target && e.target.id === 'folder-modal') closeModal();
 });
+
+async function searchArtist(query) {
+  const token = await getSpotifyToken(); // ya lo tienes implementado
+  const resp = await fetch(`https://api.spotify.com/v1/search?q=${query}&type=artist`, {
+    headers: { "Authorization": "Bearer " + token }
+  });
+  const data = await resp.json();
+  return data.artists.items;
+}
+
+import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+
+function saveFavouriteArtist(userId, artist) {
+  const db = getDatabase();
+  const favRef = ref(db, `users/${userId}/favourite_artists/`);
+  const newFav = push(favRef);
+
+  return set(newFav, {
+    id: artist.id,
+    name: artist.name,
+    image: artist.images?.[0]?.url || "",
+    followers: artist.followers.total,
+    genres: artist.genres
+  });
+}
+
+import { onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
+
+function loadFavouriteArtists(userId) {
+  const db = getDatabase();
+  const favRef = ref(db, `users/${userId}/favourite_artists`);
+
+  onValue(favRef, snapshot => {
+    const data = snapshot.val() || {};
+    renderSavedArtists(Object.values(data));
+  });
+}
+
+function renderSavedArtists(artists) {
+  const container = document.getElementById("savedArtists");
+  container.innerHTML = "";
+
+  artists.forEach(a => {
+    const div = document.createElement("div");
+    div.classList.add("artistCard");
+    div.innerHTML = `
+      <img src="${a.image}" style="width:80px;border-radius:50%">
+      <p>${a.name}</p>
+    `;
+    container.appendChild(div);
+  });
+}
+
