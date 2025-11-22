@@ -5,7 +5,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
 // Módulos de Realtime Database (RTDB)
-import { getDatabase, ref as databaseRef, onValue, set, get, update } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+import { getDatabase, ref as databaseRef, onValue, set, get, update, push } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
 // Módulos de Storage
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
@@ -625,7 +625,6 @@ async function searchArtist(query) {
   return data.artists.items;
 }
 
-import { getDatabase, ref, set, push } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
 function saveFavouriteArtist(userId, artist) {
   const db = getDatabase();
@@ -641,7 +640,6 @@ function saveFavouriteArtist(userId, artist) {
   });
 }
 
-import { onValue } from "https://www.gstatic.com/firebasejs/10.13.1/firebase-database.js";
 
 function loadFavouriteArtists(userId) {
   const db = getDatabase();
