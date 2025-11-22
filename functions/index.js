@@ -9,10 +9,12 @@ exports.getSpotifyToken = onRequest((req, res) => {
       return res.status(400).json({ error: "Missing authorization code" });
     }
 
-    const clientId = process.env.SPOTIFY_CLIENT_ID;
-    const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
-    const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
+    const functions = require("firebase-functions");
 
+    const clientId = functions.config().spotify.client_id;
+    const clientSecret = functions.config().spotify.client_secret;
+    const redirectUri = functions.config().spotify.redirect_uri;
+    
     try {
       const response = await axios.post(
         "https://accounts.spotify.com/api/token",
