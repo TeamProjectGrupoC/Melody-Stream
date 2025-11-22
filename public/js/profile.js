@@ -6,6 +6,7 @@ import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/fi
 
 // Módulos de Realtime Database (RTDB)
 import { getDatabase, ref, onValue, set, get, update, push } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+const databaseRef = ref;
 
 // Módulos de Storage
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
