@@ -280,10 +280,9 @@ function seekToPosition() {
   const progressBar = document.getElementById("progressBar");
   const percentage = progressBar.value / 100;
 
-  // Calcula la nueva posición en milisegundos
   const newPositionMs = Math.round(lastDuration * percentage);
+  document.getElementById("currentTime").textContent = formatTime(newPositionMs);
 
-  // Usa el método 'seek' del Web Playback SDK
   window.spotifyPlayer.seek(newPositionMs).then(() => {
     console.log(`Buscando nueva posición: ${formatTime(newPositionMs)}`);
   });
