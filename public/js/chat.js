@@ -192,10 +192,11 @@ async function main() {
             div.className = "message";
 
             if (data.sender === currentUser.uid) {
-                div.classList.add("sent");
+                div.classList.add("you");
             } else {
-                div.classList.add("received");
+                div.classList.add("other");
             }
+
 
             if (data.text) {
                 const p = document.createElement("p");
