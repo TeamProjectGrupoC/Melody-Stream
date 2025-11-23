@@ -1,6 +1,6 @@
 // --- IMPORTS ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
 // --- FIREBASE CONFIGURATION ---
