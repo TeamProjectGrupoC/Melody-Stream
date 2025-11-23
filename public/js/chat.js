@@ -1,9 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import {
-    getDatabase, ref, get, child, set, push, onValue, off, update
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-
+import { getDatabase, ref, get, child, set, push, onValue, off, update, onChildAdded} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 /*
 DATABASE STRUCTURE AND LOGIC:
 
@@ -189,6 +186,32 @@ async function main() {
         chatWith.textContent = selectedUsername;
         messagesDiv.innerHTML = "";
 
+        onChildAdded(messagesRef, (childSnap) => {
+            const data = childSnap.val();
+            const div = document.createElement("div");
+            div.className = "message";
+
+            if (data.sender === currentUser.uid) {
+                div.classList.add("sent");
+            } else {
+                div.classList.add("received");
+            }
+
+            if (data.text) {
+                const p = document.createElement("p");
+                p.textContent = data.text;
+                div.appendChild(p);
+            }
+
+            if (data.attachment) {
+                const card = buildAttachmentCard(data.attachment);
+                div.appendChild(card);
+            }
+
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        });
+
         // Listen to messages
         onValue(messagesRef, (snapshot) => {
             messagesDiv.innerHTML = "";
@@ -246,6 +269,34 @@ async function main() {
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         });
     });
+
+    function buildAttachmentCard(att) {
+        const card = document.createElement("div");
+        card.className = "attachment-card";
+
+        const img = document.createElement("img");
+        img.src = att.imageURL;
+        img.className = "attachment-image";
+        card.appendChild(img);
+
+        const meta = document.createElement("div");
+        meta.className = "attachment-meta";
+
+        const title = document.createElement("h4");
+        title.textContent = att.title;
+        meta.appendChild(title);
+
+        if (att.author) {
+            const author = document.createElement("p");
+            author.textContent = att.author;
+            meta.appendChild(author);
+        }
+
+        card.appendChild(meta);
+
+        return card;
+    }
+
 
     // --- Send message ---
     const sendMessage = async (fileAttachment = null) => {
