@@ -211,6 +211,10 @@ async function isSongInDatabase(songId) {
   const db = getDatabase();
   const songRef = ref(db, `canciones/${songId}`);
   const snapshot = await get(songRef);
+
+  if(snapshot.exists()){
+    console.log("ESTA CANCIÓN YA ESTÁ EN LA BASE DE DATOS")
+  }
   return snapshot.exists();
 }
 
