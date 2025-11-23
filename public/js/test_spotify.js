@@ -328,6 +328,7 @@ function attachFavoriteButtons() {
 		btn.addEventListener("click", () => {
 		const id = btn.getAttribute("data-id");
 		toggleFavorite(id, btn);
+    addToFavorite(id);
 		});
 	});
 }
