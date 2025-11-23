@@ -169,6 +169,10 @@ async function searchTrack() {
           fav = await isFavorite(track.id, auth.currentUser.uid);
         }
 
+        if (!await isSongInDatabase(track.id)) {
+          await saveSongToDatabase(track);
+        }
+
         return `
           <div style="padding:10px; margin:10px;">
             <img src="${track.album.images[0].url}" alt="Album Art" style="width: 100px; height: 100px;">
@@ -194,14 +198,35 @@ async function searchTrack() {
     
 	document.getElementById("trackInfo").innerHTML = trackList.join("");
 
-
-    attachFavoriteButtons();
+  attachFavoriteButtons();
   } 
   catch (err) {
     console.error(err);
     document.getElementById("trackInfo").innerHTML =
       "<p>Error searching for songs.</p>";
   }
+}
+
+async function isSongInDatabase(songId) {
+  const db = getDatabase();
+  const songRef = ref(db, `canciones/${songId}`);
+  const snapshot = await get(songRef);
+  return snapshot.exists();
+}
+
+// Save the song data to the "canciones" node in Firebase
+async function saveSongToDatabase(track) {
+  const db = getDatabase();
+  const songRef = ref(db, `canciones/${track.id}`);
+  
+  await set(songRef, {
+    title: track.name,
+    artist: track.artists.map((artist) => artist.name).join(", "),
+    album: track.album.name,
+    albumImageUrl: track.album.images[0].url,
+    previewUrl: track.preview_url,
+  });
+  console.log(`Song ${track.name} saved to database.`);
 }
 
 /***********************
@@ -306,6 +331,7 @@ async function addToFavorite(songId){
 		alert("You must log in to add songs to your favorites");
 		return;
     }
+
     const favSongRef = ref(database, `users/${user.uid}/favoritos/${songId}`);
     await set(favSongRef, true);
 
@@ -325,10 +351,9 @@ function attachFavoriteButtons() {
 	const buttons = document.querySelectorAll(".fav-btn");
 
 	buttons.forEach((btn) => {
-		btn.addEventListener("click", () => {
-		const id = btn.getAttribute("data-id");
-		toggleFavorite(id, btn);
-    addToFavorite(id);
+      btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      toggleFavorite(id, btn);
 		});
 	});
 }
@@ -350,12 +375,15 @@ async function toggleFavorite(songId, button) {
 		button.innerHTML = '<i class="bi bi-heart-fill"></i>';
 		button.classList.remove("not-fav");
 		button.classList.add("is-fav");
+    addToFavorite(id);
 	} else {
 		// Quitar de favoritos
 		await set(favRef, null);
 		button.innerHTML = '<i class="bi bi-heart"></i>';
 		button.classList.remove("is-fav");
 		button.classList.add("not-fav");
+
+    alert("This song has been removed from favorites")
 	}
 }
 

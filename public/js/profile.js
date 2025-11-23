@@ -919,44 +919,53 @@ async function searchSong(query) {
   return data.tracks.items;
 }
 
-function saveFavouriteSong(userId, track) {
-  const db = getDatabase();
-  const favRef = ref(db, `users/${userId}/favourite_songs/`);
-  const newFav = push(favRef);
+async function saveFavouriteSong(userId, track) {
+  const favSongRef = ref(database, `users/${userId}/favoritos/${track.id}`);
 
-  return set(newFav, {
-    id: track.id,
-    name: track.name,
-    artist: track.artists[0].name,
-    preview_url: track.preview_url,
-    album_image: track.album.images?.[0]?.url || ""
-  });
+  await set(favSongRef, {
+        name: track.name,
+        artist: track.artists[0].name,
+        preview_url: track.preview_url,
+        album_image: track.album.images?.[0]?.url || ""
+    });
 }
 
 function loadFavouriteSongs(userId) {
   const db = getDatabase();
-  const favRef = ref(db, `users/${userId}/favourite_songs`);
+  const favRef = ref(db, `users/${userId}/favoritos`);
 
   onValue(favRef, snapshot => {
     const data = snapshot.val() || {};
-    renderSavedSongs(Object.values(data));
+    const songIds = Object.keys(data);
+    renderSavedSongs(songIds, data);
   });
 }
 
-function renderSavedSongs(songs) {
+function renderSavedSongs(songIds, favorites) {
   const container = document.getElementById("savedSongs");
   container.innerHTML = "";
 
-  songs.forEach(song => {
-    const div = document.createElement("div");
-    div.classList.add("artistCard");
-    div.innerHTML = `
-      <img src="${song.album_image}" style="width:80px;border-radius:10px">
-      <p><strong>${song.name}</strong></p>
-      <p>${song.artist}</p>
-      ${song.preview_url ? `<audio controls src="${song.preview_url}" style="width:100%"></audio>` : "<p>No preview available</p>"}
-    `;
-    container.appendChild(div);
+  const db = getDatabase();
+
+  songIds.forEach(songId => {
+    const songRef = ref(db, `canciones/${songId}`);
+
+    onValue(songRef, snapshot => {
+      const data = snapshot.val();
+
+      if (data) {
+        const div = document.createElement("div");
+        div.classList.add("artistCard");
+
+        div.innerHTML = `
+          <img src="${data.albumImageUrl || 'images/logos/silueta.png'}" style="width:80px; border-radius:10px;">
+          <p><strong>${data.title}</strong></p>
+          <p>${data.artists.join(", ")}</p>
+          ${data.previewUrl ? `<audio controls src="${data.previewUrl}" style="width:100%"></audio>` : "<p>No preview available</p>"}
+        `;
+        container.appendChild(div);
+      }
+    });
   });
 }
 
@@ -1003,6 +1012,4 @@ document.getElementById("btnSearchSong").addEventListener("click", async () => {
     resultContainer.innerHTML = "<p>Error searching songs.</p>";
   }
 });
-
-
 
