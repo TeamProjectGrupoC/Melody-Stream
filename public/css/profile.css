@@ -429,6 +429,22 @@ main a:hover {
   background-color: #e53935;
 }
 
+.artistCard .shareArtistBtn {
+  margin-top: 0.5rem;
+  background-color: --color-azul2;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.artistCard .shareArtistBtn:hover {
+  background-color: --color-azul2;
+}
+
 
 /* ===============================
    🎧 Song Cards (Resultados)

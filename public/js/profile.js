@@ -753,24 +753,42 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
   }
 });
 
-// SHARE ARTISTS
+//----------SHARE ARTISTS-------------------------------------------------------------------------------------------------------------------
 
-function loadUserChatsForShare(selectEl) {
+async function loadUserChatsForShare(selectEl) {
   const db = getDatabase();
   const chatsRef = ref(db, `userChats/${currentUser.uid}`);
 
-  onValue(chatsRef, (snapshot) => {
-    const data = snapshot.val() || {};
-    selectEl.innerHTML = "";
+  const snapshot = await get(chatsRef);
+  const data = snapshot.val() || {};
 
-    for (const chatId in data) {
-      const option = document.createElement("option");
-      option.value = chatId;
-      option.textContent = chatId;
-      selectEl.appendChild(option);
-    }
-  });
+  selectEl.innerHTML = "";
+
+  for (const chatId in data) {
+
+    // 1. Obtener los dos UIDs del chat
+    const parts = chatId.split("_");
+    const userA = parts[0];
+    const userB = parts[1];
+
+    // 2. Saber quién es el otro usuario
+    const otherUid = (userA === currentUser.uid) ? userB : userA;
+
+    // 3. Obtener datos del otro usuario
+    const userSnap = await get(ref(db, `users/${otherUid}`));
+    const userData = userSnap.val();
+
+    const displayedName = userData?.username || userData?.email || otherUid;
+
+    // 4. Crear la opción
+    const option = document.createElement("option");
+    option.value = chatId;
+    option.textContent = displayedName;
+
+    selectEl.appendChild(option);
+  }
 }
+
 
 function openShareArtistModal(artist) {
   const modal = document.getElementById("shareArtistModal");
@@ -813,11 +831,11 @@ async function shareArtistToChat(chatId, artist) {
   };
 
   const msgKey = push(messagesRef).key;
+  await set(ref(db, `chats/${chatId}/messages/${msgKey}`), message);
 
-  await update(chatRef, {
-    [`messages/${msgKey}`]: message,
-    createdAt: timestamp
-  });
+  // Actualizar createdAt solo
+  await update(chatRef, { createdAt: timestamp });
+
 
   // actualizar lista userChats
   const lastMessageObj = {
