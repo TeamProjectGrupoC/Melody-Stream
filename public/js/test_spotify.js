@@ -1,3 +1,24 @@
+// --- IMPORTS ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+
+// --- FIREBASE CONFIGURATION ---
+const firebaseConfig = {
+    apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
+    authDomain: "melodystream123.firebaseapp.com",
+    databaseURL: "https://melodystream123-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "melodystream123",
+    storageBucket: "melodystream123.firebasestorage.app",
+    messagingSenderId: "640160988809",
+    appId: "1:640160988809:web:d0995d302123ccf0431058",
+    measurementId: "G-J97KEDLYMB"
+};
+
+// --- FIREBASE CONFIG ---
+const auth = getAuth();
+const database = getDatabase();
+
 /***********************
  *  PARAMS + TOKEN
  ***********************/
@@ -138,7 +159,7 @@ async function searchTrack() {
     }
 
     // Render the list
-    document.getElementById("trackInfo").innerHTML = await Promise.all(
+    const trackList = await Promise.all(
       tracks.map(async (track, i) => {
         //Verify favorite song
         let fav = false;
@@ -168,7 +189,10 @@ async function searchTrack() {
           </div>
         `;
       })
-    ).join("");
+	);
+    
+	document.getElementById("trackInfo").innerHTML = trackList.join("");
+
 
     attachFavoriteButtons();
   } 
