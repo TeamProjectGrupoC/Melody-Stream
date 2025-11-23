@@ -200,57 +200,43 @@ async function main() {
                 div.classList.add(data.sender === currentUser.uid ? "you" : "other");
 
                 if (data.attachment) {
-                    // Render rich attachment card
                     const card = document.createElement('div');
                     card.className = 'attachment-card';
 
+                    // image
                     const img = document.createElement('img');
                     img.src = data.attachment.imageURL || 'images/logos/logo.png';
-                    if (data.attachment.author === "Favourite Artist") {
-                        meta.style.textAlign = "left";
-                        title.style.fontWeight = "bold";
-                    }
+                    img.className = 'attachment-image';
+                    card.appendChild(img);
 
-                    img.alt = data.attachment.title || 'shared';
-                    img.style.width = '80px';
-                    img.style.height = '80px';
-                    img.style.objectFit = 'cover';
-                    img.style.marginRight = '10px';
-
+                    // text container
                     const meta = document.createElement('div');
                     meta.className = 'attachment-meta';
 
-                    const title = document.createElement('div');
-                    title.className = 'attachment-title';
-                    title.textContent = data.attachment.title || 'Untitled';
-
-                    const author = document.createElement('div');
-                    author.className = 'attachment-author';
-                    author.textContent = data.attachment.author || '';
-
+                    const title = document.createElement('h4');
+                    title.textContent = data.attachment.title || 'No title';
                     meta.appendChild(title);
-                    meta.appendChild(author);
 
-                    if (data.attachment.audioURL) {
+                    if (data.attachment.author) {
+                        const author = document.createElement('p');
+                        author.textContent = data.attachment.author;
+                        meta.appendChild(author);
+                    }
+
+                    // audio (optional)
+                    if (data.attachment.audioURL && data.attachment.audioURL !== "") {
                         const audio = document.createElement('audio');
                         audio.controls = true;
                         audio.src = data.attachment.audioURL;
-                        audio.style.width = '100%';
                         meta.appendChild(audio);
                     }
 
-                    card.appendChild(img);
                     card.appendChild(meta);
 
-                    if (data.text) {
-                        const textDiv = document.createElement('div');
-                        textDiv.className = 'message-text';
-                        textDiv.textContent = data.text;
-                        card.appendChild(textDiv);
-                    }
-
+                    // VERY IMPORTANT → ENGADIR AO MENSAXE
                     div.appendChild(card);
-                } else {
+                }
+                else {
                     // simple text message
                     div.textContent = data.text || '';
                 }
