@@ -618,7 +618,7 @@ document.getElementById('folder-modal')?.addEventListener('click', (e) => {
 
 
 
-//----------------------------------------------------------------------------------------------------------------------
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 //SECCION DE ARTISTAS FAVORITOS
 function getSpotifyUserToken() {
   return localStorage.getItem("spotify_access_token");
@@ -640,11 +640,24 @@ async function searchArtist(query) {
   return data.artists.items;
 }
 
-function saveFavouriteArtist(userId, artist) {
+async function saveFavouriteArtist(userId, artist) {
   const db = getDatabase();
   const favRef = ref(db, `users/${userId}/favourite_artists/`);
-  const newFav = push(favRef);
 
+  // 1. Leer favoritos actuales
+  const snapshot = await get(favRef);
+  const data = snapshot.val() || {};
+
+  // 2. Comprobar si ya existe
+  const alreadySaved = Object.values(data).some(a => a.id === artist.id);
+
+  if (alreadySaved) {
+    alert("This artist is already in your favourites.");
+    return;
+  }
+
+  // 3. Guardar si NO existe
+  const newFav = push(favRef);
   return set(newFav, {
     id: artist.id,
     name: artist.name,
@@ -653,6 +666,7 @@ function saveFavouriteArtist(userId, artist) {
     genres: artist.genres
   });
 }
+
 
 function loadFavouriteArtists(userId) {
   const db = getDatabase();
@@ -668,16 +682,37 @@ function renderSavedArtists(artists) {
   const container = document.getElementById("savedArtists");
   container.innerHTML = "";
 
-  artists.forEach(a => {
+  // artists viene como array, pero necesitamos keys para borrar
+  artists.forEach((a, index) => {
     const div = document.createElement("div");
     div.classList.add("artistCard");
     div.innerHTML = `
       <img src="${a.image}" style="width:80px;border-radius:50%">
       <p>${a.name}</p>
+      <button class="removeArtistBtn">Remove</button>
     `;
+
+    div.querySelector(".removeArtistBtn").addEventListener("click", async () => {
+      const db = getDatabase();
+      const favRef = ref(db, `users/${currentUser.uid}/favourite_artists`);
+
+      // volver a obtener snapshot para tener las claves
+      const snap = await get(favRef);
+      const favs = snap.val();
+      const keyToDelete = Object.keys(favs).find(
+        key => favs[key].id === a.id
+      );
+
+      if (keyToDelete) {
+        await set(ref(db, `users/${currentUser.uid}/favourite_artists/${keyToDelete}`), null);
+        alert(`${a.name} removed from favourites`);
+      }
+    });
+
     container.appendChild(div);
   });
 }
+
 
 document.getElementById("btnSearchArtist").addEventListener("click", async () => {
   const query = document.getElementById("artistSearch").value.trim();
@@ -722,6 +757,9 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
     resultContainer.innerHTML = "<p>Error searching artists.</p>";
   }
 });
+
+
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------z
 
 async function searchSong(query) {
   const token = getSpotifyUserToken();

@@ -413,6 +413,23 @@ main a:hover {
   transform: scale(1.03);
 }
 
+.artistCard .removeArtistBtn {
+  margin-top: 0.5rem;
+  background-color: #c62828;
+  color: white;
+  border: none;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.2s ease;
+}
+
+.artistCard .removeArtistBtn:hover {
+  background-color: #e53935;
+}
+
+
 /* ===============================
    🎧 Song Cards (Resultados)
    =============================== */
