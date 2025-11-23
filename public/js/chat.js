@@ -206,6 +206,11 @@ async function main() {
 
                     const img = document.createElement('img');
                     img.src = data.attachment.imageURL || 'images/logos/logo.png';
+                    if (data.attachment.author === "Favourite Artist") {
+                        meta.style.textAlign = "left";
+                        title.style.fontWeight = "bold";
+                    }
+
                     img.alt = data.attachment.title || 'shared';
                     img.style.width = '80px';
                     img.style.height = '80px';

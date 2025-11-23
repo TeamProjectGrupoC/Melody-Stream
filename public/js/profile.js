@@ -682,31 +682,26 @@ function renderSavedArtists(artists) {
   const container = document.getElementById("savedArtists");
   container.innerHTML = "";
 
-  // artists viene como array, pero necesitamos keys para borrar
-  artists.forEach((a, index) => {
+  artists.forEach(a => {
     const div = document.createElement("div");
     div.classList.add("artistCard");
+
     div.innerHTML = `
       <img src="${a.image}" style="width:80px;border-radius:50%">
       <p>${a.name}</p>
+
+      <button class="shareArtistBtn">Share</button>
       <button class="removeArtistBtn">Remove</button>
     `;
 
+    // -------- REMOVE --------
     div.querySelector(".removeArtistBtn").addEventListener("click", async () => {
-      const db = getDatabase();
-      const favRef = ref(db, `users/${currentUser.uid}/favourite_artists`);
+      removeFavouriteArtist(a.id);
+    });
 
-      // volver a obtener snapshot para tener las claves
-      const snap = await get(favRef);
-      const favs = snap.val();
-      const keyToDelete = Object.keys(favs).find(
-        key => favs[key].id === a.id
-      );
-
-      if (keyToDelete) {
-        await set(ref(db, `users/${currentUser.uid}/favourite_artists/${keyToDelete}`), null);
-        alert(`${a.name} removed from favourites`);
-      }
+    // -------- SHARE --------
+    div.querySelector(".shareArtistBtn").addEventListener("click", () => {
+      openShareArtistModal(a);
     });
 
     container.appendChild(div);
@@ -758,7 +753,111 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
   }
 });
 
+// SHARE ARTISTS
 
+function loadUserChatsForShare(selectEl) {
+  const db = getDatabase();
+  const chatsRef = ref(db, `userChats/${currentUser.uid}`);
+
+  onValue(chatsRef, (snapshot) => {
+    const data = snapshot.val() || {};
+    selectEl.innerHTML = "";
+
+    for (const chatId in data) {
+      const option = document.createElement("option");
+      option.value = chatId;
+      option.textContent = chatId;
+      selectEl.appendChild(option);
+    }
+  });
+}
+
+function openShareArtistModal(artist) {
+  const modal = document.getElementById("shareArtistModal");
+  const nameEl = document.getElementById("shareArtistName");
+  const select = document.getElementById("chatSelect");
+
+  nameEl.innerText = artist.name;
+
+  // guardamos datos del artista en el modal
+  modal.dataset.artistId = artist.id;
+  modal.dataset.artistName = artist.name;
+  modal.dataset.artistImage = artist.image;
+
+  loadUserChatsForShare(select);
+
+  modal.style.display = "flex";
+}
+
+document.getElementById("shareArtistCancel").addEventListener("click", () => {
+  document.getElementById("shareArtistModal").style.display = "none";
+});
+
+async function shareArtistToChat(chatId, artist) {
+
+  const db = getDatabase();
+  const messagesRef = ref(db, `chats/${chatId}/messages`);
+  const chatRef = ref(db, `chats/${chatId}`);
+  const timestamp = Date.now();
+
+  const message = {
+    sender: currentUser.uid,
+    timestamp,
+    attachment: {
+      title: artist.name,
+      imageURL: artist.image,
+      author: "Favourite Artist",
+      audioURL: "" // no hay audio
+    },
+    text: `Shared artist: ${artist.name}`
+  };
+
+  const msgKey = push(messagesRef).key;
+
+  await update(chatRef, {
+    [`messages/${msgKey}`]: message,
+    createdAt: timestamp
+  });
+
+  // actualizar lista userChats
+  const lastMessageObj = {
+    sender: currentUser.uid,
+    text: `[Artist] ${artist.name}`,
+    timestamp
+  };
+
+  await update(ref(db, `userChats/${currentUser.uid}/${chatId}`), {
+    lastMessage: lastMessageObj
+  });
+
+  // para el otro usuario
+  const parts = chatId.split("_");
+  const otherUser = parts[0] === currentUser.uid ? parts[1] : parts[0];
+
+  await update(ref(db, `userChats/${otherUser}/${chatId}`), {
+    lastMessage: lastMessageObj
+  });
+}
+
+document.getElementById("shareArtistConfirm").addEventListener("click", async () => {
+  const modal = document.getElementById("shareArtistModal");
+  const chatId = document.getElementById("chatSelect").value;
+
+  const artist = {
+    id: modal.dataset.artistId,
+    name: modal.dataset.artistName,
+    image: modal.dataset.artistImage
+  };
+
+  await shareArtistToChat(chatId, artist);
+
+  modal.style.display = "none";
+  alert("Artist shared!");
+});
+
+
+
+// SONGS
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------z
 
 async function searchSong(query) {
