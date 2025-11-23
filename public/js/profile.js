@@ -678,6 +678,29 @@ function loadFavouriteArtists(userId) {
   });
 }
 
+async function removeFavouriteArtist(artistId) {
+  const db = getDatabase();
+  const favRef = ref(db, `users/${currentUser.uid}/favourite_artists`);
+
+  // obtenemos los favoritos actuales para saber la key exacta
+  const snapshot = await get(favRef);
+  const favs = snapshot.val() || {};
+
+  // buscar la key que corresponde a ese artista
+  const keyToDelete = Object.keys(favs).find(key => favs[key].id === artistId);
+
+  if (!keyToDelete) {
+    console.warn("Artist not found in favourites:", artistId);
+    return;
+  }
+
+  // eliminar el artista
+  await set(ref(db, `users/${currentUser.uid}/favourite_artists/${keyToDelete}`), null);
+
+  alert("Artist removed from favourites");
+}
+
+
 function renderSavedArtists(artists) {
   const container = document.getElementById("savedArtists");
   container.innerHTML = "";
