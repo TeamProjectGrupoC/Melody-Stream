@@ -138,29 +138,41 @@ async function searchTrack() {
     }
 
     // Render the list
-    document.getElementById("trackInfo").innerHTML = tracks
-    .map(
-      (track, i) => `
-        <div style="padding:10px; margin:10px;">
-          <img src="${track.album.images[0].url}" alt="Album Art" style="width: 100px; height: 100px;">
-          <h2>${i + 1}. ${track.name}</h2>
-          <p>Artista: ${track.artists.map((artist) => artist.name).join(", ")}</p>
-          <p>Álbum: ${track.album.name}</p>
-          
-          ${isPremium ? 
-            // If it is premium, show the button
-            `<button onclick="playTrack('${track.uri}')">
-              ▶ Reproducir
-            </button>`
-            : 
-            // If not, do not show nothing
-            ''
-          }
-        </div>
-      `
-    )
-    .join("");
-  } catch (err) {
+    document.getElementById("trackInfo").innerHTML = await Promise.all(
+      tracks.map(async (track, i) => {
+        //Verify favorite song
+        let fav = false;
+
+        if (auth.currentUser) {
+          fav = await isFavorite(track.id, auth.currentUser.uid);
+        }
+
+        return `
+          <div style="padding:10px; margin:10px;">
+            <img src="${track.album.images[0].url}" alt="Album Art" style="width: 100px; height: 100px;">
+            <h2>${i + 1}. ${track.name}</h2>
+            <p>Artista: ${track.artists.map((artist) => artist.name).join(", ")}</p>
+            <p>Álbum: ${track.album.name}</p>
+            
+            ${isPremium ? 
+              `<button onclick="playTrack('${track.uri}')">
+                ▶ Reproducir
+              </button>`
+              : ''
+            }
+
+            <!-- Botón de favorito -->
+            <button class="fav-btn ${fav ? "is-fav" : "not-fav"}" data-id="${track.id}">
+              <i class="${fav ? "bi bi-heart-fill" : "bi bi-heart"}"></i>
+            </button>
+          </div>
+        `;
+      })
+    ).join("");
+
+    attachFavoriteButtons();
+  } 
+  catch (err) {
     console.error(err);
     document.getElementById("trackInfo").innerHTML =
       "<p>Error searching for songs.</p>";
@@ -257,6 +269,68 @@ function playPauseSong() {
             button.textContent = "▶";  // Cambiar icono a play
         }
     });
+}
+
+/***********************
+ * ADD FAVORITE SONG
+ ***********************/
+async function addToFavorite(songId){
+
+    const user = auth.currentUser;
+    if (!user) {
+		alert("You must log in to add songs to your favorites");
+		return;
+    }
+    const favSongRef = ref(database, `users/${user.uid}/favoritos/${songId}`);
+    await set(favSongRef, true);
+
+    alert("Song added to your favorites");
+}
+
+async function isFavorite(songId, userId){
+    return new Promise((resolve) => {
+        const favRef = ref(database, `users/${userId}/favoritos/${songId}`);
+        onValue(favRef, (snapshot) => {
+            resolve(snapshot.exists());
+        }, { onlyOnce: true });
+    });
+}
+
+function attachFavoriteButtons() {
+	const buttons = document.querySelectorAll(".fav-btn");
+
+	buttons.forEach((btn) => {
+		btn.addEventListener("click", () => {
+		const id = btn.getAttribute("data-id");
+		toggleFavorite(id, btn);
+		});
+	});
+}
+
+async function toggleFavorite(songId, button) {
+	const user = auth.currentUser; 
+
+	if (!user) {
+		alert("You must log in to add songs to your favorites");
+		return;
+	}
+
+	const favRef = ref(database, `users/${user.uid}/favoritos/${songId}`);
+	const nowFavorite = button.classList.contains("not-fav");
+
+	if (nowFavorite) {
+		// Agregar a favoritos
+		await set(favRef, true);
+		button.innerHTML = '<i class="bi bi-heart-fill"></i>';
+		button.classList.remove("not-fav");
+		button.classList.add("is-fav");
+	} else {
+		// Quitar de favoritos
+		await set(favRef, null);
+		button.innerHTML = '<i class="bi bi-heart"></i>';
+		button.classList.remove("is-fav");
+		button.classList.add("not-fav");
+	}
 }
 
 /***********************
