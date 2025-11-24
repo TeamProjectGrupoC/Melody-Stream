@@ -316,22 +316,19 @@ async function main() {
             timestamp: newTimestamp
         };
 
-        //if (fileAttachment) {
-            //newMessage.attachment = fileAttachment;
-        }
-
         if (fileAttachment) {
             if (fileAttachment.audioURL && fileAttachment.audioURL !== "") {
                 newMessage.attachment = fileAttachment;
             } 
             else {
+            // Si no hay audioURL, no lo incluimos
             newMessage.attachment = {
                 title: fileAttachment.title,
                 imageURL: fileAttachment.imageURL,
                 author: fileAttachment.author
             };
-            }
         }
+         }
 
         const lastMessageData = {
             sender: currentUser.uid,
@@ -384,6 +381,6 @@ async function main() {
             user.style.display = username.includes(filterText) ? "" : "none";
         });
     });
-
+}
 
 main();
