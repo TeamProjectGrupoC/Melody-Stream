@@ -957,10 +957,17 @@ function renderSavedSongs(songIds, favorites) {
         const div = document.createElement("div");
         div.classList.add("artistCard");
 
+        let artistNames = "Unknown Artist"; // Valor predeterminado
+
+        if (Array.isArray(data.artist)) {
+          artistNames = data.artist.join(", ");  // Si es un arreglo, concatenamos los artistas
+        } else if (typeof data.artist === 'string') {
+          artistNames = data.artist;  // Si es una cadena, usamos directamente el nombre del artista
+        }
         div.innerHTML = `
           <img src="${data.albumImageUrl || 'images/logos/silueta.png'}" style="width:80px; border-radius:10px;">
           <p><strong>${data.title}</strong></p>
-          <p>${data.artist.join(", ")}</p>
+          <p>${artistNames}</p>
           ${data.previewUrl ? `<audio controls src="${data.previewUrl}" style="width:100%"></audio>` : "<p>No preview available</p>"}
         `;
         container.appendChild(div);
