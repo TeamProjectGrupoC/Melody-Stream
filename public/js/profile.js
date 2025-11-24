@@ -1,4 +1,3 @@
-// ...existing code...
 // --- IMPORTACIONES ---
 // Módulos de App y Autenticación (como los tenías)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
@@ -108,7 +107,6 @@ function cargarDatosDePerfil() {
 }
 
 async function loadUserPodcasts(uid) {
-  // Asegurarse de que exista un contenedor en el HTML para mostrar los podcasts
   let container = document.getElementById('userPodcasts');
   if (!container) {
     container = document.createElement('div');
@@ -133,9 +131,12 @@ async function loadUserPodcasts(uid) {
 
     const podcasts = snapshot.val();
     const list = document.createElement('div');
+    list.style.display = 'grid';
+    list.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';
+    list.style.gap = '1.5rem';
+    
     let found = false;
 
-    // cargar las carpetas del usuario una sola vez para reutilizar en cada podcast
     const foldersSnap = await get(databaseRef(db, 'folders'));
     const userFolders = {};
     if (foldersSnap.exists()) {
@@ -154,55 +155,47 @@ async function loadUserPodcasts(uid) {
         found = true;
         const item = document.createElement('div');
         item.className = 'podcast-item';
-        item.style.border = '1px solid #ccc';
-        item.style.padding = '8px';
-        item.style.marginBottom = '10px';
-        item.style.borderRadius = '6px';
 
+        // Imagen
+        const img = document.createElement('img');
+        img.src = p.iconURL || 'images/logos/silueta.png';
+        img.alt = (p.nombre || 'podcast') + ' icon';
+        item.appendChild(img);
+
+        // Título
         const title = document.createElement('h4');
         title.textContent = p.nombre || '(no title)';
         item.appendChild(title);
 
-        if (p.iconURL) {
-          const img = document.createElement('img');
-          img.src = p.iconURL;
-          img.alt = (p.nombre || '') + ' icon';
-          img.style.maxWidth = '120px';
-          img.style.display = 'block';
-          img.style.marginBottom = '8px';
-          item.appendChild(img);
-        }
-
+        // Descripción
         if (p.descripcion) {
           const desc = document.createElement('p');
           desc.textContent = p.descripcion;
           item.appendChild(desc);
         }
 
+        // Audio
         if (p.audioURL || p.audioUrl || p.audio) {
           const audio = document.createElement('audio');
           audio.controls = true;
           audio.src = p.audioURL || p.audioUrl || p.audio;
-          audio.style.width = '100%';
           item.appendChild(audio);
         }
 
-        // Select para asignar a carpeta (usa las carpetas del usuario)
-        const folderRow = document.createElement('div');
-        folderRow.style.marginTop = '8px';
+        // Select de carpetas
         const folderLabel = document.createElement('label');
-        folderLabel.textContent = 'Folder: ';
+        folderLabel.textContent = 'Folder:';
         folderLabel.htmlFor = `folder-select-${pid}`;
-        folderRow.appendChild(folderLabel);
+        item.appendChild(folderLabel);
 
         const select = document.createElement('select');
         select.id = `folder-select-${pid}`;
+        
         const noneOpt = document.createElement('option');
         noneOpt.value = '';
         noneOpt.textContent = '-- No folder --';
         select.appendChild(noneOpt);
 
-        // añadir opciones de las carpetas del usuario
         for (const fid in userFolders) {
           const opt = document.createElement('option');
           opt.value = fid;
@@ -210,40 +203,25 @@ async function loadUserPodcasts(uid) {
           if (p.folderId && String(p.folderId) === String(fid)) opt.selected = true;
           select.appendChild(opt);
         }
+        item.appendChild(select);
 
-        // Si no tienes carpetas, mostrar enlace para crear una
-        if (Object.keys(userFolders).length === 0) {
-          const hint = document.createElement('small');
-          hint.style.display = 'block';
-          hint.style.marginTop = '6px';
-          hint.innerHTML = 'You have no folders. <a href="folder_upload.html">Create one</a>';
-          folderRow.appendChild(select);
-          item.appendChild(folderRow);
-          item.appendChild(hint);
-        } else {
-          folderRow.appendChild(select);
-          item.appendChild(folderRow);
-        }
-
-        // Botón único: "Add to folder" (usa el select para asignar/quitar carpeta)
+        // Botón "Add to folder"
         const addBtn = document.createElement('button');
         addBtn.textContent = 'Add to folder';
-        addBtn.style.marginLeft = '8px';
         addBtn.addEventListener('click', async () => {
           const chosen = select.value || null;
           try {
             await update(databaseRef(db, `podcasts/${pid}`), { folderId: chosen });
-            addBtn.textContent = 'Saved';
-            setTimeout(() => (addBtn.textContent = 'Add to folder'), 900);
+            const originalText = addBtn.textContent;
+            addBtn.textContent = 'Saved!';
+            setTimeout(() => (addBtn.textContent = originalText), 1500);
           } catch (err) {
             console.error('Error updating podcast folder:', err);
             alert('Error updating folder: ' + (err.message || err));
           }
         });
-        folderRow.appendChild(addBtn);
+        item.appendChild(addBtn);
 
-        // Nota: para ver los podcasts de una carpeta, usa la lista de carpetas (se muestra en "My Folders")
-        item.appendChild(folderRow);
         list.appendChild(item);
       }
     }
@@ -261,7 +239,6 @@ async function loadUserPodcasts(uid) {
   }
 }
 
-// carga las carpetas del usuario y crea botón "View" que abre modal en la misma página
 async function loadUserFolders(uid) {
   let container = document.getElementById("userFolders");
   if (!container) {
@@ -286,39 +263,43 @@ async function loadUserFolders(uid) {
 
     const folders = snap.val();
     const list = document.createElement("div");
+    list.style.display = 'grid';
+    list.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';
+    list.style.gap = '1.5rem';
+    
     let found = false;
+    
     for (const fid in folders) {
       const f = folders[fid];
       if (f.createdBy === uid) {
         found = true;
         const item = document.createElement("div");
         item.className = "folder-item";
-        item.style.border = "1px solid #ccc";
-        item.style.padding = "8px";
-        item.style.marginBottom = "10px";
-        item.style.borderRadius = "6px";
 
+        // Imagen
+        const img = document.createElement("img");
+        img.src = f.iconURL || "images/logos/silueta.png";
+        img.alt = f.name + " icon";
+        item.appendChild(img);
+
+        // Título
         const title = document.createElement("h4");
         title.textContent = f.name || "(no name)";
         item.appendChild(title);
 
-        if (f.iconURL) {
-          const img = document.createElement("img");
-          img.src = f.iconURL;
-          img.alt = f.name + " icon";
-          img.style.maxWidth = "120px";
-          img.style.display = "block";
-          img.style.marginBottom = "8px";
-          item.appendChild(img);
+        // Descripción
+        if (f.description) {
+          const desc = document.createElement("p");
+          desc.textContent = f.description;
+          item.appendChild(desc);
         }
 
-        // View button: NO redirige, abre modal y carga podcasts en la misma página
+        // View button
         const viewBtn = document.createElement("button");
         viewBtn.textContent = "View";
         viewBtn.className = "view-folder";
         viewBtn.setAttribute('data-folder-id', fid);
         viewBtn.setAttribute('data-folder-name', f.name || '');
-        viewBtn.style.marginRight = "8px";
         item.appendChild(viewBtn);
 
         list.appendChild(item);
@@ -389,107 +370,37 @@ function setupFormUploadListener() {
   });
 }
 
-// --- Modal + helpers para listar podcasts en la misma página ---
 function createPodcastCard(p) {
   const wrapper = document.createElement('div');
   wrapper.className = 'podcast-card';
-  wrapper.style.display = 'flex';
-  wrapper.style.gap = '12px';
-  wrapper.style.alignItems = 'flex-start';
-  wrapper.style.border = '1px solid #eee';
-  wrapper.style.padding = '8px';
-  wrapper.style.borderRadius = '6px';
 
   const thumb = document.createElement('img');
   thumb.src = p.thumbnail || 'images/logos/default.png';
   thumb.alt = p.title || 'thumbnail';
-  thumb.style.width = '120px';
-  thumb.style.height = 'auto';
-  thumb.style.objectFit = 'cover';
-  thumb.style.borderRadius = '4px';
 
-  const meta = document.createElement('div');
-  meta.style.flex = '1';
+  const info = document.createElement('div');
+  info.className = 'podcast-card-info';
 
   const title = document.createElement('h3');
   title.textContent = p.title || 'Sin título';
-  title.style.margin = '0 0 6px 0';
-
-  const author = document.createElement('p');
-  author.textContent = p.author ? `Autor: ${p.author}` : '';
-  author.style.margin = '0 0 6px 0';
-  author.style.fontSize = '0.9rem';
-  author.style.color = '#555';
 
   const desc = document.createElement('p');
   desc.textContent = p.description || '';
-  desc.style.margin = '0 0 8px 0';
-  desc.style.color = '#444';
 
-  const metaRow = document.createElement('div');
-  metaRow.style.display = 'flex';
-  metaRow.style.gap = '12px';
-  metaRow.style.flexWrap = 'wrap';
+  info.appendChild(title);
+  info.appendChild(desc);
 
-  if (p.duration) {
-    const dur = document.createElement('span');
-    dur.textContent = `Duración: ${p.duration}`;
-    dur.style.fontSize = '0.85rem';
-    dur.style.color = '#666';
-    metaRow.appendChild(dur);
-  }
-
-  if (p.date) {
-    const date = document.createElement('span');
-    date.textContent = p.date;
-    date.style.fontSize = '0.85rem';
-    date.style.color = '#666';
-    metaRow.appendChild(date);
-  }
-
-  const actions = document.createElement('div');
-  actions.style.marginTop = '8px';
-  actions.style.display = 'flex';
-  actions.style.flexDirection = 'column';
-  actions.style.gap = '8px';
-
-  // Reproducir en el modal: crear elemento audio si hay URL
+  // Audio player si existe
   const audioSrc = p.audioURL || p.audioUrl || p.audio || p.url || p.audio_src || '';
   if (audioSrc) {
     const audioEl = document.createElement('audio');
     audioEl.controls = true;
     audioEl.src = audioSrc;
-    audioEl.style.width = '100%';
-    actions.appendChild(audioEl);
-
-    // Añadir botón de descargar (opcional)
-    const dl = document.createElement('a');
-    dl.href = audioSrc;
-    dl.download = '';
-    dl.textContent = 'Download';
-    dl.style.display = 'inline-block';
-    dl.style.padding = '6px 10px';
-    dl.style.border = '1px solid #ccc';
-    dl.style.borderRadius = '4px';
-    dl.style.background = '#fafafa';
-    dl.style.textDecoration = 'none';
-    dl.style.color = '#222';
-    actions.appendChild(dl);
-  } else {
-    const noAudio = document.createElement('small');
-    noAudio.textContent = 'No audio disponible';
-    noAudio.style.color = '#777';
-    actions.appendChild(noAudio);
+    info.appendChild(audioEl);
   }
 
-  meta.appendChild(title);
-  meta.appendChild(author);
-  meta.appendChild(desc);
-  meta.appendChild(metaRow);
-  meta.appendChild(actions);
-
   wrapper.appendChild(thumb);
-  wrapper.appendChild(meta);
+  wrapper.appendChild(info);
 
   return wrapper;
 }
@@ -514,14 +425,14 @@ async function loadFolderPodcasts(folderId, folderName) {
   const listEl = document.getElementById('folder-podcast-list');
   const titleEl = document.getElementById('folder-modal-title');
   if (!listEl || !titleEl) return;
-  titleEl.textContent = 'Cargando...';
+  titleEl.textContent = folderName || 'Loading...';
   listEl.innerHTML = '';
   openModal();
 
   try {
     const podsSnap = await get(databaseRef(db, 'podcasts'));
     if (!podsSnap.exists()) {
-      listEl.textContent = 'No hay podcasts en esta carpeta.';
+      listEl.innerHTML = '<p class="modal-empty-message">This folder is empty.</p>';
       return;
     }
     const all = podsSnap.val();
@@ -532,26 +443,22 @@ async function loadFolderPodcasts(folderId, folderName) {
         items.push({
           id: pid,
           title: p.nombre || p.title || '',
-          author: p.autor || p.author || '',
           description: p.descripcion || p.description || '',
           thumbnail: p.iconURL || p.thumbnail || '',
-          audioURL: p.audioURL || p.audioUrl || p.audio || p.url || p.audio_src || '',
-          duration: p.duracion || p.duration || '',
-          date: p.fecha || p.date || ''
+          audioURL: p.audioURL || p.audioUrl || p.audio || p.url || p.audio_src || ''
         });
       }
     }
 
-    titleEl.textContent = folderName && folderName.trim() !== '' ? folderName : `Carpeta ${folderId}`;
     if (items.length === 0) {
-      listEl.textContent = 'No hay podcasts en esta carpeta.';
+      listEl.innerHTML = '<p class="modal-empty-message">This folder is empty.</p>';
       return;
     }
     items.forEach(p => listEl.appendChild(createPodcastCard(p)));
   } catch (err) {
     console.error(err);
     titleEl.textContent = 'Error al cargar';
-    listEl.textContent = 'No se pudieron cargar los podcasts. Revisa la consola.';
+    listEl.innerHTML = '<p class="modal-empty-message">No se pudieron cargar los podcasts.</p>';
   }
 }
 
@@ -895,8 +802,6 @@ document.getElementById("shareArtistConfirm").addEventListener("click", async ()
   modal.style.display = "none";
   alert("Artist shared!");
 });
-
-
 
 // SONGS
 //----------------------------------------------------------------------------------------------------------------------------------------------------------------------z
