@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Create Folder — MelodyStream</title>
     <link rel="stylesheet" href="css/general.css" />
-    <link rel="stylesheet" href="css/podcast_upload.css" />
+    <link rel="stylesheet" href="css/folder_upload.css" />
   </head>
   <body>
     <header id="headerPrincipal">
@@ -37,10 +37,10 @@
       <h1>Create Folder</h1>
 
       <div id="folderForm">
-        <label for="folderName">Folder name</label>
-        <input id="folderName" type="text" placeholder="e.g. ENTREVISTAS" />
+        <label for="folderName">Folder Name</label>
+        <input id="folderName" type="text" placeholder="e.g. Interviews, Tech Talks..." required />
 
-        <label for="folderIcon">Folder icon (optional)</label>
+        <label for="folderIcon">Folder Icon (optional)</label>
         <input id="folderIcon" type="file" accept="image/*" />
 
         <div style="margin-top: 10px">
@@ -53,7 +53,47 @@
     </main>
 
     <footer id="footerPrincipal">
-      <!-- ...existing footer... -->
+      <h2 id="footer-title">MELODY STREAM</h2>
+      <div id="footer-follow">
+        <p>FOLLOW US</p>
+        <ul>
+          <li>
+            <figure>
+              <a href="https://www.spotify.com" target="_blank">
+                <img src="images/logos/Spotify.svg" alt="Spotify" />
+              </a>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <a href="https://www.facebook.com" target="_blank">
+                <img src="images/logos/Facebook.svg" alt="Facebook" />
+              </a>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <a href="https://www.instagram.com" target="_blank">
+                <img src="images/logos/Instagram.svg" alt="Instagram" />
+              </a>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <a href="https://www.twitter.com" target="_blank">
+                <img src="images/logos/Twitter.svg" alt="Twitter" />
+              </a>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <a href="https://www.youtube.com" target="_blank">
+                <img src="images/logos/Youtube.svg" alt="YouTube" />
+              </a>
+            </figure>
+          </li>
+        </ul>
+      </div>
     </footer>
 
     <script type="module" src="js/folder_upload.js"></script>

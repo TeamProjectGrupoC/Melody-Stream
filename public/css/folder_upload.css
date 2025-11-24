@@ -1,0 +1,173 @@
+/* ===============================
+   MelodyStream — Create Folder Page
+   =============================== */
+
+/* Fondo y layout */
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  min-height: 80vh;
+  padding: 3rem 1rem;
+  gap: 2rem;
+}
+
+/* Título */
+main h1 {
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--color-azul2);
+  text-align: center;
+  margin-bottom: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* ===============================
+   🧾 Formulario principal
+   =============================== */
+#folderForm {
+  width: 100%;
+  max-width: 650px;
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 2.5rem 2rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+/* Etiquetas */
+#folderForm label {
+  display: block;
+  margin-top: 1rem;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+  color: var(--color-blanco);
+}
+
+/* Inputs */
+#folderForm input[type="text"],
+#folderForm input[type="file"],
+#folderForm textarea {
+  width: 100%;
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 0.7rem 0.9rem;
+  color: var(--color-blanco);
+  font-size: 1rem;
+  transition: 0.3s ease border-color, box-shadow;
+}
+
+/* Efectos focus */
+#folderForm input:focus,
+#folderForm textarea:focus {
+  outline: none;
+  border-color: var(--color-azul1);
+  box-shadow: 0 0 0 3px rgba(62, 154, 222, 0.3);
+}
+
+/* Placeholders visibles */
+#folderForm input::placeholder,
+#folderForm textarea::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+  opacity: 1;
+}
+
+/* Textarea */
+#folderForm textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+/* ===============================
+   🎛️ Botones
+   =============================== */
+#folderForm button {
+  width: 100%;
+  border: none;
+  border-radius: 10px;
+  padding: 0.8rem 1.2rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 0.8rem;
+}
+
+/* Botón principal "Create Folder" */
+#saveFolderBtn {
+  background-color: #28a745;
+  color: var(--color-blanco);
+}
+
+#saveFolderBtn:hover {
+  background-color: #218838;
+  transform: scale(1.03);
+}
+
+/* Botón "Cancel" */
+#cancelFolderBtn {
+  background-color: transparent;
+  border: 1px solid #dc3545;
+  color: #dc3545;
+}
+
+#cancelFolderBtn:hover {
+  background-color: #dc3545;
+  color: var(--color-blanco);
+  transform: scale(1.03);
+}
+
+/* ===============================
+   💬 Mensaje inferior
+   =============================== */
+#folderMsg {
+  margin-top: 1.2rem;
+  font-weight: 500;
+  text-align: center;
+  color: var(--color-azul2);
+}
+
+/* Header profile image */
+#headerProfileIm img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+#headerProfileIm {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+
+/* ===============================
+   📱 Responsividad
+   =============================== */
+@media (max-width: 600px) {
+  #folderForm {
+    padding: 1.5rem;
+    max-width: 90%;
+  }
+  
+  main h1 {
+    font-size: 2rem;
+  }
+}
+
+/* Animación fadeIn */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
