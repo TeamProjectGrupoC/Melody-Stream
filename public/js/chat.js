@@ -249,11 +249,22 @@ async function main() {
 
                     // audio (optional)
                     if (data.attachment.audioURL && data.attachment.audioURL !== "") {
-                        const audio = document.createElement('audio');
-                        audio.controls = true;
-                        audio.src = data.attachment.audioURL;
-                        meta.appendChild(audio);
-                    }
+    const accessToken = localStorage.getItem("spotify_access_token");
+    if (accessToken) {
+
+    fetch(`https://us-central1-TU_PROYECTO.cloudfunctions.net/checkSpotifyPremium?accessToken=${accessToken}`)
+        .then(res => res.json())
+        .then(result => {
+            if (result.premium) {
+                const audio = document.createElement('audio');
+                audio.controls = true;
+                audio.src = data.attachment.audioURL;
+                meta.appendChild(audio);
+            }
+        })
+        .catch(err => console.error(err));
+}}
+
 
                     card.appendChild(meta);
 
