@@ -950,6 +950,18 @@ function loadFavouriteSongs(userId) {
   });
 }
 
+async function removeFavSongs(songId){
+  const db = getDatabase();
+
+  const favSongRef = ref(db, `users/${currentUser.uid}/favoritos/${songId}`);
+  await remove(favSongRef);
+
+  const songRef = ref(db, `canciones/${trackId}`);
+  await remove(songRef);
+
+  console.log(`Song with id ${trackId} removed from favorites for user ${userId}`);
+}
+
 function renderSavedSongs(songIds, favorites) {
   const container = document.getElementById("savedSongs");
   container.innerHTML = "";
@@ -966,19 +978,33 @@ function renderSavedSongs(songIds, favorites) {
         const div = document.createElement("div");
         div.classList.add("artistCard");
 
-        let artistNames = "Unknown Artist"; // Valor predeterminado
+        let artistNames = "Unknown Artist";
 
         if (Array.isArray(data.artist)) {
-          artistNames = data.artist.join(", ");  // Si es un arreglo, concatenamos los artistas
+          artistNames = data.artist.join(", ");
         } else if (typeof data.artist === 'string') {
-          artistNames = data.artist;  // Si es una cadena, usamos directamente el nombre del artista
+          artistNames = data.artist;  
         }
         div.innerHTML = `
           <img src="${data.albumImageUrl || 'images/logos/silueta.png'}" style="width:80px; border-radius:10px;">
           <p><strong>${data.title}</strong></p>
           <p>${artistNames}</p>
           ${data.previewUrl ? `<audio controls src="${data.previewUrl}" style="width:100%"></audio>` : "<p>No preview available</p>"}
+
+          <button class="shareSongBtn">Share</button>
+          <button class="removeSongBtn">Remove</button>
         `;
+
+        //REMOVE
+        div.querySelector(".removeSongBtn").addEventListener("click", async () => {
+          removeFavSongs(songId);
+        });
+
+        //SHARE
+        //div.querySelector(".shareSongBtn").addEventListener("click", () => {
+          //openShareArtistModal(a);
+        //});
+
         container.appendChild(div);
       }
     });
