@@ -317,8 +317,18 @@ async function main() {
         };
 
         if (fileAttachment) {
-            newMessage.attachment = fileAttachment;
+            if (fileAttachment.audioURL && fileAttachment.audioURL !== "") {
+                newMessage.attachment = fileAttachment;
+            } 
+            else {
+            // Si no hay audioURL, no lo incluimos
+            newMessage.attachment = {
+                title: fileAttachment.title,
+                imageURL: fileAttachment.imageURL,
+                author: fileAttachment.author
+            };
         }
+         }
 
         const lastMessageData = {
             sender: currentUser.uid,
