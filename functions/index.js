@@ -42,27 +42,4 @@ const admin = require("firebase-admin");
 
 admin.initializeApp();
 
-// Función para sincronizar solo los campos públicos modificados
-exports.syncPublicProfile = onDocumentWritten("/users/{uid}", (event) => {
-  const uid = event.params.uid;
-  const beforeData = event.data?.before?.val() || {};
-  const afterData = event.data?.after?.val();
 
-  if (!afterData) {
-    // Usuario borrado: opcionalmente borrar su perfil público
-    return admin.database().ref(`publicProfiles/${uid}`).remove();
-  }
-
-  // Construimos un objeto solo con los campos públicos que cambiaron
-  const publicData = {};
-  if (afterData.username !== beforeData.username) publicData.username = afterData.username || null;
-  if (afterData.urlFotoPerfil !== beforeData.urlFotoPerfil) publicData.urlFotoPerfil = afterData.urlFotoPerfil || null;
-  if (JSON.stringify(afterData.favorite_songs) !== JSON.stringify(beforeData.favorite_songs)) {
-    publicData.favorite_songs = afterData.favorite_songs || null;
-  }
-
-  // Si no hubo cambios, no hacemos nada
-  if (Object.keys(publicData).length === 0) return null;
-
-  return admin.database().ref(`publicProfiles/${uid}`).update(publicData);
-});

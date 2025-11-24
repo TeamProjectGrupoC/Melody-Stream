@@ -1,129 +1,125 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="author"
-      content="Carolina Alba García, Celtia Castelo Gajino, Guillermo Arcos Salgado, Ines Vilariño, Mario Seoane, Francisco"
-    />
-    <meta
-      name="description"
-      content="Melody Stream: listen to music; upload your own podcast; and chat and share your favourite songs with your friends"
-    />
-    <meta name="keywords" content="Melody Stream, music, podcast, friends" />
-    <title>Melody Stream – View Profile</title>
 
-    <link rel="stylesheet" href="css/general.css" />
-    <link rel="stylesheet" href="css/profile.css" />
-    <link rel="stylesheet" href="css/viewprofile.css" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="author"
+    content="Carolina Alba García, Celtia Castelo Gajino, Guillermo Arcos Salgado, Ines Vilariño, Mario Seoane, Francisco" />
+  <meta name="description"
+    content="Melody Stream: listen to music; upload your own podcast; and chat and share your favourite songs with your friends" />
+  <meta name="keywords" content="Melody Stream, music, podcast, friends" />
+  <title>Melody Stream – View Profile</title>
 
-    <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg" />
-  </head>
+  <link rel="stylesheet" href="css/general.css" />
+  <link rel="stylesheet" href="css/profile.css" />
+  <link rel="stylesheet" href="css/viewprofile.css" />
 
-  <body>
-    <header id="headerPrincipal">
-      <figure>
-        <img src="images/logos/logo.png" alt="Webpage logo" />
-      </figure>
+  <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg" />
+</head>
 
-      <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
+<body>
+  <header id="headerPrincipal">
+    <figure>
+      <img src="images/logos/logo.png" alt="Webpage logo" />
+    </figure>
 
-      <nav id="NavPrincipal">
-        <ul>
-          <li><a href="index.html">HOME</a></li>
-          <li><a href="test_register_spotify.html">MUSIC</a></li>
-          <li><a href="podcast.html">PODCAST</a></li>
-          <li><a href="login.html">LOG IN</a></li>
-          <li><a href="users.html">USERS</a></li>
-        </ul>
-      </nav>
+    <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
 
-      <div id="headerProfileIm">
-        <a href="profile.html">
-          <img
-            id="headerUserPic"
-            src="images/logos/silueta.png"
-            alt="User Profile Icon"
-          />
-        </a>
+    <nav id="NavPrincipal">
+      <ul>
+        <li><a href="index.html">HOME</a></li>
+        <li><a href="test_register_spotify.html">MUSIC</a></li>
+        <li><a href="podcast.html">PODCAST</a></li>
+        <li><a href="login.html">LOG IN</a></li>
+        <li><a href="users.html">USERS</a></li>
+      </ul>
+    </nav>
+
+    <div id="headerProfileIm">
+      <a href="profile.html">
+        <img id="headerUserPic" src="images/logos/silueta.png" alt="User Profile Icon" />
+      </a>
+    </div>
+  </header>
+
+  <main>
+
+    <div class="profile-card">
+
+      <div class="profile-header">
+        <!-- FOTO -->
+        <img id="profileImg" src="images/logos/silueta.png" alt="User photo" />
+
+        <!-- INFO -->
+        <div class="profile-info">
+          <h2 id="profileName">Username</h2>
+
+        </div>
       </div>
-    </header>
 
-   <main>
+      <p id="msg">Loading profile...</p>
 
-  <p id="msg">Loading profile...</p>
+      <h3>Favourite songs </h3>
+      <div id="viewUserSongs" class="cards-container"></div>
+      <p id="noSongsMsg" class="empty-msg" style="display:none;">No favorite songs found.</p>
+      <h3>Favourite artists</h3>
+      <div id="viewUserArtists" class="cards-container"></div>
+      <p id="noArtistsMsg" class="empty-msg" style="display:none;">No favorite artists found.</p>
+      <h3>Uploaded podcasts</h3>
+      <div id="viewUserPodcasts" class="cards-container"></div>
+      <p id="noPodcastsMsg" class="empty-msg" style="display:none;">No podcasts found.</p>
 
-  <!-- FOTO DE PERFIL -->
-  <div class="perfil-foto-contenedor">
-    <img
-      id="profileImg"
-      src="images/logos/silueta.png"
-      alt="User photo"
-      width="200"
-      height="200"
-    />
-  </div>
+    </div>
 
-  <!-- DATOS DEL USUARIO -->
-  <div id="viewUserData">
-      <p class="username-big" id="profileName"></p>
-
-      <p class="small-label">Favorite Song:</p>
-      <p id="favSong"></p>
-  </div>
-
-  <!-- PODCASTS -->
-  <h3>Podcasts</h3>
-  <div id="viewUserPodcasts"></div>
-
-</main>
+  </main>
 
 
-    <footer id="footerPrincipal">
-      <h2 id="footer-title">MELODY STREAM</h2>
-      <div id="footer-follow">
-        <p>FOLLOW US</p>
-        <ul>
-          <li>
-            <figure>
-              <a href="https://www.spotify.com" target="_blank">
-                <img src="images/logos/Spotify.svg" alt="Spotify" />
-              </a>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <a href="https://www.facebook.com" target="_blank">
-                <img src="images/logos/Facebook.svg" alt="Facebook" />
-              </a>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <a href="https://www.instagram.com" target="_blank">
-                <img src="images/logos/Instagram.svg" alt="Instagram" />
-              </a>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <a href="https://www.twitter.com" target="_blank">
-                <img src="images/logos/Twitter.svg" alt="Twitter" />
-              </a>
-            </figure>
-          </li>
-          <li>
-            <figure>
-              <a href="https://www.youtube.com" target="_blank">
-                <img src="images/logos/Youtube.svg" alt="YouTube" />
-              </a>
-            </figure>
-          </li>
-        </ul>
-      </div>
-    </footer>
+  <footer id="footerPrincipal">
+    <h2 id="footer-title">MELODY STREAM</h2>
+    <div id="footer-follow">
+      <p>FOLLOW US</p>
+      <ul>
+        <li>
+          <figure>
+            <a href="https://www.spotify.com" target="_blank">
+              <img src="images/logos/Spotify.svg" alt="Spotify" />
+            </a>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <a href="https://www.facebook.com" target="_blank">
+              <img src="images/logos/Facebook.svg" alt="Facebook" />
+            </a>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <a href="https://www.instagram.com" target="_blank">
+              <img src="images/logos/Instagram.svg" alt="Instagram" />
+            </a>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <a href="https://www.twitter.com" target="_blank">
+              <img src="images/logos/Twitter.svg" alt="Twitter" />
+            </a>
+          </figure>
+        </li>
+        <li>
+          <figure>
+            <a href="https://www.youtube.com" target="_blank">
+              <img src="images/logos/Youtube.svg" alt="YouTube" />
+            </a>
+          </figure>
+        </li>
+      </ul>
+    </div>
+  </footer>
 
-    <script type="module" src="js/viewprofile.js"></script>
-  </body>
+  <script type="module" src="js/viewprofile.js"></script>
+</body>
+
 </html>

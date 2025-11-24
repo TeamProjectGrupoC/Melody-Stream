@@ -1,8 +1,7 @@
 // --- IMPORTS ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-//import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, push, set, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-//import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -15,7 +14,9 @@ const firebaseConfig = {
   appId: "1:640160988809:web:d0995d302123ccf0431058",
   measurementId: "G-J97KEDLYMB"
 };
+
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const db = getDatabase(app);
 
 // --- HTML ELEMENTS ---
@@ -26,15 +27,26 @@ const resultsContainer = document.getElementById("searchResults");
 searchBtn.addEventListener("click", searchUsers);
 
 // --------------------------------------------------
+// 🔥 ESPERAR A QUE HAYA USUARIO LOGUEADO
+// --------------------------------------------------
+onAuthStateChanged(auth, (user) => {
+  if (!user) {
+    console.warn("Usuario no logueado aún. No se cargan usuarios.");
+    return;
+  }
+
+  console.log("Auth OK. Cargando usuarios...");
+  loadInitialUsers();
+});
+
+// --------------------------------------------------
 // 🔥 1. Mostrar automáticamente 10 usuarios
 // --------------------------------------------------
-loadInitialUsers();
-
 async function loadInitialUsers() {
   resultsContainer.innerHTML = "Loading users...";
 
   try {
-    const usersRef = ref(db, "publicProfiles");
+    const usersRef = ref(db, "users");
     const snapshot = await get(usersRef);
 
     if (!snapshot.exists()) {
@@ -44,10 +56,13 @@ async function loadInitialUsers() {
 
     const usersObj = snapshot.val();
 
-    // Array manteniendo UID
     const users = Object.entries(usersObj)
       .slice(0, 10)
-      .map(([uid, data]) => ({ uid, ...data }));
+      .map(([uid, data]) => ({
+        uid,
+        username: data.username,
+        urlFotoPerfil: data.urlFotoPerfil
+      }));
 
     displayUsers(users);
 
@@ -70,7 +85,7 @@ async function searchUsers() {
   }
 
   try {
-    const usersRef = ref(db, "publicProfiles");
+    const usersRef = ref(db, "users");
     const snapshot = await get(usersRef);
 
     if (!snapshot.exists()) {
@@ -84,7 +99,11 @@ async function searchUsers() {
       .filter(([uid, user]) =>
         user.username?.toLowerCase().includes(searchTerm)
       )
-      .map(([uid, data]) => ({ uid, ...data }));
+      .map(([uid, data]) => ({
+        uid,
+        username: data.username,
+        urlFotoPerfil: data.urlFotoPerfil
+      }));
 
     if (matched.length === 0) {
       resultsContainer.innerHTML = "<p>No users match your search.</p>";
@@ -110,7 +129,6 @@ function displayUsers(list) {
     div.className = "search-user";
     div.style.cursor = "pointer";
 
-    // 👉 Al hacer clic, abrir el perfil de otro usuario
     div.addEventListener("click", () => {
       window.location.href = `viewprofile.html?uid=${user.uid}`;
     });

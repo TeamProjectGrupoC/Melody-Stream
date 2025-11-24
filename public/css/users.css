@@ -1,27 +1,70 @@
+/* --- GENERAL LAYOUT --- */
+main h1 {
+  color: white;
+  text-align: center;
+  font-size: 2.2rem;
+  margin-bottom: 20px;
+}
+
+/* --- SEARCH BAR --- */
+#searchContainer {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-bottom: 30px;
+}
+
+#searchInput {
+  width: 350px;            /* 🔥 Más grande */
+  padding: 12px 15px;
+  font-size: 1rem;
+  border-radius: 10px;
+  border: 2px solid #888;
+}
+
+#searchBtn {
+  padding: 12px 25px;
+  font-size: 1rem;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+/* --- USER GRID --- */
 #searchResults {
   margin-top: 20px;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 20px;
+  display: flex;
+  flex-wrap: wrap;          /* 🔥 Se ajusta automáticamente */
+  gap: 25px;
+  justify-content: center;  /* Centrado */
   padding: 10px;
 }
 
 .search-user {
+  width: 160px;               /* 🔥 Más ancho */
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  background: #1d1d1d;
+  padding: 15px;
+  border-radius: 12px;
+  transition: transform .2s;
+}
+
+.search-user:hover {
+  transform: scale(1.06);
 }
 
 .search-user img {
-  width: 100px;
-  height: 100px;
+  width: 110px;
+  height: 110px;
   object-fit: cover;
-  border-radius: 50%; /* FOTO REDONDA estilo insta */
+  border-radius: 50%;
   border: 2px solid #ccc;
 }
 
 .search-user p {
-  margin: 5px 0 0 0;
+  margin: 10px 0 0 0;
+  font-size: 1.1rem;
+  color: white;
   font-weight: 600;
 }
