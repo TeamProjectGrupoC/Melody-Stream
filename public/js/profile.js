@@ -959,7 +959,7 @@ async function removeFavSongs(songId){
   const songRef = ref(db, `canciones/${songId}`);
   await remove(songRef);
 
-  console.log(`Song with id ${songId} removed from favorites for user ${userId}`);
+  console.log(`Song with id ${songId} removed from favorites`);
 }
 
 function renderSavedSongs(songIds, favorites) {
