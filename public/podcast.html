@@ -52,9 +52,21 @@
         <button id="createFolderBtn">Create Folder</button>
       </div>
 
-      <h2>Available Podcasts</h2>
+      <h2>Available Folders</h2>
+      <div id="foldersList"></div>
+
+      <h2 style="margin-top: 2rem;">Available Podcasts</h2>
       <div id="podcastList"></div>
     </main>
+
+    <!-- Modal para ver podcasts de una carpeta -->
+    <div id="folder-modal">
+      <div>
+        <button id="folder-modal-close">Close</button>
+        <h2 id="folder-modal-title">Podcasts in Folder</h2>
+        <div id="folder-podcast-list"></div>
+      </div>
+    </div>
 
     <footer id="footerPrincipal">
       <h2 id="footer-title">MELODY STREAM</h2>
