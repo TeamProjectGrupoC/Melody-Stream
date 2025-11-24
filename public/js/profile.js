@@ -920,14 +920,23 @@ async function searchSong(query) {
 }
 
 async function saveFavouriteSong(userId, track) {
-  const favSongRef = ref(database, `users/${userId}/favoritos/${track.id}`);
+  const db = getDatabase();
+  const songRef = ref(db, `canciones/${track.id}`);
+  const favSongRef = ref(db, `users/${userId}/favoritos/${track.id}`);
 
-  await set(favSongRef, {
-        name: track.name,
-        artist: track.artists[0].name,
-        preview_url: track.preview_url,
-        album_image: track.album.images?.[0]?.url || ""
-    });
+  const songData = {
+    title: track.name,
+    artist: track.artists.map((artist) => artist.name).join(", "),
+    album: track.album.name,
+    albumImageUrl: track.album.images[0].url,
+    previewUrl: track.preview_url,
+  }
+
+  await set(songRef, songData);
+  await set(favSongRef, songData);
+
+  console.log(`Song ${track.name} added to favorites for user ${userId}`);
+
 }
 
 function loadFavouriteSongs(userId) {
