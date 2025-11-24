@@ -328,6 +328,13 @@ async function main() {
             user.style.display = username.includes(filterText) ? "" : "none";
         });
     });
+
+    // --- Click in name : go to viewprofile ---
+    chatWith.addEventListener("click", () => {
+        if (!selectedUser) return;
+        window.location.href = `viewprofile.html?uid=${selectedUser}`;
+    });
+
 }
 
 main();

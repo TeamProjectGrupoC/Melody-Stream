@@ -1,0 +1,27 @@
+#searchResults {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 20px;
+  padding: 10px;
+}
+
+.search-user {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.search-user img {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 50%; /* FOTO REDONDA estilo insta */
+  border: 2px solid #ccc;
+}
+
+.search-user p {
+  margin: 5px 0 0 0;
+  font-weight: 600;
+}

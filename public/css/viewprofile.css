@@ -1,0 +1,179 @@
+/* --- Configuración Base del Main (La Tarjeta/Rectángulo) --- */
+main {
+    max-width: 900px;
+    margin: 80px auto 40px;
+    padding: 40px;
+
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 24px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto 1fr;
+    gap: 20px 40px;
+    grid-template-areas:
+        "header header"
+        "photo info"
+        "podcasts podcasts";
+}
+
+/* --- 1. Título Principal --- */
+main h1 {
+    grid-area: header;
+    text-align: left;
+    font-size: 1.5rem;
+    color: #8b949e;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #30363d;
+    padding-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* --- HEADER DEL PERFIL --- */
+#msg {
+  font-size: 1.4rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Nombre grande del perfil mostrado */
+#viewUserData .username-big {
+  font-size: 2.3rem;
+  font-weight: bold;
+  color: #b38cff;
+  margin-bottom: 10px;
+}
+
+/* Etiquetas pequeñas (Username:, Favorite Song:) */
+#viewUserData .small-label {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #ccccff;
+  margin-top: 10px;
+}
+
+/* --- 2. Foto de Perfil (Izquierda) --- */
+.perfil-foto-contenedor {
+    grid-area: photo;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+.perfil-foto-contenedor img {
+    width: 180px;
+    height: 180px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 4px solid #58a6ff;
+    box-shadow: 0 8px 24px rgba(88, 166, 255, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.perfil-foto-contenedor img:hover {
+    transform: scale(1.05);
+}
+
+/* --- 3. Información del Usuario (Derecha: Nombre y Canción) --- */
+#viewUserData {
+    grid-area: info;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    color: #f0f6fc;
+}
+
+#viewUserData p {
+    font-size: 1.1rem;
+    line-height: 1.6;
+    color: #c9d1d9;
+    margin: 5px 0;
+}
+
+/* --- 4. Sección de Podcasts --- */
+main h3 {
+    grid-area: podcasts;
+    margin-top: 40px;
+    font-size: 1.8rem;
+    color: #f0f6fc;
+    border-left: 5px solid #a371f7;
+    padding-left: 15px;
+}
+
+#viewUserPodcasts {
+    grid-area: podcasts;
+    margin-top: 60px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+/* Tarjetas de podcasts */
+.podcast-item {
+    background: #1a1a1f;
+    border: 1px solid #2e2e39;
+    border-radius: 12px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.podcast-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+    border-color: #58a6ff;
+}
+
+/* Título del podcast */
+.podcast-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 10px;
+}
+
+/* Carátula cuadrada */
+.podcast-cover {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+/* Audios */
+audio {
+    width: 100%;
+    margin-top: 10px;
+    height: 30px;
+}
+
+/* --- Responsive (Móviles) --- */
+@media (max-width: 768px) {
+    main {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+            "header"
+            "photo"
+            "info"
+            "podcasts";
+        text-align: center;
+        padding: 20px;
+    }
+
+    .perfil-foto-contenedor {
+        margin-bottom: 20px;
+    }
+
+    #viewUserData {
+        align-items: center;
+    }
+
+    #viewUserData .username-big {
+        font-size: 2rem;
+    }
+}
