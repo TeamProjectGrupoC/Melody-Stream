@@ -1,51 +1,48 @@
-<!doctype html>
-<html lang="es">
-<head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Music Library — Melody Stream</title>
-    <!-- Ajusta la ruta si tu CSS global tiene otro nombre o ubicación -->
-    <link rel="stylesheet" href="css/styles.css" />
-</head>
-<body>
-    <div class="app">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="brand">
-                <div class="logo">MS</div>
-                <h1 class="title">Melody</h1>
-            </div>
-            <nav class="nav">
-                <a class="nav-item active" href="#">Biblioteca</a>
-                <a class="nav-item" href="#">Explorar</a>
-                <a class="nav-item" href="#">Listas</a>
-                <a class="nav-item" href="#">Favoritos</a>
-            </nav>
-            <div class="sidebar-footer">
-                <button class="create-playlist">+ Nueva lista</button>
-            </div>
-        </aside>
+<!DOCTYPE html>
+<html lang="en">
+  <head>//bruh
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="author"
+      content="Carolina Alba García, Celtia Castelo Gajino, Guillermo Arcos Salgado, Ines Vilariño, Mario Seoane, Francisco"
+    />
+    <meta
+      name="description"
+      content="Melody Stream: listen to music; upload your own podcast; and chat and share your favourite songs with your friends"
+    />
+    <meta name="keywords" content="Melody Stream, music, podcast, friends" />
+    <title>Login with Spotify</title>
 
-        <!-- Main area -->
-        <div class="main">
-            <!-- Top bar -->
-            <header class="topbar">
-                <div class="search">
-                    <input type="search" placeholder="Buscar canciones, artistas o álbumes" />
-                </div>
-                <div class="top-controls">
-                    <div class="filter">
-                        <select>
-                            <option>Recientes</option>
-                            <option>Más populares</option>
-                            <option>Alfabético</option>
-                        </select>
-                    </div>
-                    <div class="user">
-                        <img class="avatar" alt="usuario" src="assets/avatar-placeholder.png" />
-                    </div>
-                </div>
-            </header>
+    <link rel="stylesheet" href="css/general.css" />
+    <link rel="stylesheet" href="css/test_register_spotify.css" />
+    <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg" />
+  </head>
+  <body>
+    <header id="headerPrincipal">
+      <figure>
+        <img src="images/logos/logo.png" alt="Webpage logo" />
+      </figure>
+      <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
+      <nav id="NavPrincipal">
+        <ul>
+          <li><a href="index.html">HOME</a></li>
+          <li><a href="test_register_spotify.html">MUSIC</a></li>
+          <li><a href="podcast.html">PODCAST</a></li>
+          <li><a href="login.html">LOG IN</a></li>
+        </ul>
+      </nav>
+
+      <div id="headerProfileIm">
+        <a href="profile.html">
+          <img
+            id="headerUserPic"
+            src="images/logos/silueta.png"
+            alt="User Profile Icon"
+          />
+        </a>
+      </div>
+    </header>
 
             <!-- Content: music library -->
             <main class="content">
@@ -110,6 +107,54 @@
                     </div>
                 </section>
             </main>
+            <footer id="footerPrincipal">
+      <h2 id="footer-title">MELODY STREAM</h2>
+      <div id="footer-follow">
+        <p>FOLLOW US</p>
+        <ul>
+          <!-- Logo 1 (Spotify) -->
+          <li>
+            <figure>
+              <a href="https://www.spotify.com" target="_blank">
+                <img src="images/logos/Spotify.svg" alt="Spotify" />
+              </a>
+            </figure>
+          </li>
+          <!-- Logo 2 (Facebook) -->
+          <li>
+            <figure>
+              <a href="https://www.facebook.com" target="_blank">
+                <img src="images/logos/Facebook.svg" alt="Facebook" />
+              </a>
+            </figure>
+          </li>
+          <!-- Logo 3 (Instagram) -->
+          <li>
+            <figure>
+              <a href="https://www.instagram.com" target="_blank">
+                <img src="images/logos/Instagram.svg" alt="Instagram" />
+              </a>
+            </figure>
+          </li>
+          <!-- Logo 4 (Twitter) -->
+          <li>
+            <figure>
+              <a href="https://www.twitter.com" target="_blank">
+                <img src="images/logos/Twitter.svg" alt="Twitter" />
+              </a>
+            </figure>
+          </li>
+          <!-- Logo 5 (YouTube) -->
+          <li>
+            <figure>
+              <a href="https://www.youtube.com" target="_blank">
+                <img src="images/logos/Youtube.svg" alt="YouTube" />
+              </a>
+            </figure>
+          </li>
+        </ul>
+      </div>
+    </footer>
         </div>
     </div>
 </body>

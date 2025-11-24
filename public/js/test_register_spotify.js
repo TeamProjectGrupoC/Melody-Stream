@@ -12,7 +12,7 @@
     botonlibreria.addEventListener("click", function() {
         window.location.href = "musiclibrary.html";
     });
-
+    //ola
     const boton = document.getElementById('volverhome');
     boton.addEventListener('click', function() {
         window.location.href = "index.html"; 
