@@ -214,6 +214,77 @@ body {
     margin-right: 20px;
 }
 
+/* ======================================================
+   ESTILO PARA MENSAJES MUSICALES
+   ====================================================== */
+
+.message.music-message {
+    background: #1db95420; 
+    border: 1px solid #1db95440;
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+}
+
+.message.you.music-message {
+    background: #1db95430;
+    border-color: #1db95470;
+}
+
+.message.other.music-message {
+    background: #1db95415;
+    border-color: #1db95440;
+}
+
+/* --- Tarjeta del attachment musical --- */
+.attachment-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    background: transparent;
+    padding: 0;
+}
+
+/* Image */
+.attachment-card img {
+    width: 130px;
+    height: 130px;
+    border-radius: 12px;
+    object-fit: cover;
+    display: block;
+}
+
+/* Text */
+.attachment-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* Title */
+.attachment-meta h4 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--color-blanco);
+    font-weight: bold;
+}
+
+/* Artist */
+.attachment-meta p {
+    margin: 0;
+    font-size: 14px;
+    color: #bbb;
+}
+
+/* Audio player */
+.attachment-meta audio {
+    width: 100%;
+    margin-top: 6px;
+    border-radius: 8px;
+}
+
+
 /* 6. Estilos Responsive (Solo para el layout del chat) */
 @media (max-width: 800px) {
     .chat-container {
