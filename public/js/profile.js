@@ -1059,7 +1059,7 @@ document.getElementById("btnSearchSong").addEventListener("click", async () => {
 function openShareSongModal(track) {
   const modal = document.getElementById("shareSongModal");
   const nameEl = document.getElementById("shareSongName");
-  const select = document.getElementById("chatSelect");
+  const select = document.getElementById("chatSelectSong");
 
   nameEl.innerText = track.name;
 
@@ -1123,11 +1123,7 @@ async function shareSongToChat(chatId, track) {
 
 document.getElementById("shareSongConfirm").addEventListener("click", async () => {
   
-  const chatId = document.getElementById("chatSelect").value;
-  if (!chatId) {
-    alert("Please select a chat to share the song.");
-    return;
-  }
+  const chatId = document.getElementById("chatSelectSong").value;
   const modal = document.getElementById("shareSongModal");
 
   const track = {
