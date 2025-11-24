@@ -960,7 +960,7 @@ function renderSavedSongs(songIds, favorites) {
         div.innerHTML = `
           <img src="${data.albumImageUrl || 'images/logos/silueta.png'}" style="width:80px; border-radius:10px;">
           <p><strong>${data.title}</strong></p>
-          <p>${data.artists.join(", ")}</p>
+          <p>${data.artist.join(", ")}</p>
           ${data.previewUrl ? `<audio controls src="${data.previewUrl}" style="width:100%"></audio>` : "<p>No preview available</p>"}
         `;
         container.appendChild(div);
