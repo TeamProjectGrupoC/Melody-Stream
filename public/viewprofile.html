@@ -9,9 +9,12 @@
   <meta name="description"
     content="Melody Stream: listen to music; upload your own podcast; and chat and share your favourite songs with your friends" />
   <meta name="keywords" content="Melody Stream, music, podcast, friends" />
-  <title>Melody Stream</title>
+  <title>Melody Stream – View Profile</title>
 
   <link rel="stylesheet" href="css/general.css" />
+  <link rel="stylesheet" href="css/profile.css" />
+  <link rel="stylesheet" href="css/viewprofile.css" />
+
   <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg" />
 </head>
 
@@ -20,15 +23,16 @@
     <figure>
       <img src="images/logos/logo.png" alt="Webpage logo" />
     </figure>
+
     <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
+
     <nav id="NavPrincipal">
       <ul>
         <li><a href="index.html">HOME</a></li>
         <li><a href="test_register_spotify.html">MUSIC</a></li>
         <li><a href="podcast.html">PODCAST</a></li>
-         <li><a href="users.html">USERS</a></li>
-        <!-- will change dinamically -->
-        <li><a id="loginProfileLink" href="login.html">LOG IN</a></li>
+        <li><a href="login.html">LOG IN</a></li>
+        <li><a href="users.html">USERS</a></li>
       </ul>
     </nav>
 
@@ -37,20 +41,45 @@
         <img id="headerUserPic" src="images/logos/silueta.png" alt="User Profile Icon" />
       </a>
     </div>
-
   </header>
 
   <main>
-    <h1>Melody Stream Team C - Test 1</h1>
-    <h2 id="helloUser"></h2>
+
+    <div class="profile-card">
+
+      <div class="profile-header">
+        <!-- FOTO -->
+        <img id="profileImg" src="images/logos/silueta.png" alt="User photo" />
+
+        <!-- INFO -->
+        <div class="profile-info">
+          <h2 id="profileName">Username</h2>
+
+        </div>
+      </div>
+
+      <p id="msg">Loading profile...</p>
+
+      <h3>Favourite songs </h3>
+      <div id="viewUserSongs" class="cards-container"></div>
+      <p id="noSongsMsg" class="empty-msg" style="display:none;">No favorite songs found.</p>
+      <h3>Favourite artists</h3>
+      <div id="viewUserArtists" class="cards-container"></div>
+      <p id="noArtistsMsg" class="empty-msg" style="display:none;">No favorite artists found.</p>
+      <h3>Uploaded podcasts</h3>
+      <div id="viewUserPodcasts" class="cards-container"></div>
+      <p id="noPodcastsMsg" class="empty-msg" style="display:none;">No podcasts found.</p>
+
+    </div>
+
   </main>
+
 
   <footer id="footerPrincipal">
     <h2 id="footer-title">MELODY STREAM</h2>
     <div id="footer-follow">
       <p>FOLLOW US</p>
       <ul>
-        <!-- Logo 1 (Spotify) -->
         <li>
           <figure>
             <a href="https://www.spotify.com" target="_blank">
@@ -58,7 +87,6 @@
             </a>
           </figure>
         </li>
-        <!-- Logo 2 (Facebook) -->
         <li>
           <figure>
             <a href="https://www.facebook.com" target="_blank">
@@ -66,7 +94,6 @@
             </a>
           </figure>
         </li>
-        <!-- Logo 3 (Instagram) -->
         <li>
           <figure>
             <a href="https://www.instagram.com" target="_blank">
@@ -74,7 +101,6 @@
             </a>
           </figure>
         </li>
-        <!-- Logo 4 (Twitter) -->
         <li>
           <figure>
             <a href="https://www.twitter.com" target="_blank">
@@ -82,7 +108,6 @@
             </a>
           </figure>
         </li>
-        <!-- Logo 5 (YouTube) -->
         <li>
           <figure>
             <a href="https://www.youtube.com" target="_blank">
@@ -93,8 +118,8 @@
       </ul>
     </div>
   </footer>
-  <script type="module" src="js/header.js"></script>
-  <script type="module" src="js/home.js"></script>
+
+  <script type="module" src="js/viewprofile.js"></script>
 </body>
 
 </html>

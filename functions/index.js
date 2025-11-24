@@ -40,3 +40,26 @@ exports.getSpotifyToken = onRequest((req, res) => {
     }
   });
 });
+
+const { onDocumentWritten } = require("firebase-functions/v2/database");
+const admin = require("firebase-admin");
+
+admin.initializeApp();
+
+
+exports.checkSpotifyPremium = onRequest((req, res) => {
+    cors(req, res, async () => {
+        const accessToken = req.query.accessToken || req.body.accessToken;
+        if (!accessToken) return res.status(400).json({ error: "Access token missing" });
+
+        try {
+            const response = await axios.get("https://api.spotify.com/v1/me", {
+                headers: { Authorization: `Bearer ${accessToken}` }
+            });
+            res.json({ premium: response.data.product === "premium" });
+        } catch (err) {
+            console.error("Error checking premium:", err.response?.data || err.message);
+            res.status(500).json({ error: "Failed to check premium" });
+        }
+    });
+});
