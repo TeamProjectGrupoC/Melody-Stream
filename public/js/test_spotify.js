@@ -1,3 +1,25 @@
+// --- IMPORTS ---
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
+import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+
+// --- FIREBASE CONFIGURATION ---
+const firebaseConfig = {
+    apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
+    authDomain: "melodystream123.firebaseapp.com",
+    databaseURL: "https://melodystream123-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "melodystream123",
+    storageBucket: "melodystream123.firebasestorage.app",
+    messagingSenderId: "640160988809",
+    appId: "1:640160988809:web:d0995d302123ccf0431058",
+    measurementId: "G-J97KEDLYMB"
+};
+
+// --- FIREBASE CONFIG ---
+const app = initializeApp(firebaseConfig);
+const auth = getAuth();
+const database = getDatabase();
+
 /***********************
  *  PARAMS + TOKEN
  ***********************/
@@ -34,6 +56,10 @@ async function getToken() {
     }
 
     accessToken = data.access_token;
+
+    //Lo guardamos para los artistas
+    localStorage.setItem("spotify_access_token", accessToken);
+
 
     // Check user type (premium or not)
     await getUserProfile();
@@ -80,36 +106,29 @@ function loadWebPlaybackSDK() {
   document.body.appendChild(script);
 
   window.onSpotifyWebPlaybackSDKReady = () => {
-    const player = new Spotify.Player({
+    window.spotifyPlayer = new Spotify.Player({
       name: "MelodyStream Player",
       getOAuthToken: (cb) => cb(accessToken),
       volume: 0.8,
     });
 
     // When ready
-    player.addListener("ready", ({ device_id }) => {
+    spotifyPlayer.addListener("ready", ({ device_id }) => {
       console.log("Device ready:", device_id);
       deviceId = device_id;
       document.getElementById("playerBar").style.display = "block";
     });
 
     // MAIN STATE LISTENER → update progress bar
-    player.addListener("player_state_changed", (state) => {
+    spotifyPlayer.addListener("player_state_changed", (state) => {
       if (!state) return;
-
       lastDuration = state.duration;
-      const position = state.position;
-
-      document.getElementById("progressBar").value = (position / lastDuration) * 100;
-      document.getElementById("currentTime").textContent = formatTime(position);
-      document.getElementById("totalTime").textContent = formatTime(lastDuration);
-
       const track = state.track_window.current_track;
       document.getElementById("currentTrack").textContent =
         `${track.name} - ${track.artists[0].name}`;
     });
 
-    player.connect();
+    spotifyPlayer.connect();
   };
 }
 
@@ -141,33 +160,62 @@ async function searchTrack() {
     }
 
     // Render the list
-    document.getElementById("trackInfo").innerHTML = tracks
-    .map(
-      (track, i) => `
-        <div style="padding:10px; margin:10px;">
-          <img src="${track.album.images[0].url}" alt="Album Art" style="width: 100px; height: 100px;">
-          <h2>${i + 1}. ${track.name}</h2>
-          <p>Artista: ${track.artists.map((artist) => artist.name).join(", ")}</p>
-          <p>Álbum: ${track.album.name}</p>
-          
-          ${isPremium ? 
-            // If it is premium, show the button
-            `<button onclick="playTrack('${track.uri}')">
-              ▶ Reproducir Canción Completa
-            </button>`
-            : 
-            // If not, do not show nothing
-            ''
-          }
-        </div>
-      `
-    )
-    .join("");
-  } catch (err) {
+    const trackList = await Promise.all(
+      tracks.map(async (track, i) => {
+        //Verify favorite song
+        let fav = false;
+
+        if (auth.currentUser) {
+          fav = await isFavorite(track.id, auth.currentUser.uid);
+        }
+
+        return `
+          <div style="padding:10px; margin:10px;">
+            <img src="${track.album.images[0].url}" alt="Album Art" style="width: 100px; height: 100px;">
+            <h2>${i + 1}. ${track.name}</h2>
+            <p>Artista: ${track.artists.map((artist) => artist.name).join(", ")}</p>
+            <p>Álbum: ${track.album.name}</p>
+            
+            ${isPremium ? 
+              `<button onclick="playTrack('${track.uri}')">
+                ▶ Reproducir
+              </button>`
+              : ''
+            }
+
+            <!-- Botón de favorito -->
+            <button class="fav-btn ${fav ? "is-fav" : "not-fav"}" data-id="${track.id}">
+              <i class="${fav ? "bi bi-heart-fill" : "bi bi-heart"}"></i>
+            </button>
+          </div>
+        `;
+      })
+	);
+    
+	document.getElementById("trackInfo").innerHTML = trackList.join("");
+
+  attachFavoriteButtons();
+  } 
+  catch (err) {
     console.error(err);
     document.getElementById("trackInfo").innerHTML =
       "<p>Error searching for songs.</p>";
   }
+}
+
+// Save the song data to the "canciones" node in Firebase
+async function saveSongToDatabase(track) {
+  const db = getDatabase();
+  const songRef = ref(db, `canciones/${track.id}`);
+  
+  await set(songRef, {
+    title: track.name,
+    artist: track.artists.map((artist) => artist.name).join(", "),
+    album: track.album.name,
+    albumImageUrl: track.album.images[0].url,
+    previewUrl: track.preview_url,
+  });
+  console.log(`Song ${track.name} saved to database.`);
 }
 
 /***********************
@@ -202,7 +250,7 @@ async function playTrack(uri) {
         }),
       }
     );
-
+    document.getElementById("playPauseBtn").textContent = "||";
     console.log("Playing full track on Premium device.");
   } catch (err) {
     console.error("Error playing full track:", err);
@@ -234,6 +282,118 @@ function displayUserStatus() {
   statusDiv.style.padding = "10px";
 }
 
+
+function playPauseSong() {
+    const button = document.getElementById("playPauseBtn");
+
+    // Verificar si existe el Web Playback SDK
+    if (!window.spotifyPlayer) {
+        console.warn("El reproductor todavía no está listo.");
+        return;
+    }
+
+    window.spotifyPlayer.getCurrentState().then(state => {
+        if (!state) {
+            console.warn("No hay canción reproduciéndose.");
+            return;
+        }
+
+        if (state.paused) {
+            // Si está pausado → Reanudar
+            window.spotifyPlayer.resume();
+            button.textContent = "||";  // Cambiar icono a pause
+        } else {
+            // Si está sonando → Pausar
+            window.spotifyPlayer.pause();
+            button.textContent = "▶";  // Cambiar icono a play
+        }
+    });
+}
+
+/***********************
+ * ADD FAVORITE SONG
+ ***********************/
+async function addToFavorite(songId){
+
+    const user = auth.currentUser;
+    if (!user) {
+		alert("You must log in to add songs to your favorites");
+		return;
+    }
+
+    const favSongRef = ref(database, `users/${user.uid}/favoritos/${songId}`);
+    await set(favSongRef, true);
+
+    alert("Song added to your favorites");
+}
+
+async function isFavorite(songId, userId){
+    return new Promise((resolve) => {
+        const favRef = ref(database, `users/${userId}/favoritos/${songId}`);
+        onValue(favRef, (snapshot) => {
+            resolve(snapshot.exists());
+        }, { onlyOnce: true });
+    });
+}
+
+function attachFavoriteButtons() {
+	const buttons = document.querySelectorAll(".fav-btn");
+
+	buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+      const id = btn.getAttribute("data-id");
+      toggleFavorite(id, btn);
+		});
+	});
+}
+
+async function toggleFavorite(songId, button) {
+	const user = auth.currentUser; 
+
+	if (!user) {
+		alert("You must log in to add songs to your favorites");
+		return;
+	}
+
+	const favRef = ref(database, `users/${user.uid}/favoritos/${songId}`);
+	const nowFavorite = button.classList.contains("not-fav");
+
+	if (nowFavorite) {
+		// Agregar a favoritos
+		await set(favRef, true);
+		button.innerHTML = '<i class="bi bi-heart-fill"></i>';
+		button.classList.remove("not-fav");
+		button.classList.add("is-fav");
+    addToFavorite(songId);
+
+    const songRef = ref(database, `canciones/${songId}`);
+    const snapshot = await get(songRef);
+
+    if (!snapshot.exists()) {
+      // Fetch song details from Spotify and save it
+      const track = await getTrackById(songId); 
+      await saveSongToDatabase(track);
+    }
+	} 
+  else {
+		// Quitar de favoritos
+		await set(favRef, null);
+		button.innerHTML = '<i class="bi bi-heart"></i>';
+		button.classList.remove("is-fav");
+		button.classList.add("not-fav");
+
+    alert("This song has been removed from favorites")
+	}
+}
+
+async function getTrackById(songId) {
+  const res = await fetch(`https://api.spotify.com/v1/tracks/${songId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const track = await res.json();
+  return track;
+}
+
 /***********************
  * HELPER: Time Format
  ***********************/
@@ -243,10 +403,29 @@ function formatTime(ms) {
     const seconds = totalSeconds % 60;
     return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
 }
+
+/***********************
+ * Seek
+ ***********************/
+function seekToPosition() {
+  if (!window.spotifyPlayer || !lastDuration || !isPremium) return;
+
+  const progressBar = document.getElementById("progressBar");
+  const percentage = progressBar.value / 100;
+
+  const newPositionMs = Math.round(lastDuration * percentage);
+
+  window.spotifyPlayer.seek(newPositionMs).then(() => {
+    console.log(`Buscando nueva posición: ${formatTime(newPositionMs)}`);
+  });
+}
+
 /***********************
  *  EVENTS
  ***********************/
 document.getElementById("searchBtn").addEventListener("click", searchTrack);
+document.getElementById("playPauseBtn").addEventListener("click", playPauseSong);
+document.getElementById("progressBar").addEventListener("change", seekToPosition);
 
 
 

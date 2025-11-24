@@ -130,6 +130,27 @@ main h1 {
   width: 100%;
 }
 
+.fav-btn {
+  background-color: transparent; 
+  border: none; 
+  padding: 5px;
+  cursor: pointer; 
+  display: inline-block;
+}
+
+.fav-btn.is-fav {
+  color: #FF4081; 
+}
+
+.fav-btn.not-fav {
+  color: #888; 
+}
+
+.fav-btn:focus {
+  outline: none; 
+}
+
+
 /* ===============================
    ✨ Animación y responsivo
    =============================== */

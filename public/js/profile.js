@@ -5,7 +5,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
 // Módulos de Realtime Database (RTDB)
-import { getDatabase, ref as databaseRef, onValue, set, get, update } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+import { getDatabase, ref, onValue, set, get, update, push, remove } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+const databaseRef = ref;
 
 // Módulos de Storage
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
@@ -63,11 +64,6 @@ function cargarDatosDePerfil() {
             <p><strong>Username:</strong> ${userData.username || "—"}</p>
             <p><strong>Phone:</strong> ${userData.phone || "—"}</p>
             <p><strong>Email:</strong> ${user.email}</p>
-            <p><strong>Favorite Songs:</strong> ${
-              userData.favorite_songs
-                ? Object.keys(userData.favorite_songs).join(", ")
-                : "—"
-            }</p>
           `;
 
           // Mostrar foto de perfil si existe
@@ -81,9 +77,16 @@ function cargarDatosDePerfil() {
         }
       });
 
+      document.getElementById("favArtistsSection").style.display = "block";
+      document.getElementById("favSongsSection").style.display = "block";
+
+
       // Cargar y mostrar los podcasts subidos por este usuario
       loadUserPodcasts(user.uid);
       loadUserFolders(user.uid);
+      loadFavouriteArtists(user.uid);
+      loadFavouriteSongs(user.uid);
+
 
     } else {
       msgElemento.textContent = "⚠️ You must be logged in to see your profile.";
@@ -96,6 +99,10 @@ function cargarDatosDePerfil() {
       // Limpiar lista de podcasts al cerrar sesión
       const existingContainer = document.getElementById('userPodcasts');
       if (existingContainer) existingContainer.innerHTML = '';
+
+      document.getElementById("favArtistsSection").style.display = "none";
+      document.getElementById("favSongsSection").style.display = "none";
+
     }
   });
 }
@@ -607,3 +614,537 @@ document.getElementById('folder-form-close')?.addEventListener('click', closeMod
 document.getElementById('folder-modal')?.addEventListener('click', (e) => {
   if (e.target && e.target.id === 'folder-modal') closeModal();
 });
+
+
+
+
+//-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//SECCION DE ARTISTAS FAVORITOS
+function getSpotifyUserToken() {
+  return localStorage.getItem("spotify_access_token");
+}
+
+async function searchArtist(query) {
+  const token = getSpotifyUserToken();
+  if (!token) {
+    alert("Please sign in with Spotify first.");
+    return [];
+  }
+
+  const resp = await fetch(
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist&limit=6`,
+    { headers: { "Authorization": "Bearer " + token } }
+  );
+
+  const data = await resp.json();
+  return data.artists.items;
+}
+
+async function saveFavouriteArtist(userId, artist) {
+  const db = getDatabase();
+  const favRef = ref(db, `users/${userId}/favourite_artists/`);
+
+  // 1. Leer favoritos actuales
+  const snapshot = await get(favRef);
+  const data = snapshot.val() || {};
+
+  // 2. Comprobar si ya existe
+  const alreadySaved = Object.values(data).some(a => a.id === artist.id);
+
+  if (alreadySaved) {
+    alert("This artist is already in your favourites.");
+    return;
+  }
+
+  // 3. Guardar si NO existe
+  const newFav = push(favRef);
+  return set(newFav, {
+    id: artist.id,
+    name: artist.name,
+    image: artist.images?.[0]?.url || "",
+    followers: artist.followers.total,
+    genres: artist.genres
+  });
+}
+
+
+function loadFavouriteArtists(userId) {
+  const db = getDatabase();
+  const favRef = ref(db, `users/${userId}/favourite_artists`);
+
+  onValue(favRef, snapshot => {
+    const data = snapshot.val() || {};
+    renderSavedArtists(Object.values(data));
+  });
+}
+
+async function removeFavouriteArtist(artistId) {
+  const db = getDatabase();
+  const favRef = ref(db, `users/${currentUser.uid}/favourite_artists`);
+
+  // obtenemos los favoritos actuales para saber la key exacta
+  const snapshot = await get(favRef);
+  const favs = snapshot.val() || {};
+
+  // buscar la key que corresponde a ese artista
+  const keyToDelete = Object.keys(favs).find(key => favs[key].id === artistId);
+
+  if (!keyToDelete) {
+    console.warn("Artist not found in favourites:", artistId);
+    return;
+  }
+
+  // eliminar el artista
+  await set(ref(db, `users/${currentUser.uid}/favourite_artists/${keyToDelete}`), null);
+
+  alert("Artist removed from favourites");
+}
+
+
+function renderSavedArtists(artists) {
+  const container = document.getElementById("savedArtists");
+  container.innerHTML = "";
+
+  artists.forEach(a => {
+    const div = document.createElement("div");
+    div.classList.add("artistCard");
+
+    div.innerHTML = `
+      <img src="${a.image}" style="width:80px;border-radius:50%">
+      <p>${a.name}</p>
+
+      <button class="shareArtistBtn">Share</button>
+      <button class="removeArtistBtn">Remove</button>
+    `;
+
+    // -------- REMOVE --------
+    div.querySelector(".removeArtistBtn").addEventListener("click", async () => {
+      removeFavouriteArtist(a.id);
+    });
+
+    // -------- SHARE --------
+    div.querySelector(".shareArtistBtn").addEventListener("click", () => {
+      openShareArtistModal(a);
+    });
+
+    container.appendChild(div);
+  });
+}
+
+
+document.getElementById("btnSearchArtist").addEventListener("click", async () => {
+  const query = document.getElementById("artistSearch").value.trim();
+  const resultContainer = document.getElementById("artistResults");
+
+  resultContainer.innerHTML = ""; // limpia resultados previos
+
+  if (query === "") {
+    resultContainer.innerHTML = "<p>Please enter an artist name.</p>";
+    return;
+  }
+
+  try {
+    const artists = await searchArtist(query);
+
+    if (!artists || artists.length === 0) {
+      resultContainer.innerHTML = "<p>No artists found.</p>";
+      return;
+    }
+
+    artists.forEach(artist => {
+      const card = document.createElement("div");
+      card.classList.add("artistCard");
+
+      card.innerHTML = `
+        <img src="${artist.images?.[0]?.url || 'images/logos/silueta.png'}" />
+        <p>${artist.name}</p>
+        <button class="addFavBtn">Add to favourites</button>
+      `;
+
+      // Botón añadir a favoritos
+      card.querySelector(".addFavBtn").addEventListener("click", () => {
+        saveFavouriteArtist(currentUser.uid, artist);
+        alert(`${artist.name} added to favourites`);
+      });
+
+      resultContainer.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error("Error searching artists:", error);
+    resultContainer.innerHTML = "<p>Error searching artists.</p>";
+  }
+});
+
+//----------SHARE ARTISTS-------------------------------------------------------------------------------------------------------------------
+
+async function loadUserChatsForShare(selectEl) {
+  const db = getDatabase();
+  const chatsRef = ref(db, `userChats/${currentUser.uid}`);
+
+  const snapshot = await get(chatsRef);
+  const data = snapshot.val() || {};
+
+  selectEl.innerHTML = "";
+
+  for (const chatId in data) {
+
+    // 1. Obtener los dos UIDs del chat
+    const parts = chatId.split("_");
+    const userA = parts[0];
+    const userB = parts[1];
+
+    // 2. Saber quién es el otro usuario
+    const otherUid = (userA === currentUser.uid) ? userB : userA;
+
+    // 3. Obtener datos del otro usuario
+    const userSnap = await get(ref(db, `users/${otherUid}`));
+    const userData = userSnap.val();
+
+    const displayedName = userData?.username || userData?.email || otherUid;
+
+    // 4. Crear la opción
+    const option = document.createElement("option");
+    option.value = chatId;
+    option.textContent = displayedName;
+
+    selectEl.appendChild(option);
+  }
+}
+
+
+function openShareArtistModal(artist) {
+  const modal = document.getElementById("shareArtistModal");
+  const nameEl = document.getElementById("shareArtistName");
+  const select = document.getElementById("chatSelect");
+
+  nameEl.innerText = artist.name;
+
+  // guardamos datos del artista en el modal
+  modal.dataset.artistId = artist.id;
+  modal.dataset.artistName = artist.name;
+  modal.dataset.artistImage = artist.image;
+
+  loadUserChatsForShare(select);
+
+  modal.style.display = "flex";
+}
+
+document.getElementById("shareArtistCancel").addEventListener("click", () => {
+  document.getElementById("shareArtistModal").style.display = "none";
+});
+
+async function shareArtistToChat(chatId, artist) {
+
+  const db = getDatabase();
+  const messagesRef = ref(db, `chats/${chatId}/messages`);
+  const chatRef = ref(db, `chats/${chatId}`);
+  const timestamp = Date.now();
+
+  const message = {
+    sender: currentUser.uid,
+    timestamp,
+    attachment: {
+      title: artist.name,
+      imageURL: artist.image,
+      author: "Favourite Artist",
+      audioURL: "" // no hay audio
+    },
+    text: `Shared artist: ${artist.name}`
+  };
+
+  const msgKey = push(messagesRef).key;
+  await set(ref(db, `chats/${chatId}/messages/${msgKey}`), message);
+
+  // Actualizar createdAt solo
+  await update(chatRef, { createdAt: timestamp });
+
+
+  // actualizar lista userChats
+  const lastMessageObj = {
+    sender: currentUser.uid,
+    text: `[Artist] ${artist.name}`,
+    timestamp
+  };
+
+  await update(ref(db, `userChats/${currentUser.uid}/${chatId}`), {
+    lastMessage: lastMessageObj
+  });
+
+  // para el otro usuario
+  const parts = chatId.split("_");
+  const otherUser = parts[0] === currentUser.uid ? parts[1] : parts[0];
+
+  await update(ref(db, `userChats/${otherUser}/${chatId}`), {
+    lastMessage: lastMessageObj
+  });
+}
+
+document.getElementById("shareArtistConfirm").addEventListener("click", async () => {
+  const modal = document.getElementById("shareArtistModal");
+  const chatId = document.getElementById("chatSelect").value;
+
+  const artist = {
+    id: modal.dataset.artistId,
+    name: modal.dataset.artistName,
+    image: modal.dataset.artistImage
+  };
+
+  await shareArtistToChat(chatId, artist);
+
+  modal.style.display = "none";
+  alert("Artist shared!");
+});
+
+
+
+// SONGS
+//----------------------------------------------------------------------------------------------------------------------------------------------------------------------z
+
+async function searchSong(query) {
+  const token = getSpotifyUserToken();
+  if (!token) {
+    alert("Please sign in with Spotify first.");
+    return [];
+  }
+
+  const resp = await fetch(
+    `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=6`,
+    {
+      headers: { "Authorization": "Bearer " + token }
+    }
+  );
+
+  const data = await resp.json();
+  return data.tracks.items;
+}
+
+async function saveFavouriteSong(userId, track) {
+  const db = getDatabase();
+  const songRef = ref(db, `canciones/${track.id}`);
+  const favSongRef = ref(db, `users/${userId}/favoritos/${track.id}`);
+
+  const songData = {
+    title: track.name,
+    artist: track.artists.map((artist) => artist.name).join(", "),
+    album: track.album.name,
+    albumImageUrl: track.album.images[0].url,
+    previewUrl: track.preview_url,
+  }
+
+  await set(songRef, songData);
+  await set(favSongRef, songData);
+
+  console.log(`Song ${track.name} added to favorites for user ${userId}`);
+
+}
+
+function loadFavouriteSongs(userId) {
+  const db = getDatabase();
+  const favRef = ref(db, `users/${userId}/favoritos`);
+
+  onValue(favRef, snapshot => {
+    const data = snapshot.val() || {};
+    const songIds = Object.keys(data);
+    renderSavedSongs(songIds, data);
+  });
+}
+
+async function removeFavSongs(songId){
+  const db = getDatabase();
+
+  const favSongRef = ref(db, `users/${currentUser.uid}/favoritos/${songId}`);
+  await remove(favSongRef);
+
+  const songRef = ref(db, `canciones/${songId}`);
+  await remove(songRef);
+
+  console.log(`Song with id ${songId} removed from favorites`);
+}
+
+function renderSavedSongs(songIds, favorites) {
+  const container = document.getElementById("savedSongs");
+  container.innerHTML = "";
+
+  const db = getDatabase();
+
+  songIds.forEach(songId => {
+    const songRef = ref(db, `canciones/${songId}`);
+
+    onValue(songRef, snapshot => {
+      const data = snapshot.val();
+
+      if (data) {
+        const div = document.createElement("div");
+        div.classList.add("artistCard");
+
+        let artistNames = "Unknown Artist";
+
+        if (Array.isArray(data.artist)) {
+          artistNames = data.artist.join(", ");
+        } else if (typeof data.artist === 'string') {
+          artistNames = data.artist;  
+        }
+        div.innerHTML = `
+          <img src="${data.albumImageUrl || 'images/logos/silueta.png'}" style="width:80px; border-radius:10px;">
+          <p><strong>${data.title}</strong></p>
+          <p>${artistNames}</p>
+          ${data.previewUrl ? `<audio controls src="${data.previewUrl}" style="width:100%"></audio>` : "<p>No preview available</p>"}
+
+          <button class="shareSongBtn">Share</button>
+          <button class="removeSongBtn">Remove</button>
+        `;
+
+        //REMOVE
+        div.querySelector(".removeSongBtn").addEventListener("click", async () => {
+          removeFavSongs(songId);
+        });
+
+        //SHARE
+        div.querySelector(".shareSongBtn").addEventListener("click", () => {
+          openShareSongModal(data);
+        });
+
+        container.appendChild(div);
+      }
+    });
+  });
+}
+
+document.getElementById("btnSearchSong").addEventListener("click", async () => {
+  const query = document.getElementById("songSearch").value.trim();
+  const resultContainer = document.getElementById("songResults");
+
+  resultContainer.innerHTML = "";
+
+  if (!query) {
+    resultContainer.innerHTML = "<p>Please enter a song name.</p>";
+    return;
+  }
+
+  try {
+    const songs = await searchSong(query);
+
+    if (!songs || songs.length === 0) {
+      resultContainer.innerHTML = "<p>No songs found.</p>";
+      return;
+    }
+
+    songs.forEach(song => {
+      const card = document.createElement("div");
+      card.classList.add("artistCard");
+
+      card.innerHTML = `
+        <img src="${song.album.images?.[0]?.url || 'images/logos/silueta.png'}" />
+        <p><strong>${song.name}</strong></p>
+        <p>${song.artists[0].name}</p>
+        <button class="addSongBtn">Add to favourites</button>
+      `;
+
+      card.querySelector(".addSongBtn").addEventListener("click", () => {
+        saveFavouriteSong(currentUser.uid, song);
+        alert(`${song.name} added to favourites`);
+      });
+
+      resultContainer.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error("Error searching songs:", error);
+    resultContainer.innerHTML = "<p>Error searching songs.</p>";
+  }
+});
+
+
+function openShareSongModal(track) {
+  const modal = document.getElementById("shareSongModal");
+  const nameEl = document.getElementById("shareSongName");
+  const select = document.getElementById("chatSelect");
+
+  nameEl.innerText = track.name;
+
+  //Save songs in modal
+  modal.dataset.trackId = track.id;
+  modal.dataset.trackTitle = track.title;
+  modal.dataset.trackArtist = track.artist;
+  modal.dataset.trackAlbum = track.album;
+  modal.dataset.trackImage = track.albumImageUrl;
+  modal.dataset.trackAudioUrl = track.previewUrl;
+
+  loadUserChatsForShare(select);
+
+  modal.style.display = "flex";
+}
+
+document.getElementById("shareSongCancel").addEventListener("click", () => {
+  document.getElementById("shareSongModal").style.display = "none";
+});
+
+async function shareSongToChat(chatId, track) {
+  const db = getDatabase();
+  const messagesRef = ref(db, `chats/${chatId}/messages`);
+  const chatRef = ref(db, `chats/${chatId}`);
+  const timestamp = Date.now();
+
+  const message = {
+    sender: currentUser.uid,
+    timestamp,
+    attachment: {
+      title: track.title,
+      imageURL: track.albumImageUrl,
+      author: track.artist,  
+      audioURL: track.previewUrl || "" 
+    },
+    text: `Shared song: ${track.title}`
+  };
+
+  const msgKey = push(messagesRef).key;
+  await set(ref(db, `chats/${chatId}/messages/${msgKey}`), message);
+
+  await update(chatRef, { createdAt: timestamp });
+
+  const lastMessageObj = {
+    sender: currentUser.uid,
+    text: `[Song] ${track.title}`,
+    timestamp
+  };
+
+  await update(ref(db, `userChats/${currentUser.uid}/${chatId}`), {
+    lastMessage: lastMessageObj
+  });
+
+  const parts = chatId.split("_");
+  const otherUser = parts[0] === currentUser.uid ? parts[1] : parts[0];
+
+  await update(ref(db, `userChats/${otherUser}/${chatId}`), {
+    lastMessage: lastMessageObj
+  });
+}
+
+document.getElementById("shareSongConfirm").addEventListener("click", async () => {
+  
+  const chatId = document.getElementById("chatSelect").value;
+  if (!chatId) {
+    alert("Please select a chat to share the song.");
+    return;
+  }
+  const modal = document.getElementById("shareSongModal");
+
+  const track = {
+    id: modal.dataset.trackId,
+    title: modal.dataset.trackTitle,
+    artist: modal.dataset.trackArtist,
+    album: modal.dataset.trackAlbum,
+    albumImageUrl: modal.dataset.trackImage,
+    previewUrl: modal.dataset.trackAudioUrl
+  };
+
+  await shareSongToChat(chatId, track);
+
+  modal.style.display = "none";
+  alert("Song shared!");
+});
+
+
+
+

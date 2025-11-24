@@ -16,7 +16,7 @@
 
     <link rel="stylesheet" href="css/general.css" />
     <link rel="stylesheet" href="css/profile.css" />
-    <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg" />
+    <link rel="icon" type="image/png" href="imagenes/logos/logo.png" />
   </head>
   <body>
     <header id="headerPrincipal">
@@ -76,11 +76,81 @@
         />
         <button type="submit">Upload</button>
       </form>
+
       <!-- Datos del perfil -->
       <div id="userData"></div>
 
       <!-- Botón a chat -->
       <button id="goToChatBtn">Go to your Chats</button>
+
+    <div id="folder-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center;">
+      <div style="background:#fff; max-width:1000px; width:95%; max-height:90vh; overflow:auto; border-radius:8px; padding:16px; position:relative;">
+        <button id="folder-modal-close" style="position:absolute; right:12px; top:12px;">Cerrar</button>
+        <h2 id="folder-modal-title">Podcasts de la carpeta</h2>
+
+        <form id="folder-form">
+          <!-- Aquí pueden ir inputs si quieres editar datos de la carpeta -->
+          <div id="folder-podcast-list" class="podcast-list" style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
+            <!-- Podcasts cargados dinámicamente -->
+          </div>
+
+          <div style="margin-top:16px; display:flex; gap:8px;">
+            <button type="button" id="folder-form-close">Cerrar</button>
+            <!-- Si quieres acciones del formulario añade aquí submit -->
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <section id="favArtistsSection" style="display: none;">
+      <h2>Your favourite artists</h2>
+
+      <input type="text" id="artistSearch" placeholder="Search artist...">
+      <button id="btnSearchArtist">Search</button>
+
+      <div id="artistResults"></div>
+
+      <h3>Saved favourites</h3>
+      <div id="savedArtists"></div>
+    </section>
+
+    <div id="shareArtistModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:500px;">
+        <h3>Share this artist in a chat</h3>
+        <p id="shareArtistName"></p>
+
+        <select id="chatSelect" style="width:100%; padding:8px; margin-top:10px;"></select>
+
+        <button id="shareArtistConfirm" style="width:100%; margin-top:15px;">Share</button>
+        <button id="shareArtistCancel" style="width:100%; margin-top:10px;">Cancel</button>
+      </div>
+    </div>
+
+
+    <section id="favSongsSection" style="display:none; margin-top: 2rem;">
+      <h2>Your favourite songs</h2>
+
+      <input type="text" id="songSearch" placeholder="Search song...">
+      <button id="btnSearchSong">Search</button>
+
+      <div id="songResults"></div>
+
+      <h3>Saved songs</h3>
+      <div id="savedSongs"></div>
+    </section>
+
+    <div id="shareSongModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:500px;">
+        <h3>Share this song in a chat</h3>
+        <p id="shareSongName"></p>
+
+        <select id="chatSelect" style="width:100%; padding:8px; margin-top:10px;"></select>
+
+        <button id="shareSongConfirm" style="width:100%; margin-top:15px;">Share</button>
+        <button id="shareSongCancel" style="width:100%; margin-top:10px;">Cancel</button>
+      </div>
+    </div>
+
     </main>
 
     <footer id="footerPrincipal">
@@ -131,25 +201,6 @@
         </ul>
       </div>
     </footer>
-
-    <div id="folder-modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:1000; align-items:center; justify-content:center;">
-      <div style="background:#fff; max-width:1000px; width:95%; max-height:90vh; overflow:auto; border-radius:8px; padding:16px; position:relative;">
-        <button id="folder-modal-close" style="position:absolute; right:12px; top:12px;">Cerrar</button>
-        <h2 id="folder-modal-title">Podcasts de la carpeta</h2>
-
-        <form id="folder-form">
-          <!-- Aquí pueden ir inputs si quieres editar datos de la carpeta -->
-          <div id="folder-podcast-list" class="podcast-list" style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
-            <!-- Podcasts cargados dinámicamente -->
-          </div>
-
-          <div style="margin-top:16px; display:flex; gap:8px;">
-            <button type="button" id="folder-form-close">Cerrar</button>
-            <!-- Si quieres acciones del formulario añade aquí submit -->
-          </div>
-        </form>
-      </div>
-    </div>
 
     <script type="module" src="js/profile.js"></script>
   </body>
