@@ -169,10 +169,6 @@ async function searchTrack() {
           fav = await isFavorite(track.id, auth.currentUser.uid);
         }
 
-        if (!await isSongInDatabase(track.id)) {
-          await saveSongToDatabase(track);
-        }
-
         return `
           <div style="padding:10px; margin:10px;">
             <img src="${track.album.images[0].url}" alt="Album Art" style="width: 100px; height: 100px;">
@@ -205,17 +201,6 @@ async function searchTrack() {
     document.getElementById("trackInfo").innerHTML =
       "<p>Error searching for songs.</p>";
   }
-}
-
-async function isSongInDatabase(songId) {
-  const db = getDatabase();
-  const songRef = ref(db, `canciones/${songId}`);
-  const snapshot = await get(songRef);
-
-  if(snapshot.exists()){
-    console.log("ESTA CANCIÓN YA ESTÁ EN LA BASE DE DATOS")
-  }
-  return snapshot.exists();
 }
 
 // Save the song data to the "canciones" node in Firebase
@@ -380,7 +365,17 @@ async function toggleFavorite(songId, button) {
 		button.classList.remove("not-fav");
 		button.classList.add("is-fav");
     addToFavorite(id);
-	} else {
+
+    const songRef = ref(database, `canciones/${songId}`);
+    const snapshot = await get(songRef);
+
+    if (!snapshot.exists()) {
+      // Fetch song details from Spotify and save it
+      const track = await getTrackById(songId); 
+      await saveSongToDatabase(track);
+    }
+	} 
+  else {
 		// Quitar de favoritos
 		await set(favRef, null);
 		button.innerHTML = '<i class="bi bi-heart"></i>';
@@ -389,6 +384,14 @@ async function toggleFavorite(songId, button) {
 
     alert("This song has been removed from favorites")
 	}
+}
+
+async function getTrackById(songId) {
+  const res = await fetch(`https://api.spotify.com/v1/tracks/${songId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const track = await res.json();
+  return track;
 }
 
 /***********************
