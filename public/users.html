@@ -3,11 +3,20 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Search Podcasts</title>
+    <meta
+      name="author"
+      content="Carolina Alba García, Celtia Castelo Gajino, Guillermo Arcos Salgado, Ines Vilariño, Mario Seoane, Francisco"
+    />
+    <meta
+      name="description"
+      content="Melody Stream: listen to music; upload your own podcast; and chat and share your favourite songs with your friends"
+    />
+    <meta name="keywords" content="Melody Stream, music, podcast, friends" />
+    <title>Melody Stream – Search Users</title>
 
     <link rel="stylesheet" href="css/general.css" />
-    <link rel="stylesheet" href="css/podcast.css" />
-
+    <link rel="stylesheet" href="css/profile.css" />
+    <link rel="stylesheet" href="css/users.css" />
     <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg" />
   </head>
 
@@ -16,7 +25,9 @@
       <figure>
         <img src="images/logos/logo.png" alt="Webpage logo" />
       </figure>
+
       <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
+
       <nav id="NavPrincipal">
         <ul>
           <li><a href="index.html">HOME</a></li>
@@ -39,21 +50,20 @@
     </header>
 
     <main>
-      <h1>Search Podcasts</h1>
+      <h1>Search Users</h1>
 
-      <div class="search-row">
+      <div id="searchContainer">
         <input
           type="text"
           id="searchInput"
-          placeholder="What do you want to listen?"
+          placeholder="Enter username to search..."
         />
-        <button id="searchButton">Search</button>
-        <button id="uploadPodcastBtn">Upload Podcast</button>
-        <button id="createFolderBtn">Create Folder</button>
+        <button id="searchBtn">Search</button>
       </div>
 
-      <h2>Available Podcasts</h2>
-      <div id="podcastList"></div>
+      <div id="searchResults">
+        <!-- Aquí aparecerán los usuarios encontrados -->
+      </div>
     </main>
 
     <footer id="footerPrincipal">
@@ -61,7 +71,6 @@
       <div id="footer-follow">
         <p>FOLLOW US</p>
         <ul>
-          <!-- Logo 1 (Spotify) -->
           <li>
             <figure>
               <a href="https://www.spotify.com" target="_blank">
@@ -69,7 +78,6 @@
               </a>
             </figure>
           </li>
-          <!-- Logo 2 (Facebook) -->
           <li>
             <figure>
               <a href="https://www.facebook.com" target="_blank">
@@ -77,7 +85,6 @@
               </a>
             </figure>
           </li>
-          <!-- Logo 3 (Instagram) -->
           <li>
             <figure>
               <a href="https://www.instagram.com" target="_blank">
@@ -85,7 +92,6 @@
               </a>
             </figure>
           </li>
-          <!-- Logo 4 (Twitter) -->
           <li>
             <figure>
               <a href="https://www.twitter.com" target="_blank">
@@ -93,7 +99,6 @@
               </a>
             </figure>
           </li>
-          <!-- Logo 5 (YouTube) -->
           <li>
             <figure>
               <a href="https://www.youtube.com" target="_blank">
@@ -105,6 +110,6 @@
       </div>
     </footer>
 
-    <script type="module" src="js/podcast.js"></script>
+    <script type="module" src="js/users.js"></script>
   </body>
 </html>
