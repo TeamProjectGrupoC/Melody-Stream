@@ -1001,9 +1001,9 @@ function renderSavedSongs(songIds, favorites) {
         });
 
         //SHARE
-        //div.querySelector(".shareSongBtn").addEventListener("click", () => {
-          //openShareArtistModal(a);
-        //});
+        div.querySelector(".shareSongBtn").addEventListener("click", () => {
+          openShareSongModal(data);
+        });
 
         container.appendChild(div);
       }
