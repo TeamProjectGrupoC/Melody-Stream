@@ -196,7 +196,10 @@ async function main() {
             } else {
                 div.classList.add("other");
             }
-
+            
+            if (isMusicAttachment(data.attachment)) {
+                div.classList.add("music-message");
+            }
 
             if (data.text) {
                 const p = document.createElement("p");
@@ -223,6 +226,11 @@ async function main() {
                 div.classList.add("message");
                 div.classList.add(data.sender === currentUser.uid ? "you" : "other");
 
+                if (isMusicAttachment(data.attachment)) {
+                    div.classList.add("music-message");
+                }
+
+                
                 if (data.attachment) {
                     const card = document.createElement('div');
                     card.className = 'attachment-card';
@@ -282,6 +290,13 @@ async function main() {
         });
     });
 
+    function isMusicAttachment(att){
+        return att &&
+           typeof att.title === "string" &&
+           typeof att.imageURL === "string" &&
+           typeof att.author === "string";
+    }
+
     function buildAttachmentCard(att) {
         const card = document.createElement("div");
         card.className = "attachment-card";
@@ -302,6 +317,13 @@ async function main() {
             const author = document.createElement("p");
             author.textContent = att.author;
             meta.appendChild(author);
+        }
+
+        if (att.audioURL && att.audioURL !== "") {
+            const audio = document.createElement('audio');
+            audio.controls = true;
+            audio.src = att.audioURL;
+            meta.appendChild(audio);
         }
 
         card.appendChild(meta);
@@ -328,10 +350,13 @@ async function main() {
         };
 
         if (fileAttachment) {
-            if (fileAttachment.audioURL && fileAttachment.audioURL !== "") {
-                newMessage.attachment = fileAttachment;
-            } 
-            else {
+            newMessage.attachment = fileAttachment;
+        }
+
+        if (fileAttachment) {
+        if (fileAttachment.audioURL && fileAttachment.audioURL !== "") {
+            newMessage.attachment = fileAttachment;
+        } else {
             // Si no hay audioURL, no lo incluimos
             newMessage.attachment = {
                 title: fileAttachment.title,
