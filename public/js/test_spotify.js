@@ -188,7 +188,7 @@ async function searchTrack() {
             
             ${isPremium ? 
               `<button onclick="playTrack('${track.uri}')">
-                ▶ Reproducir
+                ▶ Reproduce
               </button>`
               : ''
             }
