@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Music Library — Melody Stream</title>
+    <!-- Ajusta la ruta si tu CSS global tiene otro nombre o ubicación -->
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+    <div class="app">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="logo">MS</div>
+                <h1 class="title">Melody</h1>
+            </div>
+            <nav class="nav">
+                <a class="nav-item active" href="#">Biblioteca</a>
+                <a class="nav-item" href="#">Explorar</a>
+                <a class="nav-item" href="#">Listas</a>
+                <a class="nav-item" href="#">Favoritos</a>
+            </nav>
+            <div class="sidebar-footer">
+                <button class="create-playlist">+ Nueva lista</button>
+            </div>
+        </aside>
+
+        <!-- Main area -->
+        <div class="main">
+            <!-- Top bar -->
+            <header class="topbar">
+                <div class="search">
+                    <input type="search" placeholder="Buscar canciones, artistas o álbumes" />
+                </div>
+                <div class="top-controls">
+                    <div class="filter">
+                        <select>
+                            <option>Recientes</option>
+                            <option>Más populares</option>
+                            <option>Alfabético</option>
+                        </select>
+                    </div>
+                    <div class="user">
+                        <img class="avatar" alt="usuario" src="assets/avatar-placeholder.png" />
+                    </div>
+                </div>
+            </header>
+
+            <!-- Content: music library -->
+            <main class="content">
+                <section class="library">
+                    <div class="library-header">
+                        <h2>Biblioteca de música</h2>
+                        <p class="subtitle">Todas tus canciones guardadas</p>
+                    </div>
+
+                    <!-- Grid/list of tracks (UI only) -->
+                    <div class="library-grid">
+                        <!-- Repite las tarjetas para mostrar la UI -->
+                        <article class="track-card">
+                            <div class="album-art">
+                                <img src="assets/album-placeholder-1.jpg" alt="álbum 1" />
+                            </div>
+                            <div class="track-info">
+                                <h3 class="track-title">Título de la canción 1</h3>
+                                <p class="track-meta">Artista • Álbum</p>
+                            </div>
+                            <div class="track-actions">
+                                <button class="icon play">▶</button>
+                                <button class="icon more">⋯</button>
+                            </div>
+                        </article>
+
+                        <article class="track-card">
+                            <div class="album-art">
+                                <img src="assets/album-placeholder-2.jpg" alt="álbum 2" />
+                            </div>
+                            <div class="track-info">
+                                <h3 class="track-title">Título de la canción 2</h3>
+                                <p class="track-meta">Artista • Álbum</p>
+                            </div>
+                            <div class="track-actions">
+                                <button class="icon play">▶</button>
+                                <button class="icon more">⋯</button>
+                            </div>
+                        </article>
+
+                        <article class="track-card">
+                            <div class="album-art">
+                                <img src="assets/album-placeholder-3.jpg" alt="álbum 3" />
+                            </div>
+                            <div class="track-info">
+                                <h3 class="track-title">Título de la canción 3</h3>
+                                <p class="track-meta">Artista • Álbum</p>
+                            </div>
+                            <div class="track-actions">
+                                <button class="icon play">▶</button>
+                                <button class="icon more">⋯</button>
+                            </div>
+                        </article>
+
+                        <!-- Estado vacío (muestra solo si no hay canciones) -->
+                        <!--
+                        <div class="empty-state">
+                            <p>No hay canciones en tu biblioteca todavía.</p>
+                            <button class="cta">Explorar música</button>
+                        </div>
+                        -->
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
