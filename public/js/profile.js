@@ -1093,7 +1093,7 @@ async function shareSongToChat(chatId, track) {
       title: track.title,
       imageURL: track.albumImageUrl,
       author: track.artist,  
-      audioURL: track.previewUrl || "" 
+      ...(track.previewUrl && { audioURL: track.previewUrl }) 
     },
     text: `Shared song: ${track.title}`
   };
