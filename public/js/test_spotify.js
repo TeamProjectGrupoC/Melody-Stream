@@ -33,9 +33,9 @@ let userName = null;
 let userEmail = null;
 let lastDuration = 0;
 
-/***********************
- *  1. OBTAIN TOKEN
- ***********************/
+// /***********************
+//  * 1. OBTAIN TOKEN
+//  ***********************/
 async function getToken() {
   if (!code) {
     document.getElementById("trackInfo").innerHTML =
@@ -47,6 +47,16 @@ async function getToken() {
     const res = await fetch(
       `https://us-central1-melodystream123.cloudfunctions.net/getSpotifyToken?code=${code}`
     );
+    
+    // 💡 AÑADIR ESTA VERIFICACIÓN ANTES DE res.json()
+    if (!res.ok) {
+        // Capturamos el texto del error 500 para el console.error
+        const errorText = await res.text();
+        console.error(`HTTP Error ${res.status} al obtener el token:`, errorText);
+        // Lanzamos un error controlado para que sea capturado por el catch
+        throw new Error(`Server error (${res.status}). Cannot get the token. Check Cloud Function logs.`);
+    }
+
     const data = await res.json();
 
     if (!data.access_token) {

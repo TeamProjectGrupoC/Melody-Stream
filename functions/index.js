@@ -9,11 +9,15 @@ exports.getSpotifyToken = onRequest((req, res) => {
       return res.status(400).json({ error: "Missing authorization code" });
     }
 
-    const functions = require("firebase-functions");
-
-    const clientId = functions.config().spotify.client_id;
-    const clientSecret = functions.config().spotify.client_secret;
-    const redirectUri = functions.config().spotify.redirect_uri;
+    const clientId = process.env.SPOTIFY_CLIENT_ID;
+    const clientSecret = process.env.SPOTIFY_CLIENT_SECRET;
+    const redirectUri = process.env.SPOTIFY_REDIRECT_URI;
+    
+    // Verificación básica para asegurar que las variables están cargadas
+    if (!clientId || !clientSecret || !redirectUri) {
+        console.error("Missing configuration: SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET, or SPOTIFY_REDIRECT_URI are not set as environment variables.");
+        return res.status(500).json({ error: "Server configuration missing Spotify credentials." });
+    }
     
     try {
       const response = await axios.post(
