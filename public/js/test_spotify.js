@@ -364,7 +364,7 @@ async function toggleFavorite(songId, button) {
 		button.innerHTML = '<i class="bi bi-heart-fill"></i>';
 		button.classList.remove("not-fav");
 		button.classList.add("is-fav");
-    addToFavorite(id);
+    addToFavorite(songId);
 
     const songRef = ref(database, `canciones/${songId}`);
     const snapshot = await get(songRef);
