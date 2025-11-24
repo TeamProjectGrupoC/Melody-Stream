@@ -321,15 +321,16 @@ async function main() {
         }
 
         if (fileAttachment) {
-        if (fileAttachment.audioURL && fileAttachment.audioURL !== "") {
-            newMessage.attachment = fileAttachment;
-        } else {
+            if (fileAttachment.audioURL && fileAttachment.audioURL !== "") {
+                newMessage.attachment = fileAttachment;
+            } 
+            else {
             newMessage.attachment = {
                 title: fileAttachment.title,
                 imageURL: fileAttachment.imageURL,
                 author: fileAttachment.author
             };
-        }
+            }
         }
 
         const lastMessageData = {
@@ -383,6 +384,6 @@ async function main() {
             user.style.display = username.includes(filterText) ? "" : "none";
         });
     });
-}
+
 
 main();
