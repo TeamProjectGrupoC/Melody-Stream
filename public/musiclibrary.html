@@ -15,7 +15,7 @@
     <title>Login with Spotify</title>
 
     <link rel="stylesheet" href="css/general.css" />
-    <link rel="stylesheet" href="css/test_register_spotify.css" />
+    <link rel="stylesheet" href="css/musiclibrary.css" />
     <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg" />
   </head>
   <body>
@@ -46,66 +46,33 @@
 
 
 
-            <main class="content">
-                <section class="library">
-                    <div class="library-header">
-                        <h2>MUSIC LIBRARY</h2>
-                    </div>
+    <main class="content">
+        <section class="library">
+            <div class="library-header">
+                <h2>MUSIC LIBRARY</h2>
+            </div>
+        <section>    
+                    
+        <section class = "Artistas">
+            <h2>Available Artists</h2>
+        </section>
+        <section class="Lista de artistas">
+            <div class="artist-buttons">
+            <button id="chopin">
+        <img src="images/chopin.jpeg" alt="logochopin" />
+        Frederick Chopin
+      </button>
 
-                    <!-- Grid/list of tracks (UI only) -->
-                    <div class="library-grid">
-                        <!-- Repite las tarjetas para mostrar la UI -->
-                        <article class="track-card">
-                            <div class="album-art">
-                                <img src="assets/album-placeholder-1.jpg" alt="álbum 1" />
-                            </div>
-                            <div class="track-info">
-                                <h3 class="track-title">Título de la canción 1</h3>
-                                <p class="track-meta">Artista • Álbum</p>
-                            </div>
-                            <div class="track-actions">
-                                <button class="icon play">▶</button>
-                                <button class="icon more">⋯</button>
-                            </div>
-                        </article>
+        <button id="rubinstein">
+        <img src="images/rubinstein.jpeg" alt="logorubinstein" />
+        Arthur Rubinstein
+      </button>
 
-                        <article class="track-card">
-                            <div class="album-art">
-                                <img src="assets/album-placeholder-2.jpg" alt="álbum 2" />
-                            </div>
-                            <div class="track-info">
-                                <h3 class="track-title">Título de la canción 2</h3>
-                                <p class="track-meta">Artista • Álbum</p>
-                            </div>
-                            <div class="track-actions">
-                                <button class="icon play">▶</button>
-                                <button class="icon more">⋯</button>
-                            </div>
-                        </article>
-
-                        <article class="track-card">
-                            <div class="album-art">
-                                <img src="assets/album-placeholder-3.jpg" alt="álbum 3" />
-                            </div>
-                            <div class="track-info">
-                                <h3 class="track-title">Título de la canción 3</h3>
-                                <p class="track-meta">Artista • Álbum</p>
-                            </div>
-                            <div class="track-actions">
-                                <button class="icon play">▶</button>
-                                <button class="icon more">⋯</button>
-                            </div>
-                        </article>
-
-                        <!-- Estado vacío (muestra solo si no hay canciones) -->
-                        <!--
-                        <div class="empty-state">
-                            <p>No hay canciones en tu biblioteca todavía.</p>
-                            <button class="cta">Explorar música</button>
-                        </div>
-                        -->
-                    </div>
-                </section>
+      <button id="Quevedo">
+        <img src="images/quevedo.jpeg" alt="logoquevedo" />
+        Quevedo
+      </button>
+        <div>           
             </main>
             <footer id="footerPrincipal">
       <h2 id="footer-title">MELODY STREAM</h2>
@@ -158,4 +125,5 @@
         </div>
     </div>
 </body>
+<script type="module" src="js/musiclibrary.js"></script>
 </html>
