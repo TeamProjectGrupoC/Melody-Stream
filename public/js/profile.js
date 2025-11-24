@@ -1055,3 +1055,96 @@ document.getElementById("btnSearchSong").addEventListener("click", async () => {
   }
 });
 
+
+function openShareSongModal(track) {
+  const modal = document.getElementById("shareSongModal");
+  const nameEl = document.getElementById("shareSongName");
+  const select = document.getElementById("chatSelect");
+
+  nameEl.innerText = track.name;
+
+  //Save songs in modal
+  modal.dataset.trackId = track.id;
+  modal.dataset.trackTitle = track.title;
+  modal.dataset.trackArtist = track.artist;
+  modal.dataset.trackAlbum = track.album;
+  modal.dataset.trackImage = track.albumImageUrl;
+  modal.dataset.trackAudioUrl = track.previewUrl;
+
+  loadUserChatsForShare(select);
+
+  modal.style.display = "flex";
+}
+
+document.getElementById("shareSongCancel").addEventListener("click", () => {
+  document.getElementById("shareSongModal").style.display = "none";
+});
+
+async function shareSongToChat(chatId, track) {
+  const db = getDatabase();
+  const messagesRef = ref(db, `chats/${chatId}/messages`);
+  const chatRef = ref(db, `chats/${chatId}`);
+  const timestamp = Date.now();
+
+  const message = {
+    sender: currentUser.uid,
+    timestamp,
+    attachment: {
+      title: track.title,
+      imageURL: track.albumImageUrl,
+      author: track.artist,  
+      audioURL: track.previewUrl || "" 
+    },
+    text: `Shared song: ${track.title}`
+  };
+
+  const msgKey = push(messagesRef).key;
+  await set(ref(db, `chats/${chatId}/messages/${msgKey}`), message);
+
+  await update(chatRef, { createdAt: timestamp });
+
+  const lastMessageObj = {
+    sender: currentUser.uid,
+    text: `[Song] ${track.title}`,
+    timestamp
+  };
+
+  await update(ref(db, `userChats/${currentUser.uid}/${chatId}`), {
+    lastMessage: lastMessageObj
+  });
+
+  const parts = chatId.split("_");
+  const otherUser = parts[0] === currentUser.uid ? parts[1] : parts[0];
+
+  await update(ref(db, `userChats/${otherUser}/${chatId}`), {
+    lastMessage: lastMessageObj
+  });
+}
+
+document.getElementById("shareSongConfirm").addEventListener("click", async () => {
+  
+  const chatId = document.getElementById("chatSelect").value;
+  if (!chatId) {
+    alert("Please select a chat to share the song.");
+    return;
+  }
+  const modal = document.getElementById("shareSongModal");
+
+  const track = {
+    id: modal.dataset.trackId,
+    title: modal.dataset.trackTitle,
+    artist: modal.dataset.trackArtist,
+    album: modal.dataset.trackAlbum,
+    albumImageUrl: modal.dataset.trackImage,
+    previewUrl: modal.dataset.trackAudioUrl
+  };
+
+  await shareSongToChat(chatId, track);
+
+  modal.style.display = "none";
+  alert("Song shared!");
+});
+
+
+
+
