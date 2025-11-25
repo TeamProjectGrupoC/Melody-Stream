@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>//bruh
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
@@ -14,30 +14,30 @@
     <meta name="keywords" content="Melody Stream, music, podcast, friends" />
     <title>Login with Spotify</title>
 
-    <link rel="stylesheet" href="css/general.css" />
-    <link rel="stylesheet" href="css/artista.css" />
+    <link rel="stylesheet" href="../css/general.css" />
+    <link rel="stylesheet" href="artista.css" />
     <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg" />
   </head>
-   <body>
+  <body>
     <header id="headerPrincipal">
       <figure>
-        <img src="images/logos/logo.png" alt="Webpage logo" />
+        <img src="../images/logos/logo.png" alt="Webpage logo" />
       </figure>
       <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
       <nav id="NavPrincipal">
         <ul>
-          <li><a href="index.html">HOME</a></li>
-          <li><a href="test_register_spotify.html">MUSIC</a></li>
-          <li><a href="podcast.html">PODCAST</a></li>
-          <li><a href="login.html">LOG IN</a></li>
+          <li><a href="../index.html">HOME</a></li>
+          <li><a href="../test_register_spotify.html">MUSIC</a></li>
+          <li><a href="../podcast.html">PODCAST</a></li>
+          <li><a href="../login.html">LOG IN</a></li>
         </ul>
       </nav>
 
       <div id="headerProfileIm">
-        <a href="profile.html">
+        <a href="../profile.html">
           <img
             id="headerUserPic"
-            src="images/logos/silueta.png"
+            src="../images/logos/silueta.png"
             alt="User Profile Icon"
           />
         </a>
@@ -46,34 +46,35 @@
 
 
 
-    <main class="content">
-        <section class="library">
-            <div class="library-header">
-                <h2>MUSIC LIBRARY</h2>
+    <main >       
+        <section class="PerfilArtista">
+                <h1>Frédéric Chopin</h1>
+                <div class="artist-image">
+                <img src="../images/chopin.jpeg" alt="Chopin Image">
             </div>
-        <section>    
-                    
-        <section class = "Artistas">
-            <h2>Available Artists</h2>
-        </section>
-        <section class="Lista de artistas">
-            <div class="artist-buttons">
-            <button id="chopin">
-        <img src="images/chopin.jpeg" alt="logochopin" />
-        Frederick Chopin
-      </button>
+        </section> 
+<nav class="dropdown-menu">
+    <ul>
+        <li>
+            <a href="#">Inicio</a>
+        </li>
+        <li class="dropdown">
+            <a href="#">Artistas Destacados</a>
+            <ul class="dropdown-content">
+                <li><a href="#">Mozart</a></li>
+                <li><a href="#">Bach</a></li>
+                <li><a href="#">Chopin</a></li>
+            </ul>
+        </li>
+        <li>
+            <a href="#">Contacto</a>
+        </li>
+    </ul>
+</nav>
 
-        <button id="rubinstein">
-        <img src="images/rubinstein.jpeg" alt="logorubinstein" />
-        Arthur Rubinstein
-      </button>
 
-      <button id="Quevedo">
-        <img src="images/quevedo.jpeg" alt="logoquevedo" />
-        Quevedo
-      </button>
-        <div>           
-            </main>
+
+    </main>
             <footer id="footerPrincipal">
       <h2 id="footer-title">MELODY STREAM</h2>
       <div id="footer-follow">
@@ -83,7 +84,7 @@
           <li>
             <figure>
               <a href="https://www.spotify.com" target="_blank">
-                <img src="images/logos/Spotify.svg" alt="Spotify" />
+                <img src="../images/logos/Spotify.svg" alt="Spotify" />
               </a>
             </figure>
           </li>
@@ -91,7 +92,7 @@
           <li>
             <figure>
               <a href="https://www.facebook.com" target="_blank">
-                <img src="images/logos/Facebook.svg" alt="Facebook" />
+                <img src="../images/logos/Facebook.svg" alt="Facebook" />
               </a>
             </figure>
           </li>
@@ -99,7 +100,7 @@
           <li>
             <figure>
               <a href="https://www.instagram.com" target="_blank">
-                <img src="images/logos/Instagram.svg" alt="Instagram" />
+                <img src="../images/logos/Instagram.svg" alt="Instagram" />
               </a>
             </figure>
           </li>
@@ -107,7 +108,7 @@
           <li>
             <figure>
               <a href="https://www.twitter.com" target="_blank">
-                <img src="images/logos/Twitter.svg" alt="Twitter" />
+                <img src="../images/logos/Twitter.svg" alt="Twitter" />
               </a>
             </figure>
           </li>
@@ -115,7 +116,7 @@
           <li>
             <figure>
               <a href="https://www.youtube.com" target="_blank">
-                <img src="images/logos/Youtube.svg" alt="YouTube" />
+                <img src="../images/logos/Youtube.svg" alt="YouTube" />
               </a>
             </figure>
           </li>
@@ -125,5 +126,5 @@
         </div>
     </div>
 </body>
-<script type="module" src="js/musiclibrary.js"></script>
+<script type="module" src="chopin.js"></script>
 </html>
