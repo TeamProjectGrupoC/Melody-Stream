@@ -1,0 +1,20 @@
+/* Selecciona la imagen dentro del div con la clase artist-image */
+.artist-image img {
+    /* 1. Hace la imagen completamente circular */
+    border-radius: 50%; 
+    
+    /* 2. Asegura que la imagen sea un cuadrado y no se distorsione */
+    width: 200px; /* Define un tamaño fijo para el ancho */
+    height: 200px; /* Define un tamaño fijo para la altura (mismo valor que el ancho) */
+    object-fit: cover; /* Recorta la imagen para cubrir el área sin distorsionarla */
+    
+    /* 3. Agrega un borde llamativo alrededor del círculo */
+    border: 5px solid #ffffff; /* Borde interior blanco */
+    box-shadow: 0 0 0 7px #4a4a4a; /* Borde exterior (un gris oscuro o color de acento) */
+    
+    /* 4. Agrega una sutil sombra de profundidad */
+    filter: drop-shadow(4px 4px 6px rgba(0, 0, 0, 0.4)); /* Sombra para levantar la imagen */
+    
+    /* 5. Pequeña animación (opcional) */
+    transition: all 0.3s ease; /* Transición suave para cualquier cambio */
+}
