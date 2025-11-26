@@ -352,7 +352,7 @@ async function addSongToFavourites(att) {
     card.className = "attachment-card";
 
     const img = document.createElement("img");
-    img.src = att.imageURL;
+    img.src = att.imageURL || "https://via.placeholder.com/150?text=No+Image";
     img.className = "attachment-image";
     card.appendChild(img);
 
@@ -372,7 +372,7 @@ async function addSongToFavourites(att) {
     if (att.audioURL && att.audioURL !== "") {
         const audio = document.createElement('audio');
         audio.controls = true;
-        audio.src = att.audioURL;
+        audio.src = att.audioURL || "";
         meta.appendChild(audio);
     }
 
