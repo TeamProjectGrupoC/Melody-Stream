@@ -103,15 +103,15 @@
       <div id="savedArtists"></div>
     </section>
 
-    <div id="shareArtistModal">
-      <div class="share-modal-content">
+    <div id="shareArtistModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:500px;">
         <h3>Share this artist in a chat</h3>
         <p id="shareArtistName"></p>
 
-        <select id="chatSelect"></select>
+        <select id="chatSelect" style="width:100%; padding:8px; margin-top:10px;"></select>
 
-        <button id="shareArtistConfirm">Share</button>
-        <button id="shareArtistCancel">Cancel</button>
+        <button id="shareArtistConfirm" style="width:100%; margin-top:15px;">Share</button>
+        <button id="shareArtistCancel" style="width:100%; margin-top:10px;">Cancel</button>
       </div>
     </div>
 
@@ -128,18 +128,17 @@
       <div id="savedSongs"></div>
     </section>
 
-    <div id="shareSongModal">
-      <div class="share-modal-content">
+    <div id="shareSongModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:20px; border-radius:12px; width:90%; max-width:500px;">
         <h3>Share this song in a chat</h3>
         <p id="shareSongName"></p>
 
-        <select id="chatSelectSong"></select>
+        <select id="chatSelectSong" style="width:100%; padding:8px; margin-top:10px;"></select>
 
-        <button id="shareSongConfirm">Share</button>
-        <button id="shareSongCancel">Cancel</button>
+        <button id="shareSongConfirm" style="width:100%; margin-top:15px;">Share</button>
+        <button id="shareSongCancel" style="width:100%; margin-top:10px;">Cancel</button>
       </div>
     </div>
-
 
     </main>
 
