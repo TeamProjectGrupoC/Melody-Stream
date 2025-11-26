@@ -186,7 +186,7 @@ async function main() {
         chatWith.textContent = selectedUsername;
         messagesDiv.innerHTML = "";
 
-        onChildAdded(messagesRef, (childSnap) => {
+        onChildAdded(messagesRef, async (childSnap) => {
             const data = childSnap.val();
             const div = document.createElement("div");
             div.className = "message";
@@ -197,10 +197,92 @@ async function main() {
                 div.classList.add("other");
             }
 
-            if (isMusicAttachment(data.attachment)) {
-                div.classList.add("music-message");
+            // --- Detect follow request message ---
+            // --- 1. Detect STATUS messages (Accepted/Rejected) ---
+            // If the text starts with confirmation emojis, we style it as a system notification
+            if (data.text.startsWith("✅") || data.text.startsWith("❌")) {
+                div.classList.add("status-message"); // Special class to center it and remove bubble background
+                const p = document.createElement("p");
+                p.textContent = data.text;
+                div.appendChild(p);
+                messagesDiv.appendChild(div);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                return;
             }
 
+            // --- 2. Detect Follow Request ---
+            if (data.text === "📩 Sent a follow request" && data.sender !== currentUser.uid) {
+                // Add a special container class for styling
+                div.classList.add("follow-request-card");
+
+                const title = document.createElement("h4");
+                title.textContent = "Follow Request";
+                div.appendChild(title);
+
+                const p = document.createElement("p");
+                // Safe access to username
+                p.textContent = `${usersMap[data.sender]?.username || "A user"} wants to follow you.`;
+                div.appendChild(p);
+
+                // Container for buttons (for flexbox layout)
+                const btnContainer = document.createElement("div");
+                btnContainer.className = "request-actions";
+
+                const acceptBtn = document.createElement("button");
+                acceptBtn.textContent = "Accept";
+                acceptBtn.className = "btn-action btn-accept"; // Added CSS classes
+
+                const rejectBtn = document.createElement("button");
+                rejectBtn.textContent = "Reject";
+                rejectBtn.className = "btn-action btn-reject"; // Added CSS classes
+
+                btnContainer.appendChild(rejectBtn);
+                btnContainer.appendChild(acceptBtn);
+                div.appendChild(btnContainer);
+
+                // --- Event Listeners ---
+                acceptBtn.addEventListener("click", async () => {
+                    // Database updates
+                    await set(ref(db, `users/${currentUser.uid}/followers/${data.sender}`), true);
+                    await set(ref(db, `users/${currentUser.uid}/followRequests/${data.sender}`), null);
+
+                    // Send confirmation message to chat
+                    const chatId = getChatId(currentUser.uid, data.sender);
+                    const messagesRef = ref(db, `chats/${chatId}/messages`);
+                    const newMsgKey = push(messagesRef).key;
+
+                    // Note: Sending with "✅" triggers the styling in block #1 above
+                    await set(ref(db, `chats/${chatId}/messages/${newMsgKey}`), {
+                        sender: currentUser.uid,
+                        text: "✅ Follow request accepted",
+                        timestamp: Date.now()
+                    });
+
+                    div.remove(); // Optional: Remove the request card after answering
+                });
+
+                rejectBtn.addEventListener("click", async () => {
+                    await set(ref(db, `users/${currentUser.uid}/followRequests/${data.sender}`), null);
+
+                    const chatId = getChatId(currentUser.uid, data.sender);
+                    const messagesRef = ref(db, `chats/${chatId}/messages`);
+                    const newMsgKey = push(messagesRef).key;
+
+                    // Note: Sending with "❌" triggers the styling in block #1 above
+                    await set(ref(db, `chats/${chatId}/messages/${newMsgKey}`), {
+                        sender: currentUser.uid,
+                        text: "❌ Follow request rejected",
+                        timestamp: Date.now()
+                    });
+                    div.remove();
+                });
+
+                messagesDiv.appendChild(div);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                return;
+            }
+
+            // --- Normal message rendering ---
             if (data.text) {
                 const p = document.createElement("p");
                 p.textContent = data.text;
@@ -216,91 +298,8 @@ async function main() {
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         });
 
-        // Listen to messages
-        onValue(messagesRef, (snapshot) => {
-            messagesDiv.innerHTML = "";
-            if (!snapshot.exists()) return;
-            snapshot.forEach(childSnap => {
-                const data = childSnap.val();
-                const div = document.createElement("div");
-                div.classList.add("message");
-                div.classList.add(data.sender === currentUser.uid ? "you" : "other");
-
-                if (isMusicAttachment(data.attachment)) {
-                    div.classList.add("music-message");
-                }
 
 
-                if (data.attachment) {
-                    const card = document.createElement('div');
-                    card.className = 'attachment-card';
-
-                    // image
-                    const img = document.createElement('img');
-                    img.src = data.attachment.imageURL || 'images/logos/logo.png';
-                    img.className = 'attachment-image';
-                    card.appendChild(img);
-
-                    // text container
-                    const meta = document.createElement('div');
-                    meta.className = 'attachment-meta';
-
-                    const title = document.createElement('h4');
-                    title.textContent = data.attachment.title || 'No title';
-                    meta.appendChild(title);
-
-                    if (data.attachment.author) {
-                        const author = document.createElement('p');
-                        author.textContent = data.attachment.author;
-                        meta.appendChild(author);
-                    }
-
-                    if (data.attachment.audioURL && data.attachment.audioURL !== "") {
-                        const accessToken = localStorage.getItem("spotify_access_token");
-
-                        if (accessToken) {
-
-                            fetch("https://api.spotify.com/v1/me", {
-                                headers: {
-                                    Authorization: "Bearer " + accessToken
-                                }
-                            })
-                                .then(res => res.json())
-                                .then(profile => {
-                                    const isPremium = profile.product === "premium";
-
-                                    if (isPremium) {
-                                        const audio = document.createElement("audio");
-                                        audio.controls = true;
-                                        audio.src = data.attachment.audioURL;
-                                        meta.appendChild(audio);
-                                    } else {
-                                        const lockMsg = document.createElement("p");
-                                        lockMsg.textContent = "🔒 Premium required to play audio";
-                                        lockMsg.style.color = "#f44";
-                                        meta.appendChild(lockMsg);
-                                    }
-                                })
-                                .catch(err => {
-                                    console.error("Spotify profile fetch failed:", err);
-                                });
-
-                        }
-                    }
-                    card.appendChild(meta);
-
-                    // VERY IMPORTANT → ENGADIR AO MENSAXE
-                    div.appendChild(card);
-                }
-                else {
-                    // simple text message
-                    div.textContent = data.text || '';
-                }
-
-                messagesDiv.appendChild(div);
-            });
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        });
     });
 
     function isMusicAttachment(att) {
@@ -363,21 +362,15 @@ async function main() {
         };
 
         if (fileAttachment) {
-            newMessage.attachment = fileAttachment;
-        }
-
-        if (fileAttachment) {
-            if (fileAttachment.audioURL && fileAttachment.audioURL !== "") {
-                newMessage.attachment = fileAttachment;
-            } else {
-                // Si no hay audioURL, no lo incluimos
-                newMessage.attachment = {
+            newMessage.attachment = fileAttachment.audioURL && fileAttachment.audioURL !== ""
+                ? fileAttachment
+                : {
                     title: fileAttachment.title,
                     imageURL: fileAttachment.imageURL,
                     author: fileAttachment.author
                 };
-            }
         }
+
 
         const lastMessageData = {
             sender: currentUser.uid,

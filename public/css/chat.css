@@ -309,3 +309,100 @@ body {
   margin-bottom: 6px;
 }
 
+/* =========================================
+   FOLLOW REQUEST STYLES
+   ========================================= */
+
+/* Override default bubble styles for request cards */
+.message.follow-request-card {
+    background: #2a2a35; /* Dark card background */
+    border: 1px solid #3f3f4b;
+    border-radius: 12px;
+    padding: 16px;
+    max-width: 280px;
+    width: 100%;
+    margin: 10px auto; /* Center the card horizontally */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+}
+
+/* Card Title */
+.follow-request-card h4 {
+    margin: 0 0 8px 0;
+    color: #fff;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+/* Card Description Text */
+.follow-request-card p {
+    color: #b0b0b8;
+    font-size: 0.85rem;
+    margin: 0 0 16px 0;
+    text-align: center;
+}
+
+/* Button Container */
+.request-actions {
+    display: flex;
+    gap: 10px;
+    width: 100%;
+    justify-content: center;
+}
+
+/* Base Button Styles */
+.btn-action {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s, opacity 0.2s;
+}
+
+.btn-action:active {
+    transform: scale(0.95);
+}
+
+/* Accept Button (Gradient matching your theme) */
+.btn-accept {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+/* Reject Button (Subtle Dark Grey) */
+.btn-reject {
+    background: #3e3e4a;
+    color: #ff6b6b; /* Soft red for reject */
+}
+
+.btn-accept:hover { opacity: 0.9; }
+.btn-reject:hover { background: #4a4a58; }
+
+
+/* =========================================
+   STATUS MESSAGE STYLES (✅ / ❌)
+   ========================================= */
+
+.message.status-message {
+    background: transparent; /* Remove bubble background */
+    align-self: center;      /* Center in the chat stream */
+    margin: 10px 0;
+    padding: 0;
+    max-width: 100%;
+}
+
+.status-message p {
+    background: rgba(255, 255, 255, 0.1);
+    color: #e0e0e0;
+    padding: 6px 16px;
+    border-radius: 20px; /* Pill shape */
+    font-size: 0.75rem;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    display: inline-block;
+}
