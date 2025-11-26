@@ -427,14 +427,25 @@ async function addSongToFavourites(att) {
         };
 
         if (fileAttachment) {
-            newMessage.attachment = fileAttachment.audioURL && fileAttachment.audioURL !== ""
-                ? fileAttachment
-                : {
-                    title: fileAttachment.title,
-                    imageURL: fileAttachment.imageURL,
-                    author: fileAttachment.author
-                };
+            newMessage.attachment = {
+                type: fileAttachment.type,               // "artist" o "song"
+                id: fileAttachment.id,
+                title: fileAttachment.title,
+
+                // Unificar imagen para artistas y canciones
+                imageURL: fileAttachment.imageURL 
+                    || fileAttachment.albumImageUrl 
+                    || fileAttachment.image 
+                    || "",
+
+                // Autor (solo canciones)
+                author: fileAttachment.author || "",
+
+                // Audio (solo canciones)
+                audioURL: fileAttachment.audioURL || ""
+            };
         }
+
 
 
         const lastMessageData = {
