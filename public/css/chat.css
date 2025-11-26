@@ -154,6 +154,7 @@ body {
     line-height: 1.4;
     word-wrap: break-word;
     box-shadow: 0 1px 1px rgba(0,0,0,0.2);
+    overflow: visible !important;
 }
 
 .message.you {
@@ -244,6 +245,7 @@ body {
     gap: 8px;
     background: transparent;
     padding: 0;
+    padding-bottom: 12px !important;
 }
 
 /* Image */
@@ -429,4 +431,9 @@ body {
     background-color: #2a2a2a;
     cursor: default;
     opacity: 0.6;
+}
+
+.addToFavBtn {
+  display: block;
+  margin-top: 10px;
 }
