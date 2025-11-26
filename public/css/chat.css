@@ -406,3 +406,27 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.05);
     display: inline-block;
 }
+
+.addToFavBtn {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background-color: var(--color-azul1);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s;
+}
+
+.addToFavBtn:hover {
+    background-color: var(--color-azul2);
+    transform: scale(1.02);
+}
+
+.addToFavBtn:disabled {
+    background-color: #2a2a2a;
+    cursor: default;
+    opacity: 0.6;
+}
