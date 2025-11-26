@@ -302,111 +302,46 @@ async function main() {
 
     });
 
-    async function addArtistToFavourites(att) {
-    const db = getDatabase();
-    const favRef = ref(db, `users/${currentUser.uid}/favourite_artists`);
-
-    const snap = await get(favRef);
-    const existing = snap.val() || {};
-
-    // Evitar duplicados
-    const exists = Object.values(existing).some(a => a.id === att.id);
-    if (exists) return;
-
-    const newKey = push(favRef).key;
-    await set(ref(db, `users/${currentUser.uid}/favourite_artists/${newKey}`), {
-        id: att.id,
-        title: att.title,
-        name: att.title,
-        image: att.imageURL,
-        author: att.author || "",
-        genres: att.genres || [],
-        followers: att.followers || null
-    });
-}
-
-async function addSongToFavourites(att) {
-    const db = getDatabase();
-    const favRef = ref(db, `users/${currentUser.uid}/favourite_songs`);
-
-    const snap = await get(favRef);
-    const existing = snap.val() || {};
-
-    // Evitar duplicados
-    const exists = Object.values(existing).some(s => s.id === att.id);
-    if (exists) return;
-
-    const newKey = push(favRef).key;
-    await set(ref(db, `users/${currentUser.uid}/favourite_songs/${newKey}`), {
-        id: att.id,
-        title: att.title,
-        image: att.imageURL,
-        author: att.author,
-        audioURL: att.audioURL || ""
-    });
-}
-
+    function isMusicAttachment(att) {
+        return att &&
+            typeof att.title === "string" &&
+            typeof att.imageURL === "string" &&
+            typeof att.author === "string";
+    }
 
     function buildAttachmentCard(att) {
-    const card = document.createElement("div");
-    card.className = "attachment-card";
+        const card = document.createElement("div");
+        card.className = "attachment-card";
 
-    const img = document.createElement("img");
-    img.src = att.imageURL || "https://via.placeholder.com/150?text=No+Image";
-    img.className = "attachment-image";
-    card.appendChild(img);
+        const img = document.createElement("img");
+        img.src = att.imageURL;
+        img.className = "attachment-image";
+        card.appendChild(img);
 
-    const meta = document.createElement("div");
-    meta.className = "attachment-meta";
+        const meta = document.createElement("div");
+        meta.className = "attachment-meta";
 
-    const title = document.createElement("h4");
-    title.textContent = att.title;
-    meta.appendChild(title);
+        const title = document.createElement("h4");
+        title.textContent = att.title;
+        meta.appendChild(title);
 
-    if (att.author) {
-        const author = document.createElement("p");
-        author.textContent = att.author;
-        meta.appendChild(author);
+        if (att.author) {
+            const author = document.createElement("p");
+            author.textContent = att.author;
+            meta.appendChild(author);
+        }
+
+        if (att.audioURL && att.audioURL !== "") {
+            const audio = document.createElement('audio');
+            audio.controls = true;
+            audio.src = att.audioURL;
+            meta.appendChild(audio);
+        }
+
+        card.appendChild(meta);
+
+        return card;
     }
-
-    if (att.audioURL && att.audioURL !== "") {
-        const audio = document.createElement('audio');
-        audio.controls = true;
-        audio.src = att.audioURL || "";
-        meta.appendChild(audio);
-    }
-
-    card.appendChild(meta);
-
-    const addBtn = document.createElement("button");
-    addBtn.className = "addToFavBtn";
-
-    if (att.type === "artist") {
-        addBtn.textContent = "Add artist to favourites";
-        addBtn.addEventListener("click", async () => {
-            await addArtistToFavourites(att);
-            addBtn.textContent = "Added ✓";
-            addBtn.disabled = true;
-        });
-    }
-
-    if (att.type === "song") {
-        addBtn.textContent = "Add song to favourites";
-        addBtn.addEventListener("click", async () => {
-            await addSongToFavourites(att);
-            addBtn.textContent = "Added ✓";
-            addBtn.disabled = true;
-        });
-    }
-
-    // Solo añadir el botón si es un attachment musical
-    if (att.type === "artist" || att.type === "song") {
-        card.appendChild(addBtn);
-    }
-
-    return card;
-    }
-
 
 
     // --- Send message ---
