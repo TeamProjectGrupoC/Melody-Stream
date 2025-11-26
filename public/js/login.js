@@ -1,138 +1,148 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 console.log("✅ login.js cargado correctamente");
 
-// Wrap all logic in an async function to wait for the config
 async function main() {
+  let firebaseConfig;
+  let app;
 
-    // --- Step 1: Get config securely from Firebase Hosting ---
-    let firebaseConfig;
+  try {
+    const response = await fetch('/__/firebase/init.json');
+    firebaseConfig = await response.json();
+  } catch (e) {
+    console.warn("No se pudo cargar /__/firebase/init.json:", e);
+  }
+
+  // Inicializar solo si no hay apps; si ya existe, reutilizarla
+  if (!getApps().length) {
+    if (!firebaseConfig) {
+      console.error("No hay configuración de Firebase disponible para inicializar la app.");
+      return;
+    }
+    app = initializeApp(firebaseConfig);
+  } else {
+    app = getApp();
+  }
+
+  const auth = getAuth(app);
+  const db = getDatabase(app);
+
+  const emailLogin = document.getElementById('emailLogin');
+  const passwordLogin = document.getElementById('passwordLogin');
+  const signInBtn = document.getElementById('signInBtn');
+  const toRegisterBtn = document.getElementById('toRegisterBtn');
+  const signOutBtn = document.getElementById('signOutBtn');
+  const msg = document.getElementById('msg');
+  const dataDiv = document.getElementById('data');
+  const extraInfoForm = document.getElementById('extraInfoForm');
+  const usernameInput = document.getElementById('usernameInput');
+  const phoneInput = document.getElementById('phoneInput');
+  const saveExtraBtn = document.getElementById('saveExtraBtn');
+
+  async function saveToDB(uid, email, username, phone) {
+    return set(ref(db, 'users/' + uid), { email, username, phone, favorite_songs: {}, spotify: {} });
+  }
+
+  async function fetchUserData(uid) {
     try {
-        const response = await fetch('/__/firebase/init.json');
-        firebaseConfig = await response.json();
+      const rootRef = ref(db);
+      const snap = await get(child(rootRef, `users/${uid}`));
+      return snap.exists() ? snap.val() : null;
     } catch (e) {
-        console.error("Could not load Firebase config. Are you running this on Firebase Hosting or using 'firebase serve'?");
-        return; // Stop the app
+      console.error(e);
+      return null;
     }
+  }
 
-    // --- Step 2: Initialize Firebase ---
-    // All this code is now INSIDE main()
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getDatabase(app);
-
-    // --- Step 3: All your original code now goes here ---
-
-    const emailLogin = document.getElementById('emailLogin');
-    const passwordLogin = document.getElementById('passwordLogin');
-    const signInBtn = document.getElementById('signInBtn');
-    const toRegisterBtn = document.getElementById('toRegisterBtn');
-    const signOutBtn = document.getElementById('signOutBtn');
-    const msg = document.getElementById('msg');
-    const dataDiv = document.getElementById('data');
-    const extraInfoForm = document.getElementById('extraInfoForm');
-    const usernameInput = document.getElementById('usernameInput');
-    const phoneInput = document.getElementById('phoneInput');
-    const saveExtraBtn = document.getElementById('saveExtraBtn');
-
-    // Helper functions are now defined inside main()
-    async function saveToDB(uid, email, username, phone) {
-        return set(ref(db, 'users/' + uid), { email, username, phone, favorite_songs:{}, spotify:{} });
-    }
-
-    async function fetchUserData(uid) {
-        try {
-            const rootRef = ref(db);
-            const snap = await get(child(rootRef, `users/${uid}`));
-            return snap.exists() ? snap.val() : null;
-        } catch(e){ console.error(e); return null; }
-    }
-
-    function showUserData(ud, uid){
-        dataDiv.style.display='block';
-        dataDiv.innerHTML = `
+  function showUserData(ud, uid) {
+    dataDiv.style.display = 'block';
+    dataDiv.innerHTML = `
             <h3>My Data (${uid})</h3>
             <p><strong>Username:</strong> ${ud.username}</p>
             <p><strong>Phone:</strong> ${ud.phone}</p>
             <p><strong>Email:</strong> ${ud.email}</p>
-            <p><strong>Favorite Songs:</strong> ${JSON.stringify(ud.favorite_songs,null,2)}</p>
+            <p><strong>Favorite Songs:</strong> ${JSON.stringify(ud.favorite_songs, null, 2)}</p>
         `;
-        signOutBtn.style.display='inline-block';
-    }
+    signOutBtn.style.display = 'inline-block';
+  }
 
-    // Login
-    signInBtn.addEventListener('click', async () => {
-        msg.textContent = '';
-        dataDiv.style.display='none';
-        extraInfoForm.style.display='none';
+  // Login
+  signInBtn?.addEventListener('click', async () => {
+    msg.textContent = '';
+    if (dataDiv) dataDiv.style.display = 'none';
+    if (extraInfoForm) extraInfoForm.style.display = 'none';
 
-        const email = emailLogin.value.trim();
-        const password = passwordLogin.value;
+    const email = emailLogin?.value.trim();
+    const password = passwordLogin?.value;
 
-        if(!email || !password){ msg.textContent='Email and password required.'; return; }
+    if (!email || !password) { if (msg) msg.textContent = 'Email and password required.'; return; }
 
-        try{
-            const cred = await signInWithEmailAndPassword(auth,email,password);
-            const user = cred.user;
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const user = cred.user;
 
-            if(!user.emailVerified){
-                msg.textContent='Your email is not verified yet. Check your inbox.';
-                await signOut(auth);
-                return;
-            }
-
-            let ud = await fetchUserData(user.uid);
-
-            if(!ud){
-                // Show extra info form to complete profile
-                extraInfoForm.style.display='block';
-                msg.textContent='Please complete your profile to save your info.';
-                return;
-            }
-
-            // Show data if already exists
-            showUserData(ud, user.uid);
-        } catch(err){ msg.textContent=`Login error: ${err.message}`; console.error(err);}
-    });
-
-    // Save extra info
-    saveExtraBtn.addEventListener('click', async () => {
-        const user = auth.currentUser;
-        const username = usernameInput.value.trim();
-        const phone = phoneInput.value.trim();
-
-        if(!username || !phone){ msg.textContent='Username and phone required.'; return; }
-
-        try{
-            await saveToDB(user.uid, user.email, username, phone);
-            extraInfoForm.style.display='none';
-            const ud = await fetchUserData(user.uid);
-            showUserData(ud, user.uid);
-            msg.textContent = `Profile saved! Logged in as ${user.email}.`;
-        } catch(err){ msg.textContent=`Error saving profile: ${err.message}`; console.error(err);}
-    });
-
-    toRegisterBtn.addEventListener('click',()=>window.location.href='register.html');
-
-    signOutBtn.addEventListener('click', async ()=>{
+      if (!user.emailVerified) {
+        if (msg) msg.textContent = 'Your email is not verified yet. Check your inbox.';
         await signOut(auth);
-        msg.textContent='Signed out.';
-        dataDiv.style.display='none';
-        extraInfoForm.style.display='none';
-        signOutBtn.style.display='none';
+        return;
+      }
 
-        // Limpiar foto guardada
-        localStorage.removeItem('profilePic');
+      const ud = await fetchUserData(user.uid);
 
-        // Restaurar la silueta
-        const headerPic = document.getElementById('headerUserPic');
-        if (headerPic) headerPic.src = "images/logos/silueta.png";
-    });
+      if (!ud) {
+        if (extraInfoForm) {
+          extraInfoForm.style.display = 'block';
+          if (msg) msg.textContent = 'Please complete your profile to save your info.';
+        }
+        return;
+      }
 
-} 
+      showUserData(ud, user.uid);
+    } catch (err) {
+      console.error(err);
+      if (msg) msg.textContent = `Login error: ${err.message}`;
+    }
+  });
 
+  // Save extra info
+  saveExtraBtn?.addEventListener('click', async () => {
+    const user = auth.currentUser;
+    const username = usernameInput?.value.trim();
+    const phone = phoneInput?.value.trim();
 
-// --- Step 4: Call main() to start the app ---
+    if (!username || !phone) { if (msg) msg.textContent = 'Username and phone required.'; return; }
+
+    try {
+      await saveToDB(user.uid, user.email, username, phone);
+      if (extraInfoForm) extraInfoForm.style.display = 'none';
+      const ud = await fetchUserData(user.uid);
+      showUserData(ud, user.uid);
+      if (msg) msg.textContent = `Profile saved! Logged in as ${user.email}.`;
+    } catch (err) {
+      console.error(err);
+      if (msg) msg.textContent = `Error saving profile: ${err.message}`;
+    }
+  });
+
+  toRegisterBtn?.addEventListener('click', () => window.location.href = 'register.html');
+
+  signOutBtn?.addEventListener('click', async () => {
+    try {
+      await signOut(auth);
+      if (msg) msg.textContent = 'Signed out.';
+      if (dataDiv) dataDiv.style.display = 'none';
+      if (extraInfoForm) extraInfoForm.style.display = 'none';
+      if (signOutBtn) signOutBtn.style.display = 'none';
+      localStorage.removeItem('profilePic');
+      const headerPic = document.getElementById('headerUserPic');
+      if (headerPic) headerPic.src = "images/logos/silueta.png";
+    } catch (e) {
+      console.error("Error signing out:", e);
+    }
+  });
+
+} // end main
+
 main();
