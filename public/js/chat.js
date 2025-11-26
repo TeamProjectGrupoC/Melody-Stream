@@ -1,6 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, get, child, set, push, onValue, off, update, onChildAdded} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, get, child, set, push, onValue, off, update, onChildAdded } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 /*
 DATABASE STRUCTURE AND LOGIC:
 
@@ -196,7 +196,7 @@ async function main() {
             } else {
                 div.classList.add("other");
             }
-            
+
             if (isMusicAttachment(data.attachment)) {
                 div.classList.add("music-message");
             }
@@ -230,7 +230,7 @@ async function main() {
                     div.classList.add("music-message");
                 }
 
-                
+
                 if (data.attachment) {
                     const card = document.createElement('div');
                     card.className = 'attachment-card';
@@ -255,25 +255,38 @@ async function main() {
                         meta.appendChild(author);
                     }
 
-                    // audio (optional)
                     if (data.attachment.audioURL && data.attachment.audioURL !== "") {
-    const accessToken = localStorage.getItem("spotify_access_token");
-    if (accessToken) {
+                        const accessToken = localStorage.getItem("spotify_access_token");
 
-    fetch(`https://us-central1-TU_PROYECTO.cloudfunctions.net/checkSpotifyPremium?accessToken=${accessToken}`)
-        .then(res => res.json())
-        .then(result => {
-            if (result.premium) {
-                const audio = document.createElement('audio');
-                audio.controls = true;
-                audio.src = data.attachment.audioURL;
-                meta.appendChild(audio);
-            }
-        })
-        .catch(err => console.error(err));
-}}
+                        if (accessToken) {
 
+                            fetch("https://api.spotify.com/v1/me", {
+                                headers: {
+                                    Authorization: "Bearer " + accessToken
+                                }
+                            })
+                                .then(res => res.json())
+                                .then(profile => {
+                                    const isPremium = profile.product === "premium";
 
+                                    if (isPremium) {
+                                        const audio = document.createElement("audio");
+                                        audio.controls = true;
+                                        audio.src = data.attachment.audioURL;
+                                        meta.appendChild(audio);
+                                    } else {
+                                        const lockMsg = document.createElement("p");
+                                        lockMsg.textContent = "🔒 Premium required to play audio";
+                                        lockMsg.style.color = "#f44";
+                                        meta.appendChild(lockMsg);
+                                    }
+                                })
+                                .catch(err => {
+                                    console.error("Spotify profile fetch failed:", err);
+                                });
+
+                        }
+                    }
                     card.appendChild(meta);
 
                     // VERY IMPORTANT → ENGADIR AO MENSAXE
@@ -290,11 +303,11 @@ async function main() {
         });
     });
 
-    function isMusicAttachment(att){
+    function isMusicAttachment(att) {
         return att &&
-           typeof att.title === "string" &&
-           typeof att.imageURL === "string" &&
-           typeof att.author === "string";
+            typeof att.title === "string" &&
+            typeof att.imageURL === "string" &&
+            typeof att.author === "string";
     }
 
     function buildAttachmentCard(att) {
@@ -354,17 +367,17 @@ async function main() {
         }
 
         if (fileAttachment) {
-        if (fileAttachment.audioURL && fileAttachment.audioURL !== "") {
-            newMessage.attachment = fileAttachment;
-        } else {
-            // Si no hay audioURL, no lo incluimos
-            newMessage.attachment = {
-                title: fileAttachment.title,
-                imageURL: fileAttachment.imageURL,
-                author: fileAttachment.author
-            };
+            if (fileAttachment.audioURL && fileAttachment.audioURL !== "") {
+                newMessage.attachment = fileAttachment;
+            } else {
+                // Si no hay audioURL, no lo incluimos
+                newMessage.attachment = {
+                    title: fileAttachment.title,
+                    imageURL: fileAttachment.imageURL,
+                    author: fileAttachment.author
+                };
+            }
         }
-         }
 
         const lastMessageData = {
             sender: currentUser.uid,
