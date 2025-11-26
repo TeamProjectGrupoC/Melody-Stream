@@ -369,11 +369,11 @@ async function addSongToFavourites(att) {
         meta.appendChild(author);
     }
 
-    if (att.audioURL && att.audioURL !== "") {
-        const audio = document.createElement('audio');
-        audio.controls = true;
-        audio.src = att.audioURL;
-        meta.appendChild(audio);
+    if (msg.attachment?.audioURL && typeof msg.attachment.audioURL === "string" && msg.attachment.audioURL.trim() !== "") {
+    const audio = document.createElement("audio");
+    audio.controls = true;
+    audio.src = msg.attachment.audioURL;
+    bubble.appendChild(audio);
     }
 
     card.appendChild(meta);
