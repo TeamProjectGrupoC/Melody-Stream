@@ -348,3 +348,8 @@ button:hover {
     }
 }
 
+/* Ocultar header hasta que header.js marque body.header-ready */
+body:not(.header-ready) #headerPrincipal {
+  visibility: hidden;
+}
+
