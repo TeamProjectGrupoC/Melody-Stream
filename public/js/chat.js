@@ -356,7 +356,7 @@ async function main() {
         }
 
         // Reproduce songs
-        /*
+        
         const isSong = att.audioURL && att.audioURL !== "";
         if (isSong) {
             const audio = document.createElement('audio');
@@ -441,7 +441,7 @@ async function main() {
                 meta.appendChild(btnSong);
             }
         //}
-        */
+        
 
         card.appendChild(meta);
 

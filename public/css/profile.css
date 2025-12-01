@@ -891,6 +891,12 @@ main a:hover {
   transition: all 0.3s ease;
 }
 
+#shareArtistModal option,
+#shareSongModal option {
+    background-color: #1e1e2e !important;
+    color: white !important;
+}
+
 #shareArtistConfirm,
 #shareSongConfirm {
   background-color: var(--color-azul1);
