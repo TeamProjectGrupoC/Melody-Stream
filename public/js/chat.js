@@ -342,15 +342,19 @@ async function main() {
         meta.appendChild(title);
 
         if (att.author) {
-            console.log("ENTRANDO EN IF ATT.AUTHOR, ATT = ", att);
-
             const author = document.createElement("p");
             author.textContent = att.author;
             meta.appendChild(author);
+
+            const btn = document.createElement("button");
+            btn.textContent = "Add to favourites";
+            btn.style.marginTop = "10px";
+            btn.className = "main-button";
+            meta.appendChild(btn);
+
         }
 
         // Reproduce songs
-        
         const isSong = att.audioURL && att.audioURL !== "";
         if (isSong) {
             const audio = document.createElement('audio');
