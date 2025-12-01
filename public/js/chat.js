@@ -350,6 +350,7 @@ async function main() {
             btn.textContent = "Add to favourites1";
             btn.style.marginTop = "10px";
             btn.className = "main-button";
+            meta.appendChild(btn);
         }
 
         // Reproduce songs
