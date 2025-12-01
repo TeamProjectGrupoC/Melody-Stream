@@ -367,7 +367,7 @@ async function main() {
 
                 btn.addEventListener("click", async () => {
                     try {
-                        const user = firebase.auth().currentUser;
+                        const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
                         const artistRef = ref(db, `users/${user.uid}/favourite_artists/${att.title}`);
@@ -386,17 +386,8 @@ async function main() {
 
                         alert("Artist added to favourites!");
                     } catch (err) {
-                        console.error("🔥 Error saving artist:", err);
-                        console.error("err.name:", err?.name);
-                        console.error("err.code:", err?.code);
-                        console.error("err.message:", err?.message);
-
-                        alert(
-                            "Error saving artist:\n" +
-                            (err?.code ? `code: ${err.code}\n` : "") +
-                            (err?.message ? `message: ${err.message}\n` : "") +
-                            (!err?.code && !err?.message ? String(err) : "")
-                        );
+                        console.error(err);
+                        alert("Error saving artist");
                     }
                 });
 
@@ -412,7 +403,7 @@ async function main() {
 
                 btnSong.addEventListener("click", async () => {
                     try {
-                        const user = firebase.auth().currentUser;
+                        const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
                         const songRef = ref(db, `users/${user.uid}/favoritos/${att.title}`);
