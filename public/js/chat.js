@@ -290,7 +290,7 @@ async function main() {
             }
 
             if (data.attachment) {
-                const card = buildAttachmentCard(data.attachment, data.sender);
+                const card = buildAttachmentCard(data.attachment);
                 div.appendChild(card);
             }
 
@@ -309,7 +309,12 @@ async function main() {
             typeof att.author === "string";
     }
 
-    function buildAttachmentCard(att, senderId) {
+    let cachedUser = null;
+        onAuthStateChanged(auth, (user) => {
+            cachedUser = user;
+    });
+
+    function buildAttachmentCard(att) {
 
         if (!att || !att.imageURL) {
             console.warn("⚠ Attachment inválido:", att);
@@ -320,8 +325,7 @@ async function main() {
         card.className = "attachment-card";
 
         // Logic to know who wheter i am the receptor or the sender
-        const currentUser = firebase.auth().currentUser;
-        const isMine = senderId === currentUser.uid;
+        const isMine = cachedUser.uid;
 
         // Image
         const img = document.createElement("img");
