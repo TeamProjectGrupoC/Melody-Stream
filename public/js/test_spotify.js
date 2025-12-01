@@ -37,6 +37,21 @@ let lastDuration = 0;
 //  * 1. OBTAIN TOKEN
 //  ***********************/
 async function getToken() {
+  // 1. Intentar cargar token desde localStorage
+  const savedToken = localStorage.getItem("spotify_access_token");
+
+  if (savedToken) {
+    console.log("Usando token almacenado.");
+    accessToken = savedToken;
+
+    await getUserProfile();
+    displayUserStatus();
+
+    if (isPremium) loadWebPlaybackSDK();
+    return;
+  }
+
+  // 2. Si no hay token guardado → usar ?code=
   if (!code) {
     document.getElementById("trackInfo").innerHTML =
       "<p>Code not found. Try logging in again.</p>";
@@ -47,14 +62,11 @@ async function getToken() {
     const res = await fetch(
       `https://us-central1-melodystream123.cloudfunctions.net/getSpotifyToken?code=${code}`
     );
-    
-    // 💡 AÑADIR ESTA VERIFICACIÓN ANTES DE res.json()
+
     if (!res.ok) {
-        // Capturamos el texto del error 500 para el console.error
-        const errorText = await res.text();
-        console.error(`HTTP Error ${res.status} al obtener el token:`, errorText);
-        // Lanzamos un error controlado para que sea capturado por el catch
-        throw new Error(`Server error (${res.status}). Cannot get the token. Check Cloud Function logs.`);
+      const errorText = await res.text();
+      console.error(`HTTP Error ${res.status} al obtener el token:`, errorText);
+      throw new Error(`Server error`);
     }
 
     const data = await res.json();
@@ -67,23 +79,20 @@ async function getToken() {
 
     accessToken = data.access_token;
 
-    //Lo guardamos para los artistas
     localStorage.setItem("spotify_access_token", accessToken);
 
-
-    // Check user type (premium or not)
     await getUserProfile();
-
     displayUserStatus();
 
-    // If premium : initialize Web Playback SDK
     if (isPremium) loadWebPlaybackSDK();
+
   } catch (err) {
     console.error(err);
     document.getElementById("trackInfo").innerHTML =
       "<p>Error getting the token.</p>";
   }
 }
+
 
 /***********************
  *  2. GET INFO OF THE USER
