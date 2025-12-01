@@ -378,11 +378,6 @@ async function main() {
                             return;
                         }
 
-                        const artistData = {
-                            name: att.title,
-                            image: att.imageURL
-                        };
-
                         // Save in firebase
                         await set(artistRef, {
                             name: att.title,
@@ -391,8 +386,17 @@ async function main() {
 
                         alert("Artist added to favourites!");
                     } catch (err) {
-                        console.error(err);
-                        alert("Error saving artist");
+                        console.error("🔥 Error saving artist:", err);
+                        console.error("err.name:", err?.name);
+                        console.error("err.code:", err?.code);
+                        console.error("err.message:", err?.message);
+
+                        alert(
+                            "Error saving artist:\n" +
+                            (err?.code ? `code: ${err.code}\n` : "") +
+                            (err?.message ? `message: ${err.message}\n` : "") +
+                            (!err?.code && !err?.message ? String(err) : "")
+                        );
                     }
                 });
 
@@ -413,9 +417,8 @@ async function main() {
 
                         const songRef = ref(db, `users/${user.uid}/favoritos/${att.title}`);
                         const snap = await get(songRef);
-                        
+
                         if (snap.exists())
-                        
                             return alert("This song is already in your favourites!");
 
                         await set(songRef, {
@@ -424,6 +427,7 @@ async function main() {
                             albumImageUrl: att.imageURL,
                             previewUrl: att.audioURL
                         });
+                        
                         alert("Song added to favourites!");
                     } catch (err) {
                         console.error(err);
