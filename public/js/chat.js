@@ -310,6 +310,12 @@ async function main() {
     }
 
     function buildAttachmentCard(att) {
+
+        if (!att || !att.imageURL) {
+            console.warn("⚠ Attachment inválido:", att);
+            return document.createTextNode("[Attachment vacío]");
+        }
+
         const card = document.createElement("div");
         card.className = "attachment-card";
 

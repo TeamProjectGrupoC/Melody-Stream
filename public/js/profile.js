@@ -1035,8 +1035,8 @@ async function shareSongToChat(chatId, track) {
     timestamp,
     attachment: {
       title: track.title,
-      imageURL: track.albumImageUrl,
-      author: track.artist,  
+      imageURL: track.albumImageUrl || track.albumImageURL || track.albumImage || "",
+      author: Array.isArray(track.artist) ? track.artist.join(", ") : track.artist || "Unknown Artist",
       ...(track.previewUrl && { audioURL: track.previewUrl }) 
     },
     text: `Shared song: ${track.title}`
@@ -1075,9 +1075,10 @@ document.getElementById("shareSongConfirm").addEventListener("click", async () =
     title: modal.dataset.trackTitle,
     artist: modal.dataset.trackArtist,
     album: modal.dataset.trackAlbum,
-    albumImageUrl: modal.dataset.trackImage,
+    albumImageUrl: modal.dataset.trackImage || modal.dataset.trackimage,
     previewUrl: modal.dataset.trackAudioUrl
   };
+
 
   await shareSongToChat(chatId, track);
 
