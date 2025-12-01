@@ -870,18 +870,15 @@ main a:hover {
 
 #shareArtistModal select,
 #shareSongModal select {
-    background-color: #1e1e2e !important;
-    color: white !important;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    padding: 10px;
-    border-radius: 8px;
+  width: 100%;
+  padding: 0.8rem;
+  margin-top: 10px;
+  background-color: #1e1e2e !important;
+  color: white !important;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  color: var(--color-blanco);
 }
-
-#shareArtistModal option,
-#shareSongModal option {
-    color: black !important;
-}
-
 
 #shareArtistModal button,
 #shareSongModal button {
