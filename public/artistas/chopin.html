@@ -47,33 +47,35 @@
 
 
 <main>       
-        <section class="PerfilArtista">
-            <h1>Frédéric Chopin</h1>
-            <div class="artist-image">
-                <img src="../images/chopin.jpeg" alt="Chopin Image">
-            </div>
-        </section> 
+    <section class="PerfilArtista">
+        <h1>Frédéric Chopin</h1>
+        <div class="artist-image">
+            <img src="../images/chopin.jpeg" alt="Chopin Image">
+        </div>
+    </section> 
+    
+    <section class="MusicSelector" style="padding: 20px; text-align: center; color: white;">
+        <h2>Discografía</h2>
         
-        <section class="MusicSelector" style="padding: 20px; text-align: center; color: white;">
-            <h2>Discografía</h2>
-            
-            <div class="selector-container">
-                <label for="albumSelect">Selecciona un álbum:</label>
-                <select id="albumSelect" style="margin-top: 10px; padding: 5px; border-radius: 5px;">
-                    <option value="" disabled selected>-- Elige un álbum --</option>
-                    </select>
-            </div>
+        <div class="selector-container">
+            <label for="albumSelect">Selecciona un álbum:</label>
+            <select id="albumSelect" style="margin-top: 10px; padding: 10px; border-radius: 5px; font-size: 16px;">
+                <option value="" disabled selected>-- Elige un álbum --</option>
+            </select>
+        </div>
 
-            <div id="songsContainer" style="margin-top: 20px; display: none;">
-                <h3>Canciones</h3>
-                <ul id="songList" style="list-style: none; padding: 0;">
-                    </ul>
+        <div id="songsContainer" style="margin-top: 20px; display: none; background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 15px;">
+            <h3>Canciones</h3>
+            <ul id="songList" style="list-style: none; padding: 0;">
+                </ul>
+        </div>
+        
+        <div id="playerContainer" style="margin-top: 30px;">
             </div>
-            
-            <div id="playerContainer" style="margin-top: 30px;">
-                </div>
-        </section>
-    </main>
+    </section>
+</main>
+
+<script src="chopin.js"></script>
             <footer id="footerPrincipal">
       <h2 id="footer-title">MELODY STREAM</h2>
       <div id="footer-follow">
