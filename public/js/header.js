@@ -163,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
           135deg,
           #FFD700 0%,
           #FFB700 25%,
-          #FFCC33 50%,  /* tono amarillo claro en vez de blanco */
+          #FFE599 50%,  /* tono amarillo claro en vez de blanco */
           #FFD700 75%,
           #FFA500 100%
         )
