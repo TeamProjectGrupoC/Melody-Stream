@@ -1,141 +1,116 @@
-// --- IMPORTACIONES DE FIREBASE ---
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getDatabase, ref, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
-
-// --- TU CONFIGURACIÓN (Asegúrate que sea la correcta) ---
-const firebaseConfig = {
-    apiKey: "TU_API_KEY", // <--- PON TU API KEY AQUÍ O MANTÉN LA QUE YA TENGAS
-    authDomain: "melodystream123.firebaseapp.com",
-    databaseURL: "https://melodystream123-default-rtdb.europe-west1.firebasedatabase.app", // <--- REVISA QUE SEA ESTA URL
-    projectId: "melodystream123",
-    storageBucket: "melodystream123.firebasestorage.app",
-    messagingSenderId: "640160988809",
-    appId: "1:640160988809:web:d0995d302123ccf0431058"
+// --- DATOS MANUALES DE CHOPIN ---
+// Aquí es donde defines los álbumes y sus canciones.
+const datosChopin = {
+    "album_1": {
+        "nombre": "Chopin: Piano Concerto No. 1 in E Minor, Op. 11, B. 53",
+        "canciones": [
+            {
+                "titulo": "I. Allegro maestoso",
+                // 🛑 REEMPLAZA ESTE VALOR con el enlace SRC del iframe de Spotify
+                "spotifyLink": "https://open.spotify.com/embed/track/ID" 
+            },
+            {
+                "titulo": "II. Romance. Larghetto",
+                "spotifyLink": "https://open.spotify.com/embed/album/ID"
+            },
+            {
+                "titulo": "III. Rondo. Vivace",
+                "spotifyLink": "https://open.spotify.com/embed/album/ID\n\n5"
+            }
+        ]
+    },
+    "album_2": {
+        "nombre": "Debussy & Chopin: The Shape of Sound",
+        "canciones": [
+            {
+                "titulo": "Nocturnes, Op. 9: No. 1",
+                "spotifyLink": "https://open.spotify.com/embed/album/ID\n\n6"
+            },
+            {
+                "titulo": "Nocturnes, Op. 55: No. 1",
+                "spotifyLink": "https://open.spotify.com/embed/album/ID\n\n7"
+            },
+            {
+                "titulo": "Scherzo No. 1 in B Minor",
+                "spotifyLink": "https://open.spotify.com/embed/album/ID\n\n8"
+            }
+        ]
+    }
 };
 
-// Inicializar
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-
-// ID de Chopin según tu base de datos (marioartista -> chopin -> idartista: 1)
-const ARTIST_ID = 1; 
-
+// --- LÓGICA DEL MENÚ Y REPRODUCCIÓN ---
 document.addEventListener('DOMContentLoaded', () => {
-    cargarAlbums();
-});
-
-// --- 1. CARGAR ÁLBUMES AL DESPLEGABLE ---
-function cargarAlbums() {
-    const albumsRef = ref(db, 'marioalbums');
-    const selectElement = document.getElementById('albumSelect');
-
-    // Escuchamos 'marioalbums'
-    onValue(albumsRef, (snapshot) => {
-        selectElement.innerHTML = '<option value="" disabled selected>Selecciona un álbum...</option>';
-        const data = snapshot.val();
-
-        if (data) {
-            // Recorremos todos los álbumes para buscar los de Chopin (idartista == 1)
-            Object.keys(data).forEach(key => {
-                const album = data[key];
-                // 'key' es el nombre del álbum (ej: "Nocturnos de Chopin")
-                // 'album' es el objeto {idalbum: X, idartista: Y}
-                
-                if (album.idartista == ARTIST_ID) {
-                    const option = document.createElement('option');
-                    option.value = album.idalbum; // El valor será el ID numérico (ej: 4)
-                    option.textContent = key;     // El texto visible será el nombre del álbum
-                    selectElement.appendChild(option);
-                }
-            });
-        }
-    });
-
-    // Añadimos el evento para cuando el usuario cambie de álbum
-    selectElement.addEventListener('change', (e) => {
-        const albumIdSeleccionado = e.target.value;
-        cargarCanciones(albumIdSeleccionado);
-    });
-}
-
-// --- 2. CARGAR CANCIONES DEL ÁLBUM SELECCIONADO ---
-function cargarCanciones(albumId) {
-    const cancionesRef = ref(db, 'mariocanciones');
+    // Referencias a los elementos del HTML
+    const albumSelect = document.getElementById('albumSelect');
     const songsContainer = document.getElementById('songsContainer');
     const songList = document.getElementById('songList');
+
+    // 1. Llenar el menú desplegable (Se ejecuta al cargar la página)
+    albumSelect.innerHTML = '<option value="" disabled selected>-- Elige un álbum --</option>';
     
-    // Mostramos el contenedor
-    songsContainer.style.display = 'block';
-    songList.innerHTML = 'Cargando canciones...';
+    for (const key in datosChopin) {
+        const album = datosChopin[key];
+        const option = document.createElement('option');
+        option.value = key;              // album_1, album_2...
+        option.textContent = album.nombre; // El nombre visible del álbum
+        albumSelect.appendChild(option);
+    }
 
-    onValue(cancionesRef, (snapshot) => {
-        songList.innerHTML = ''; // Limpiar lista
-        const data = snapshot.val();
+    // 2. Evento para cargar canciones al cambiar la selección
+    albumSelect.addEventListener('change', (e) => {
+        const albumKey = e.target.value;
+        const album = datosChopin[albumKey];
+        
+        if (!album) return;
 
-        if (data) {
-            let cancionesEncontradas = false;
+        // Mostrar la lista y limpiarla
+        songList.innerHTML = '';
+        songsContainer.style.display = 'block';
 
-            Object.keys(data).forEach(key => {
-                const cancion = data[key];
-                // Filtramos por idalbum. Nota: albumId viene del select como string, convertimos a int si es necesario
-                if (cancion.idalbum == albumId) {
-                    cancionesEncontradas = true;
-                    
-                    const li = document.createElement('li');
-                    li.textContent = key; // 'key' es el nombre de la canción (ej: "AHORA QUÉ")
-                    li.className = 'song-item';
-                    
-                    // Al hacer click, reproducimos
-                    li.addEventListener('click', () => {
-                        // AQUÍ BUSCAMOS EL LINK DE SPOTIFY
-                        // Asumimos que añadiste el campo "spotify_uri" en la base de datos
-                        // Si no existe, usamos uno de prueba o mostramos alerta
-                        const uri = cancion.spotify_uri || ""; 
-                        reproducirSpotify(uri);
-                    });
+        // Crear la lista <li> por cada canción
+        album.canciones.forEach(cancion => {
+            const li = document.createElement('li');
+            li.textContent = "🎵 " + cancion.titulo;
+            
+            // Estilos para que se vea bien
+            li.style.cursor = "pointer";
+            li.style.padding = "10px";
+            li.style.borderBottom = "1px solid rgba(255,255,255,0.2)";
+            li.style.color = "white"; 
+            li.style.textAlign = "left";
 
-                    songList.appendChild(li);
-                }
+            // Efecto Hover
+            li.onmouseover = () => li.style.backgroundColor = "rgba(255,255,255,0.1)";
+            li.onmouseout = () => li.style.backgroundColor = "transparent";
+
+            // 3. Evento Click para reproducir
+            li.addEventListener('click', () => {
+                mostrarReproductor(cancion.spotifyLink);
             });
 
-            if (!cancionesEncontradas) {
-                songList.innerHTML = '<li>No hay canciones en este álbum todavía.</li>';
-            }
-        }
+            songList.appendChild(li);
+        });
     });
-}
+});
 
-// --- 3. REPRODUCIR (INSERTAR IFRAME) ---
-function reproducirSpotify(uri) {
+/**
+ * Inserta el iframe del reproductor de Spotify en el contenedor.
+ * @param {string} link - El URL (src) del iframe de Spotify.
+ */
+function mostrarReproductor(link) {
     const playerContainer = document.getElementById('playerContainer');
-    const embedContainer = document.getElementById('spotifyEmbed');
+    if(!playerContainer) return;
 
-    if (!uri) {
-        alert("Esta canción no tiene enlace de Spotify configurado en la base de datos.");
-        return;
+    if (!link || link.includes("AQUI_PEGAS_EL_CODIGO_DE_SPOTIFY")) {
+         playerContainer.innerHTML = `<h3 style="color:red;">Error: Falta el enlace de Spotify para esta canción.</h3>`;
+         return;
     }
-
-    // Convertir URI de Spotify (spotify:track:...) a URL Embed (https://open.spotify.com/embed/...)
-    // O si guardas el link entero "https://open.spotify.com/track/...", hay que ajustarlo.
-    // Asumiremos que guardas la URI tipo "spotify:track:XXXXX"
     
-    // Truco: Reemplazamos los dos puntos para formar la URL
-    // De: spotify:track:12345 
-    // A:  https://open.spotify.com/embed/track/12345
-    
-    let embedUrl = "";
-    if (uri.startsWith('spotify:')) {
-        const parts = uri.split(':');
-        embedUrl = `https://open.spotify.com/embed/${parts[1]}/${parts[2]}`;
-    } else {
-        // Si pegaste el link HTTP directo
-        embedUrl = uri; 
-    }
-
-    playerContainer.style.display = 'block';
-    embedContainer.innerHTML = `
+    playerContainer.innerHTML = `
+        <h3 style="color:white; margin-bottom:10px;">Reproduciendo:</h3>
         <iframe 
-            src="${embedUrl}" 
+            style="border-radius:12px" 
+            src="${link}" 
             width="100%" 
             height="152" 
             frameBorder="0" 
