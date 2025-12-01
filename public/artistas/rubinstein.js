@@ -4,19 +4,19 @@ const datosRubinstein = {
         "canciones": [
             {
                 "titulo": "Mazurka Op. 67 No. 2 For Piano",
-                "spotifyLink": "AQUI_LINK_SPOTIFY" 
+                "spotifyLink": "https://open.spotify.com/embed/track/5GG2WTUsFEE5dV1uvOCr2L?utm_source=generator" 
             },
             {
                 "titulo": "3 Movements Perpetuels - No. 1",
-                "spotifyLink": "AQUI_LINK_SPOTIFY"
+                "spotifyLink": "https://open.spotify.com/embed/track/313TBejqmLskZwwqSyVvjp?utm_source=generator"
             },
             {
                 "titulo": "3 Movements Perpetuels - No. 2",
-                "spotifyLink": "AQUI_LINK_SPOTIFY"
+                "spotifyLink": "https://open.spotify.com/embed/track/30paQ7xSwKOtMsdSFxJv8y?utm_source=generator"
             },
             {
                 "titulo": "Hungarian Rhapsody No. 10",
-                "spotifyLink": "AQUI_LINK_SPOTIFY"
+                "spotifyLink": "https://open.spotify.com/embed/track/57VgIgqAI76khUbXu3fsmQ?utm_source=generator"
             }
         ]
     },
@@ -25,19 +25,19 @@ const datosRubinstein = {
         "canciones": [
             {
                 "titulo": "1. Allegro ma non tanto",
-                "spotifyLink": "AQUI_LINK_SPOTIFY"
+                "spotifyLink": "https://open.spotify.com/embed/track/6mq2sYTv7s8EUp6GYFbEYs?utm_source=generator"
             },
             {
                 "titulo": "2. Dumka. Andante con moto",
-                "spotifyLink": "AQUI_LINK_SPOTIFY"
+                "spotifyLink": "https://open.spotify.com/embed/track/0JftRsesM4sMAaNXMLM57O?utm_source=generator"
             },
             {
                 "titulo": "3. Scherzo. Molto vivace",
-                "spotifyLink": "AQUI_LINK_SPOTIFY"
+                "spotifyLink": "https://open.spotify.com/embed/track/4GoiB9mD4JGO1A13aOrVox?utm_source=generator"
             },
             {
                 "titulo": "4. Finale. Allegro",
-                "spotifyLink": "AQUI_LINK_SPOTIFY"
+                "spotifyLink": "https://open.spotify.com/embed/track/2PwwyOBhmKn4Y2Od96pqU6?utm_source=generator"
             }
         ]
     }

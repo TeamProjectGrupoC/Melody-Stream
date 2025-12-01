@@ -4,19 +4,19 @@ const datosQuevedo = {
         "canciones": [
             {
                 "titulo": "AHORA QUÉ",
-                "spotifyLink": "AQUI_LINK_SPOTIFY" 
+                "spotifyLink": "https://open.spotify.com/embed/track/0qnJAwl50LPoswiUUiKfm7?utm_source=generator" 
             },
             {
                 "titulo": "VISTA AL MAR",
-                "spotifyLink": "AQUI_LINK_SPOTIFY"
+                "spotifyLink": "https://open.spotify.com/embed/track/3aVC2o93aAvQxCSAPlj9Uo?utm_source=generator"
             },
             {
                 "titulo": "PLAYA DEL INGLÉS",
-                "spotifyLink": "AQUI_LINK_SPOTIFY"
+                "spotifyLink": "https://open.spotify.com/embed/track/3y33vvSSP8dNie0hDK4CvF?utm_source=generator"
             },
             {
                 "titulo": "PUNTO G",
-                "spotifyLink": "AQUI_LINK_SPOTIFY"
+                "spotifyLink": "https://open.spotify.com/embed/track/1fcP2ZJG2ouG99iU2nI6HT?utm_source=generator"
             }
         ]
     },
@@ -25,15 +25,15 @@ const datosQuevedo = {
         "canciones": [
             {
                 "titulo": "BUENAS NOCHES",
-                "spotifyLink": "AQUI_LINK_SPOTIFY"
+                "spotifyLink": "https://open.spotify.com/embed/track/1JkI7KcMNuIBZZoWQkcveV?utm_source=generator"
             },
             {
-                "titulo": "Canción 2 (Rellena el nombre)",
-                "spotifyLink": "AQUI_LINK_SPOTIFY"
+                "titulo": "KASSANDRA",
+                "spotifyLink": "https://open.spotify.com/embed/track/6mP16Mr2X3ZU2bNmWBUqzK?utm_source=generator"
             },
             {
-                "titulo": "Canción 3 (Rellena el nombre)",
-                "spotifyLink": "AQUI_LINK_SPOTIFY"
+                "titulo": "DURO",
+                "spotifyLink": "https://open.spotify.com/embed/track/18ngz35nTD4rzldysVtN4o?utm_source=generator"
             }
         ]
     }
