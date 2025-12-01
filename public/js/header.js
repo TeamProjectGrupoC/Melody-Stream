@@ -22,6 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const header = document.getElementById("headerPrincipal") || document.querySelector("header");
   // asegurar que exista el nav/ul
   const nav = header?.querySelector("#NavPrincipal") || header?.querySelector("nav");
+
+  let isMaster = false;
+  
   // buscar o crear el enlace de login/profile
   let loginProfileLink = document.getElementById("loginProfileLink");
   if (!loginProfileLink) {
@@ -150,6 +153,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (headerPic) headerPic.src = "images/logos/silueta.png";
       document.body.classList.add("header-ready");
       return;
+    }
+
+    // Detect master
+    if (user.email === "teamprojectgrupoc@gmail.com") {
+      isMaster = true;
+      header.style.backgroundColor = "gold";
     }
 
     if (loginProfileLink) {
