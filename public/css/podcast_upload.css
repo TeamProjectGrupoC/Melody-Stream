@@ -61,6 +61,22 @@ main h1 {
   transition: 0.3s ease border-color, box-shadow;
 }
 
+#formContainer input[type="file"]::-webkit-file-upload-button {
+  background-color: #4a4a4a; 
+  color: var(--color-blanco); 
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  margin-right: 15px; 
+  transition: background-color 0.3s ease;
+
+}
+
+#formContainer input[type="file"]::-webkit-file-upload-button:hover {
+  background-color: #6a6a6a;
+}
+
 /* Efectos focus */
 #formContainer input:focus,
 #formContainer textarea:focus {

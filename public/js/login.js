@@ -59,11 +59,10 @@ async function main() {
   function showUserData(ud, uid) {
     dataDiv.style.display = 'block';
     dataDiv.innerHTML = `
-            <h3>My Data (${uid})</h3>
+            <h3>My Data</h3>
             <p><strong>Username:</strong> ${ud.username}</p>
             <p><strong>Phone:</strong> ${ud.phone}</p>
             <p><strong>Email:</strong> ${ud.email}</p>
-            <p><strong>Favorite Songs:</strong> ${JSON.stringify(ud.favorite_songs, null, 2)}</p>
         `;
     signOutBtn.style.display = 'inline-block';
   }
@@ -119,8 +118,9 @@ async function main() {
       if (extraInfoForm) extraInfoForm.style.display = 'none';
       const ud = await fetchUserData(user.uid);
       showUserData(ud, user.uid);
-      if (msg) msg.textContent = `Profile saved! Logged in as ${user.email}.`;
-    } catch (err) {
+      if (msg) msg.innerHTML = `Profile saved! Logged in as <span class="user-email">${user.email}</span>.`;
+    } 
+    catch (err) {
       console.error(err);
       if (msg) msg.textContent = `Error saving profile: ${err.message}`;
     }

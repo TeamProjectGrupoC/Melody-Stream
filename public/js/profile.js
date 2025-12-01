@@ -59,7 +59,7 @@ function cargarDatosDePerfil() {
           // Mostrar datos de perfil
           userDataDiv.style.display = 'block';
           userDataDiv.innerHTML = `
-            <h3>Profile Information</h3>
+            <h2 class="profileInformation">Profile Information</h2>
             <p><strong>Username:</strong> ${userData.username || "—"}</p>
             <p><strong>Phone:</strong> ${userData.phone || "—"}</p>
             <p><strong>Email:</strong> ${user.email}</p>
@@ -293,7 +293,7 @@ async function loadUserFolders(uid) {
     const foldersRef = databaseRef(db, "folders");
     const snap = await get(foldersRef);
     if (!snap.exists()) {
-      contentWrapper.innerHTML = `<p class="empty-message">You have not created any folders.</p>`;
+      contentWrapper.innerHTML = `<p>You have not created any folders.</p>`;
       return;
     }
 
@@ -335,23 +335,22 @@ async function loadUserFolders(uid) {
 
         viewBtn.setAttribute('data-folder-id', fid);
         viewBtn.setAttribute('data-folder-name', f.name || '');
-        
+
         item.appendChild(viewBtn);
 
         list.appendChild(item);
       }
     }
 
-    contentWrapper.innerHTML = "";
+    contentWrapper.innerHTML = '';
     if (found) contentWrapper.appendChild(list);
-    else{
-      const emptyMessageHTML = `<p class="empty-message">You have not created any folders.</p>`;
-      contentWrapper.innerHTML = emptyMessageHTML;
+    else{      
+      contentWrapper.innerHTML = '<p class="empty-message">You have not created any folders.</p>';;
     }
   } 
   catch (err) {
     console.error("Error loading user folders:", err);
-    contentWrapper.innerHTML = "<p>Failed to load your folders.</p>";
+    contentWrapper.innerHTML = '<p class="empty-message">Failed to load your folders.</p>';
   }
 }
 
