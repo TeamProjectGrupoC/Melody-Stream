@@ -46,17 +46,37 @@
 
 
 
-    <main >       
-        <section class="PerfilArtista">
-                <h1>Frédéric Chopin</h1>
-                <div class="artist-image">
-                <img src="../images/chopin.jpeg" alt="Chopin Image">
-            </div>
-        </section> 
+    <main>       
+    <section class="PerfilArtista">
+        <h1>Frédéric Chopin</h1>
+        <div class="artist-image">
+            <img src="../images/chopin.jpeg" alt="Chopin Image">
+        </div>
+    </section> 
 
+    <section class="MusicSelector">
+        <h2>Discografía</h2>
+        
+        <div class="selector-container">
+            <label for="albumSelect">Elige un álbum:</label>
+            <select id="albumSelect">
+                <option value="" disabled selected>Cargando álbumes...</option>
+            </select>
+        </div>
 
+        <div id="songsContainer" class="songs-list" style="display:none;">
+            <h3>Canciones</h3>
+            <ul id="songList">
+                </ul>
+        </div>
 
-    </main>
+        <div id="playerContainer" class="spotify-player" style="display:none;">
+            <h3>Reproduciendo:</h3>
+            <div id="spotifyEmbed">
+                </div>
+        </div>
+    </section>
+</main>
             <footer id="footerPrincipal">
       <h2 id="footer-title">MELODY STREAM</h2>
       <div id="footer-follow">
