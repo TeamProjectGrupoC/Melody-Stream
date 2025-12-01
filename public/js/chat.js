@@ -342,6 +342,8 @@ async function main() {
         meta.appendChild(title);
 
         if (att.author) {
+            console.log("ENTRANDO EN IF ATT.AUTHOR, ATT = ", att);
+
             const author = document.createElement("p");
             author.textContent = att.author;
             meta.appendChild(author);
