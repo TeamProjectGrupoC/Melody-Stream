@@ -409,8 +409,10 @@ async function main() {
                         const songRef = ref(db, `users/${user.uid}/favoritos/${att.title}`);
                         const snap = await get(songRef);
 
-                        if (snap.exists())
-                            return alert("This song is already in your favourites!");
+                        if (snap.exists()){
+                            alert("This song is already in your favourites!");
+                            return;
+                        }
 
                         await set(songRef, {
                             name: att.title,
