@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const songsContainer = document.getElementById('songsContainer');
     const songList = document.getElementById('songList');
 
-    albumSelect.innerHTML = '<option value="" disabled selected>-- Elige un álbum --</option>';
+    albumSelect.innerHTML = '<option value="" disabled selected>-- Select an album --</option>';
     
     for (const key in datosQuevedo) {
         const album = datosQuevedo[key];
@@ -94,7 +94,7 @@ function mostrarReproductor(link) {
     }
     
     playerContainer.innerHTML = `
-        <h3 style="color:white; margin-bottom:10px;">Reproduciendo:</h3>
+        <h3 style="color:white; margin-bottom:10px;">Playing:</h3>
         <iframe style="border-radius:12px" src="${link}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
     `;
 }
