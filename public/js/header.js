@@ -158,7 +158,19 @@ document.addEventListener("DOMContentLoaded", () => {
     // Detect master
     if (user.email === "teamprojectgrupoc@gmail.com") {
       isMaster = true;
-      header.style.backgroundColor = "gold";
+      header.style.background = `
+        linear-gradient(
+          135deg,
+          #FFD700 0%,
+          #FFB700 25%,
+          #FFCC33 50%,  /* tono amarillo claro en vez de blanco */
+          #FFD700 75%,
+          #FFA500 100%
+        )
+      `;
+      header.style.border = "2px solid #B8860B"; // borde dorado oscuro
+      header.style.color = "#fff"; // texto visible
+      header.style.fontWeight = "bold";
     }
 
     if (loginProfileLink) {
