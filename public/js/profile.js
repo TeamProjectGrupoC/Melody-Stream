@@ -59,7 +59,7 @@ function cargarDatosDePerfil() {
           // Mostrar datos de perfil
           userDataDiv.style.display = 'block';
           userDataDiv.innerHTML = `
-            <h3>Profile Information</h3>
+            <h2 class="profileInformation">Profile Information</h2>
             <p><strong>Username:</strong> ${userData.username || "—"}</p>
             <p><strong>Phone:</strong> ${userData.phone || "—"}</p>
             <p><strong>Email:</strong> ${user.email}</p>
@@ -108,32 +108,44 @@ function cargarDatosDePerfil() {
 
 async function loadUserPodcasts(uid) {
   let container = document.getElementById('userPodcasts');
+  let heading = document.getElementById('podcast-heading');
+
   if (!container) {
     container = document.createElement('div');
     container.id = 'userPodcasts';
-    const heading = document.createElement('h3');
-    heading.textContent = 'My Podcasts';
+    container.classList.add('module-box');
+
+    heading = document.createElement('h2');
+    heading.textContent = 'My Uploaded Podcasts';
+    heading.id = 'podcast-heading';
+    heading.classList.add('module-title');
+
     const profileMain = document.querySelector('main') || document.body;
-    profileMain.appendChild(heading);
+    container.appendChild(heading);
     profileMain.appendChild(container);
   }
 
-  container.innerHTML = 'Loading your podcasts...';
+  let contentWrapper = document.getElementById('podcasts-content-wrapper');
+  if (!contentWrapper) {
+        contentWrapper = document.createElement('div');
+        contentWrapper.id = 'podcasts-content-wrapper';
+        container.appendChild(contentWrapper);
+  }
+
+  contentWrapper.innerHTML = 'Loading your podcasts...';
 
   try {
     const podcastsRef = databaseRef(db, 'podcasts');
     const snapshot = await get(podcastsRef);
 
     if (!snapshot.exists()) {
-      container.innerHTML = '<p>You have not uploaded any podcasts.</p>';
+      contentWrapper.innerHTML = '<p>You have not uploaded any podcasts.</p>';
       return;
     }
 
     const podcasts = snapshot.val();
     const list = document.createElement('div');
-    list.style.display = 'grid';
-    list.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';
-    list.style.gap = '1.5rem';
+    list.className = 'podcast-list';
     
     let found = false;
 
@@ -153,8 +165,9 @@ async function loadUserPodcasts(uid) {
       const p = podcasts[pid];
       if (p.idcreador === uid) {
         found = true;
+
         const item = document.createElement('div');
-        item.className = 'podcast-item';
+        item.className = 'podcast-card';
 
         // Imagen
         const img = document.createElement('img');
@@ -182,11 +195,13 @@ async function loadUserPodcasts(uid) {
           item.appendChild(audio);
         }
 
+        const controlWrapper = document.createElement('div');
+        controlWrapper.className = 'folder-selection-container';
+
         // Select de carpetas
         const folderLabel = document.createElement('label');
         folderLabel.textContent = 'Folder:';
         folderLabel.htmlFor = `folder-select-${pid}`;
-        item.appendChild(folderLabel);
 
         const select = document.createElement('select');
         select.id = `folder-select-${pid}`;
@@ -203,11 +218,18 @@ async function loadUserPodcasts(uid) {
           if (p.folderId && String(p.folderId) === String(fid)) opt.selected = true;
           select.appendChild(opt);
         }
-        item.appendChild(select);
+
+        controlWrapper.appendChild(folderLabel);
+        controlWrapper.appendChild(select);
 
         // Botón "Add to folder"
         const addBtn = document.createElement('button');
         addBtn.textContent = 'Add to folder';
+        addBtn.classList.add('main-button', 'add-to-folder-btn');
+
+        controlWrapper.appendChild(addBtn);
+        item.appendChild(controlWrapper);
+
         addBtn.addEventListener('click', async () => {
           const chosen = select.value || null;
           try {
@@ -220,52 +242,64 @@ async function loadUserPodcasts(uid) {
             alert('Error updating folder: ' + (err.message || err));
           }
         });
-        item.appendChild(addBtn);
 
         list.appendChild(item);
       }
     }
 
-    container.innerHTML = '';
+    contentWrapper.innerHTML = '';
     if (found) {
-      container.appendChild(list);
+      contentWrapper.appendChild(list);
     } else {
-      container.innerHTML = '<p>You have not uploaded any podcasts.</p>';
+      contentWrapper.innerHTML = '<p class="empty-message">You have not uploaded any podcasts.</p>';
     }
 
   } catch (err) {
     console.error('Error loading user podcasts:', err);
-    container.innerHTML = '<p>Failed to load your podcasts.</p>';
+    contentWrapper.innerHTML = '<p class="empty-message">Failed to load your podcasts.</p>';
   }
 }
 
 async function loadUserFolders(uid) {
   let container = document.getElementById("userFolders");
+  let heading = document.getElementById('folders-heading');
+
   if (!container) {
     container = document.createElement("div");
     container.id = "userFolders";
-    const heading = document.createElement("h3");
+    container.classList.add('module-box');
+
+    heading = document.createElement("h2");
     heading.textContent = "My Folders";
+    heading.id = 'folders-heading';
+    heading.classList.add('module-title');
+
     const profileMain = document.querySelector("main") || document.body;
-    profileMain.appendChild(heading);
+    
+    container.appendChild(heading);
     profileMain.appendChild(container);
   }
 
-  container.innerHTML = "Loading your folders...";
+  let contentWrapper = document.getElementById('folders-content-wrapper');
+  if (!contentWrapper) {
+        contentWrapper = document.createElement('div');
+        contentWrapper.id = 'folders-content-wrapper';
+        container.appendChild(contentWrapper); // Se añade *después* del título
+  }
+
+  contentWrapper.innerHTML = "Loading your folders...";
 
   try {
     const foldersRef = databaseRef(db, "folders");
     const snap = await get(foldersRef);
     if (!snap.exists()) {
-      container.innerHTML = "<p>You have not created any folders.</p>";
+      contentWrapper.innerHTML = `<p>You have not created any folders.</p>`;
       return;
     }
 
     const folders = snap.val();
     const list = document.createElement("div");
-    list.style.display = 'grid';
-    list.style.gridTemplateColumns = 'repeat(auto-fit, minmax(280px, 1fr))';
-    list.style.gap = '1.5rem';
+    list.className = 'folder-list';
     
     let found = false;
     
@@ -297,21 +331,26 @@ async function loadUserFolders(uid) {
         // View button
         const viewBtn = document.createElement("button");
         viewBtn.textContent = "View";
-        viewBtn.className = "view-folder";
+        viewBtn.classList.add("main-button", "view-folder");
+
         viewBtn.setAttribute('data-folder-id', fid);
         viewBtn.setAttribute('data-folder-name', f.name || '');
+
         item.appendChild(viewBtn);
 
         list.appendChild(item);
       }
     }
 
-    container.innerHTML = "";
-    if (found) container.appendChild(list);
-    else container.innerHTML = "<p>You have not created any folders.</p>";
-  } catch (err) {
+    contentWrapper.innerHTML = '';
+    if (found) contentWrapper.appendChild(list);
+    else{      
+      contentWrapper.innerHTML = '<p class="empty-message">You have not created any folders.</p>';;
+    }
+  } 
+  catch (err) {
     console.error("Error loading user folders:", err);
-    container.innerHTML = "<p>Failed to load your folders.</p>";
+    contentWrapper.innerHTML = '<p class="empty-message">Failed to load your folders.</p>';
   }
 }
 

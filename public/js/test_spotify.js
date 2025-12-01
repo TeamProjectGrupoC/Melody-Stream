@@ -34,56 +34,82 @@ let userEmail = null;
 let lastDuration = 0;
 
 // /***********************
+//  * 0. TO VALIDATE TOKEN
+//  ***********************/
+async function validateToken(token) {
+  try {
+    const res = await fetch("https://api.spotify.com/v1/me", {
+      headers: { Authorization: "Bearer " + token },
+    });
+
+    return res.ok; // true si el token funciona
+  } catch {
+    return false;
+  }
+}
+
+// /***********************
 //  * 1. OBTAIN TOKEN
 //  ***********************/
 async function getToken() {
+  const savedToken = localStorage.getItem("spotify_access_token");
+
+  // 1. ¿Hay token guardado?
+  if (savedToken) {
+    console.log("Token encontrado en localStorage. Validando...");
+
+    // 2. Validarlo llamando a Spotify
+    if (await validateToken(savedToken)) {
+      console.log("Token válido. Usándolo.");
+      accessToken = savedToken;
+
+      await getUserProfile();
+      displayUserStatus();
+      if (isPremium) loadWebPlaybackSDK();
+
+      return; 
+    }
+
+    // 3. Token inválido → borrar
+    console.warn("Token guardado inválido. Borrando...");
+    localStorage.removeItem("spotify_access_token");
+  }
+
+  // 4. Si no hay token guardado → necesitas ?code=
   if (!code) {
     document.getElementById("trackInfo").innerHTML =
       "<p>Code not found. Try logging in again.</p>";
     return;
   }
 
+  // 5. Código original para obtener token de la Cloud Function
   try {
     const res = await fetch(
       `https://us-central1-melodystream123.cloudfunctions.net/getSpotifyToken?code=${code}`
     );
-    
-    // 💡 AÑADIR ESTA VERIFICACIÓN ANTES DE res.json()
+
     if (!res.ok) {
-        // Capturamos el texto del error 500 para el console.error
-        const errorText = await res.text();
-        console.error(`HTTP Error ${res.status} al obtener el token:`, errorText);
-        // Lanzamos un error controlado para que sea capturado por el catch
-        throw new Error(`Server error (${res.status}). Cannot get the token. Check Cloud Function logs.`);
+      const errorText = await res.text();
+      console.error(`HTTP Error ${res.status} al obtener el token:`, errorText);
+      throw new Error(`Server error`);
     }
 
     const data = await res.json();
-
-    if (!data.access_token) {
-      document.getElementById("trackInfo").innerHTML =
-        "<p>Error getting token.</p>";
-      return;
-    }
-
     accessToken = data.access_token;
 
-    //Lo guardamos para los artistas
     localStorage.setItem("spotify_access_token", accessToken);
 
-
-    // Check user type (premium or not)
     await getUserProfile();
-
     displayUserStatus();
-
-    // If premium : initialize Web Playback SDK
     if (isPremium) loadWebPlaybackSDK();
+
   } catch (err) {
-    console.error(err);
+    console.error("Error getting the token", err);
     document.getElementById("trackInfo").innerHTML =
       "<p>Error getting the token.</p>";
   }
 }
+
 
 /***********************
  *  2. GET INFO OF THE USER
