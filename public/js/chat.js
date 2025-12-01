@@ -347,12 +347,6 @@ async function main() {
             const author = document.createElement("p");
             author.textContent = att.author;
             meta.appendChild(author);
-
-            const btn = document.createElement("button");
-            btn.textContent = "Add to favourites1";
-            btn.style.marginTop = "10px";
-            btn.className = "main-button";
-            meta.appendChild(btn);
         }
 
         // Reproduce songs
@@ -366,7 +360,7 @@ async function main() {
         }
 
 
-        //if (!isMine) {
+        if (!isMine) {
             // Add artist to favourites
             if (att.author === "Favourite Artist") {
                 const btn = document.createElement("button");
@@ -440,7 +434,7 @@ async function main() {
 
                 meta.appendChild(btnSong);
             }
-        //}
+        }
         
 
         card.appendChild(meta);

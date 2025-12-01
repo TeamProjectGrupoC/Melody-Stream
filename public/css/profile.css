@@ -893,8 +893,9 @@ main a:hover {
 
 #shareArtistModal option,
 #shareSongModal option {
-    background-color: #1e1e2e !important;
-    color: white !important;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--color-blanco);
+
 }
 
 #shareArtistConfirm,
