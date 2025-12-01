@@ -7,15 +7,15 @@ const datosChopin = {
             {
                 "titulo": "I. Allegro maestoso",
                 // 🛑 REEMPLAZA ESTE VALOR con el enlace SRC del iframe de Spotify
-                "spotifyLink": "https://open.spotify.com/embed/track/6mP16Mr2X3ZU2bNmWBUqzK?utm_source=generator" 
+                "spotifyLink": "https://open.spotify.com/embed/track/4vvIqOWB5BH14ai8RluY50?utm_source=generator" 
             },
             {
                 "titulo": "II. Romance. Larghetto",
-                "spotifyLink": "https://open.spotify.com/embed/album/ID"
+                "spotifyLink": "https://open.spotify.com/embed/track/35GtVdmBJSSU1uHitWby9R?utm_source=generator"
             },
             {
                 "titulo": "III. Rondo. Vivace",
-                "spotifyLink": "https://open.spotify.com/embed/album/ID\n\n5"
+                "spotifyLink": "https://open.spotify.com/embed/track/4YeAyCsoMGM0c6OjrVPZyw?utm_source=generator"
             }
         ]
     },
@@ -23,16 +23,16 @@ const datosChopin = {
         "nombre": "Debussy & Chopin: The Shape of Sound",
         "canciones": [
             {
-                "titulo": "Nocturnes, Op. 9: No. 1",
-                "spotifyLink": "https://open.spotify.com/embed/album/ID\n\n6"
+                "titulo": "Prelude, Livre I: No. 1,Danseuses de Delphes",
+                "spotifyLink": "https://open.spotify.com/embed/track/1sJuKWmOPqtZLaHqB1Q7NV?utm_source=generator"
             },
             {
-                "titulo": "Nocturnes, Op. 55: No. 1",
-                "spotifyLink": "https://open.spotify.com/embed/album/ID\n\n7"
+                "titulo": "Prelude, Livre II: No.8, Ondine",
+                "spotifyLink": "https://open.spotify.com/embed/track/26g7KVLyFfWxOQtiJyL0bX?utm_source=generator"
             },
             {
-                "titulo": "Scherzo No. 1 in B Minor",
-                "spotifyLink": "https://open.spotify.com/embed/album/ID\n\n8"
+                "titulo": "Preludes, Livre I: No.10, La Cathedrale Engloutie",
+                "spotifyLink": "https://open.spotify.com/embed/track/4svE7BJZwBNfWEnulNEwGO?utm_source=generator"
             }
         ]
     }
