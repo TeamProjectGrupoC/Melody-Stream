@@ -290,7 +290,7 @@ async function main() {
             }
 
             if (data.attachment) {
-                const card = buildAttachmentCard(data.attachment);
+                const card = buildAttachmentCard(data.attachment, data.sender);
                 div.appendChild(card);
             }
 
@@ -309,7 +309,7 @@ async function main() {
             typeof att.author === "string";
     }
 
-    function buildAttachmentCard(att) {
+    function buildAttachmentCard(att, senderId) {
 
         if (!att || !att.imageURL) {
             console.warn("⚠ Attachment inválido:", att);
@@ -319,11 +319,17 @@ async function main() {
         const card = document.createElement("div");
         card.className = "attachment-card";
 
+        // Logic to know who wheter i am the receptor or the sender
+        const currentUser = firebase.auth().currentUser;
+        const isMine = senderId === currentUser.uid;
+
+        // Image
         const img = document.createElement("img");
         img.src = att.imageURL;
         img.className = "attachment-image";
         card.appendChild(img);
 
+        // Text
         const meta = document.createElement("div");
         meta.className = "attachment-meta";
 
@@ -337,11 +343,89 @@ async function main() {
             meta.appendChild(author);
         }
 
-        if (att.audioURL && att.audioURL !== "") {
+        // Reproduce songs
+        const isSong = att.audioURL && att.audioURL !== "";
+        if (isSong) {
             const audio = document.createElement('audio');
             audio.controls = true;
             audio.src = att.audioURL;
             meta.appendChild(audio);
+        }
+
+        if (!isMine) {
+            // Add artist to favourites
+            if (att.author === "Favourite Artist") {
+                const btn = document.createElement("button");
+                btn.textContent = "Add to favourites";
+                btn.style.marginTop = "10px";
+                btn.className = "main-button";
+
+                btn.addEventListener("click", async () => {
+                    try {
+                        const user = firebase.auth().currentUser;
+                        if (!user) return alert("You must log in");
+
+                        const artistRef = firebase.database().ref(`users/${user.uid}/favourite_artists/${att.title}`);
+                        const snapshot = await artistRef.get();
+
+                        if (snapshot.exists()) {
+                            alert("This artist is already in your favourites!");
+                            return;
+                        }
+
+                        const artistData = {
+                            name: att.title,
+                            image: att.imageURL
+                        };
+
+                        // Save in firebase
+                        await artistRef.set(artistData);
+
+                        alert("Artist added to favourites!");
+                    } catch (err) {
+                        console.error(err);
+                        alert("Error saving artist");
+                    }
+                });
+
+                meta.appendChild(btn);
+            }
+
+            // Add song to favourites
+            if (isSong) {
+                const btnSong = document.createElement("button");
+                btnSong.textContent = "Add to favourite songs";
+                btnSong.className = "main-button";
+                btnSong.style.marginTop = "10px";
+
+                btnSong.addEventListener("click", async () => {
+                    try {
+                        const user = firebase.auth().currentUser;
+                        if (!user) return alert("You must log in");
+
+                        const songRef = firebase.database()
+                            .ref(`users/${user.uid}/favoritos/${att.title}`);
+
+                        const snap = await songRef.get();
+                        if (snap.exists())
+                            return alert("This song is already in your favourites!");
+
+                        await songRef.set({
+                            name: att.title,
+                            artist: att.author,
+                            albumImageUrl: att.imageURL,
+                            previewUrl: att.audioURL
+                        });
+
+                        alert("Song added to favourites!");
+                    } catch (err) {
+                        console.error(err);
+                        alert("Error saving song");
+                    }
+                });
+
+                meta.appendChild(btnSong);
+            }
         }
 
         card.appendChild(meta);
