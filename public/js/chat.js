@@ -290,7 +290,7 @@ async function main() {
             }
 
             if (data.attachment) {
-                const card = buildAttachmentCard(data.attachment);
+                const card = buildAttachmentCard(data.attachment, data.sender);
                 div.appendChild(card);
             }
 
@@ -314,7 +314,7 @@ async function main() {
             cachedUser = user;
     });
 
-    function buildAttachmentCard(att) {
+    function buildAttachmentCard(att, senderId) {
 
         if (!att || !att.imageURL) {
             console.warn("⚠ Attachment inválido:", att);
@@ -325,7 +325,7 @@ async function main() {
         card.className = "attachment-card";
 
         // Logic to know who wheter i am the receptor or the sender
-        const isMine = cachedUser.uid;
+        const isMine = senderId === cachedUser.uid;
 
         // Image
         const img = document.createElement("img");
@@ -357,11 +357,11 @@ async function main() {
         }
 
 
-        //if (!isMine) {
+        if (!isMine) {
             // Add artist to favourites
             if (att.author === "Favourite Artist") {
                 const btn = document.createElement("button");
-                btn.textContent = "Add to favourites1";
+                btn.textContent = "Add to favourite artists";
                 btn.style.marginTop = "10px";
                 btn.className = "main-button";
 
@@ -428,7 +428,7 @@ async function main() {
 
                 meta.appendChild(btnSong);
             }
-        //}
+        }
         
 
         card.appendChild(meta);
