@@ -356,7 +356,7 @@ async function main() {
             meta.appendChild(audio);
         }
 
-        if (!isMine) {
+        //if (!isMine) {
             // Add artist to favourites
             if (att.author === "Favourite Artist") {
                 const btn = document.createElement("button");
@@ -430,7 +430,7 @@ async function main() {
 
                 meta.appendChild(btnSong);
             }
-        }
+        //}
 
         card.appendChild(meta);
 
