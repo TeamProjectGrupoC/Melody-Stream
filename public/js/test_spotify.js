@@ -476,7 +476,7 @@ setInterval(() => {
         if (currentTimeEl) currentTimeEl.textContent = formatTime(state.position);
         if (totalTimeEl) totalTimeEl.textContent = formatTime(state.duration);
     });
-}, 500);
+}, 80);
 
 
 /***********************
