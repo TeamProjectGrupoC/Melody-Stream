@@ -34,30 +34,55 @@ let userEmail = null;
 let lastDuration = 0;
 
 // /***********************
+//  * 0. TO VALIDATE TOKEN
+//  ***********************/
+async function validateToken(token) {
+  try {
+    const res = await fetch("https://api.spotify.com/v1/me", {
+      headers: { Authorization: "Bearer " + token },
+    });
+
+    return res.ok; // true si el token funciona
+  } catch {
+    return false;
+  }
+}
+
+// /***********************
 //  * 1. OBTAIN TOKEN
 //  ***********************/
 async function getToken() {
-  // 1. Intentar cargar token desde localStorage
   const savedToken = localStorage.getItem("spotify_access_token");
 
+  // 1. ¿Hay token guardado?
   if (savedToken) {
-    console.log("Usando token almacenado.");
-    accessToken = savedToken;
+    console.log("Token encontrado en localStorage. Validando...");
 
-    await getUserProfile();
-    displayUserStatus();
+    // 2. Validarlo llamando a Spotify
+    if (await validateToken(savedToken)) {
+      console.log("Token válido. Usándolo.");
+      accessToken = savedToken;
 
-    if (isPremium) loadWebPlaybackSDK();
-    return;
+      await getUserProfile();
+      displayUserStatus();
+      if (isPremium) loadWebPlaybackSDK();
+
+      return; 
+    }
+
+    // 3. Token inválido → borrar
+    console.warn("Token guardado inválido. Borrando...");
+    localStorage.removeItem("spotify_access_token");
   }
 
-  // 2. Si no hay token guardado → usar ?code=
+  // 4. Si no hay token guardado → necesitas ?code=
   if (!code) {
     document.getElementById("trackInfo").innerHTML =
       "<p>Code not found. Try logging in again.</p>";
     return;
   }
 
+  // 5. Código original para obtener token de la Cloud Function
   try {
     const res = await fetch(
       `https://us-central1-melodystream123.cloudfunctions.net/getSpotifyToken?code=${code}`
@@ -70,24 +95,16 @@ async function getToken() {
     }
 
     const data = await res.json();
-
-    if (!data.access_token) {
-      document.getElementById("trackInfo").innerHTML =
-        "<p>Error getting token.</p>";
-      return;
-    }
-
     accessToken = data.access_token;
 
     localStorage.setItem("spotify_access_token", accessToken);
 
     await getUserProfile();
     displayUserStatus();
-
     if (isPremium) loadWebPlaybackSDK();
 
   } catch (err) {
-    console.error(err);
+    console.error("Error getting the token", err);
     document.getElementById("trackInfo").innerHTML =
       "<p>Error getting the token.</p>";
   }
