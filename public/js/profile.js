@@ -331,11 +331,11 @@ async function loadUserFolders(uid) {
         // View button
         const viewBtn = document.createElement("button");
         viewBtn.textContent = "View";
-        viewBtn.classList.add("main-button");
-        viewBtn.className = "view-folder";
+        viewBtn.classList.add("main-button", "view-folder");
 
         viewBtn.setAttribute('data-folder-id', fid);
         viewBtn.setAttribute('data-folder-name', f.name || '');
+        
         item.appendChild(viewBtn);
 
         list.appendChild(item);
