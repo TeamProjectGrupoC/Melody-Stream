@@ -356,6 +356,7 @@ async function main() {
         }
 
         // Reproduce songs
+        /*
         const isSong = att.audioURL && att.audioURL !== "";
         if (isSong) {
             const audio = document.createElement('audio');
@@ -363,6 +364,7 @@ async function main() {
             audio.src = att.audioURL;
             meta.appendChild(audio);
         }
+
 
         //if (!isMine) {
             // Add artist to favourites
@@ -439,6 +441,7 @@ async function main() {
                 meta.appendChild(btnSong);
             }
         //}
+        */
 
         card.appendChild(meta);
 
