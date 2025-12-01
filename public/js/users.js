@@ -37,7 +37,6 @@ onAuthStateChanged(auth, (user) => {
 
   // Detect master
   if (user.email === "teamprojectgrupoc@gmail.com") {
-    isMaster = true;
     document.getElementById("masterText").textContent = "Master User : You can see all information without following";
   }
 
