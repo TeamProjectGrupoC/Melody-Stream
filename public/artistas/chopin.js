@@ -1,147 +1,121 @@
-// --- IMPORTACIONES DE FIREBASE ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
-import { getDatabase, ref, onValue, query, orderByChild, equalTo } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 
-// --- TU CONFIGURACIÓN (Asegúrate que sea la correcta) ---
+// Configuración básica (si la necesitas para otras cosas, si no, este código funciona localmente con los datos de abajo)
 const firebaseConfig = {
-    apiKey: "TU_API_KEY", // <--- PON TU API KEY AQUÍ O MANTÉN LA QUE YA TENGAS
-    authDomain: "melodystream123.firebaseapp.com",
-    databaseURL: "https://melodystream123-default-rtdb.europe-west1.firebasedatabase.app", // <--- REVISA QUE SEA ESTA URL
-    projectId: "melodystream123",
-    storageBucket: "melodystream123.firebasestorage.app",
-    messagingSenderId: "640160988809",
-    appId: "1:640160988809:web:d0995d302123ccf0431058"
+    // ... tu configuración de firebase ...
 };
-
-// Inicializar
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// ID de Chopin según tu base de datos (marioartista -> chopin -> idartista: 1)
-const ARTIST_ID = 1; 
+// --- DATOS DE CHOPIN (Basados en tus capturas) ---
+const datosChopin = {
+    "album_1": {
+        "nombre": "Chopin: Piano Concerto No. 1 in E Minor, Op. 11, B. 53",
+        "canciones": [
+            {
+                "titulo": "Piano Concerto No. 1 in E Minor: I. Allegro maestoso",
+                // 👇 AQUÍ PEGAS EL LINK DE LA API DE SPOTIFY PARA ESTA CANCIÓN
+                "spotifyLink": "https://open.spotify.com/embed/track/6mP16Mr2X3ZU2bNmWBUqzK?utm_source=generator" width="100%" height="352" 
+            },
+            {
+                "titulo": "Piano Concerto No. 1 in E Minor: II. Romance. Larghetto",
+                // 👇 AQUÍ PEGAS EL LINK DE LA API DE SPOTIFY PARA ESTA CANCIÓN
+                "spotifyLink": "https://open.spotify.com/embed/track/TU_ID_DE_CANCION_AQUI_2"
+            },
+            {
+                "titulo": "Piano Concerto No. 1 in E Minor: III. Rondo. Vivace",
+                // 👇 AQUÍ PEGAS EL LINK DE LA API DE SPOTIFY PARA ESTA CANCIÓN
+                "spotifyLink": "https://open.spotify.com/embed/track/TU_ID_DE_CANCION_AQUI_3"
+            }
+        ]
+    },
+    "album_2": {
+        "nombre": "Debussy & Chopin: The Shape of Sound",
+        "canciones": [
+            {
+                "titulo": "Nocturnes, Op. 9: No. 1, Larghetto in B-Flat Minor",
+                "spotifyLink": "https://open.spotify.com/embed/track/TU_ID_DE_CANCION_AQUI_4"
+            },
+            {
+                "titulo": "Nocturnes, Op. 55: No. 1, Andante in F Minor",
+                "spotifyLink": "https://open.spotify.com/embed/track/TU_ID_DE_CANCION_AQUI_5"
+            },
+            {
+                "titulo": "Nocturnes, Op. 15: No. 1, Andante Cantabile in F Major",
+                "spotifyLink": "https://open.spotify.com/embed/track/TU_ID_DE_CANCION_AQUI_6"
+            },
+            {
+                "titulo": "Nocturnes, Op. 37: No. 1, Andante Sostenuto in G Minor",
+                "spotifyLink": "https://open.spotify.com/embed/track/TU_ID_DE_CANCION_AQUI_7"
+            },
+            {
+                "titulo": "Scherzo No. 1 in B Minor, Op. 20",
+                "spotifyLink": "https://open.spotify.com/embed/track/TU_ID_DE_CANCION_AQUI_8"
+            }
+        ]
+    }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
-    cargarAlbums();
-});
-
-// --- 1. CARGAR ÁLBUMES AL DESPLEGABLE ---
-function cargarAlbums() {
-    const albumsRef = ref(db, 'marioalbums');
-    const selectElement = document.getElementById('albumSelect');
-
-    // Escuchamos 'marioalbums'
-    onValue(albumsRef, (snapshot) => {
-        selectElement.innerHTML = '<option value="" disabled selected>Selecciona un álbum...</option>';
-        const data = snapshot.val();
-
-        if (data) {
-            // Recorremos todos los álbumes para buscar los de Chopin (idartista == 1)
-            Object.keys(data).forEach(key => {
-                const album = data[key];
-                // 'key' es el nombre del álbum (ej: "Nocturnos de Chopin")
-                // 'album' es el objeto {idalbum: X, idartista: Y}
-                
-                if (album.idartista == ARTIST_ID) {
-                    const option = document.createElement('option');
-                    option.value = album.idalbum; // El valor será el ID numérico (ej: 4)
-                    option.textContent = key;     // El texto visible será el nombre del álbum
-                    selectElement.appendChild(option);
-                }
-            });
-        }
-    });
-
-    // Añadimos el evento para cuando el usuario cambie de álbum
-    selectElement.addEventListener('change', (e) => {
-        const albumIdSeleccionado = e.target.value;
-        cargarCanciones(albumIdSeleccionado);
-    });
-}
-
-// --- 2. CARGAR CANCIONES DEL ÁLBUM SELECCIONADO ---
-function cargarCanciones(albumId) {
-    const cancionesRef = ref(db, 'mariocanciones');
+    const albumSelect = document.getElementById('albumSelect');
     const songsContainer = document.getElementById('songsContainer');
     const songList = document.getElementById('songList');
-    
-    // Mostramos el contenedor
-    songsContainer.style.display = 'block';
-    songList.innerHTML = 'Cargando canciones...';
 
-    onValue(cancionesRef, (snapshot) => {
-        songList.innerHTML = ''; // Limpiar lista
-        const data = snapshot.val();
+    // 1. Llenar el menú desplegable
+    for (const key in datosChopin) {
+        const album = datosChopin[key];
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = album.nombre;
+        albumSelect.appendChild(option);
+    }
 
-        if (data) {
-            let cancionesEncontradas = false;
+    // 2. Evento al cambiar de álbum
+    albumSelect.addEventListener('change', (e) => {
+        const albumKey = e.target.value;
+        const album = datosChopin[albumKey];
+        
+        // Limpiar lista anterior
+        songList.innerHTML = '';
+        songsContainer.style.display = 'block';
 
-            Object.keys(data).forEach(key => {
-                const cancion = data[key];
-                // Filtramos por idalbum. Nota: albumId viene del select como string, convertimos a int si es necesario
-                if (cancion.idalbum == albumId) {
-                    cancionesEncontradas = true;
-                    
-                    const li = document.createElement('li');
-                    li.textContent = key; // 'key' es el nombre de la canción (ej: "AHORA QUÉ")
-                    li.className = 'song-item';
-                    
-                    // Al hacer click, reproducimos
-                    li.addEventListener('click', () => {
-                        // AQUÍ BUSCAMOS EL LINK DE SPOTIFY
-                        // Asumimos que añadiste el campo "spotify_uri" en la base de datos
-                        // Si no existe, usamos uno de prueba o mostramos alerta
-                        const uri = cancion.spotify_uri || ""; 
-                        reproducirSpotify(uri);
-                    });
+        // Crear lista de canciones
+        album.canciones.forEach(cancion => {
+            const li = document.createElement('li');
+            li.textContent = "🎵 " + cancion.titulo;
+            li.style.cursor = "pointer";
+            li.style.padding = "10px";
+            li.style.borderBottom = "1px solid #444";
+            
+            // Efecto Hover simple
+            li.onmouseover = () => li.style.backgroundColor = "rgba(255,255,255,0.1)";
+            li.onmouseout = () => li.style.backgroundColor = "transparent";
 
-                    songList.appendChild(li);
-                }
+            // 3. Evento Click para reproducir
+            li.addEventListener('click', () => {
+                mostrarReproductor(cancion.spotifyLink);
             });
 
-            if (!cancionesEncontradas) {
-                songList.innerHTML = '<li>No hay canciones en este álbum todavía.</li>';
-            }
-        }
+            songList.appendChild(li);
+        });
     });
-}
+});
 
-// --- 3. REPRODUCIR (INSERTAR IFRAME) ---
-function reproducirSpotify(uri) {
+function mostrarReproductor(link) {
     const playerContainer = document.getElementById('playerContainer');
-    const embedContainer = document.getElementById('spotifyEmbed');
-
-    if (!uri) {
-        alert("Esta canción no tiene enlace de Spotify configurado en la base de datos.");
-        return;
-    }
-
-    // Convertir URI de Spotify (spotify:track:...) a URL Embed (https://open.spotify.com/embed/...)
-    // O si guardas el link entero "https://open.spotify.com/track/...", hay que ajustarlo.
-    // Asumiremos que guardas la URI tipo "spotify:track:XXXXX"
     
-    // Truco: Reemplazamos los dos puntos para formar la URL
-    // De: spotify:track:12345 
-    // A:  https://open.spotify.com/embed/track/12345
+    // Si el link es solo el ID, lo formateamos. Si ya pones el iframe completo, ajusta esto.
+    // Asumiré que pones el link tipo "https://open.spotify.com/embed/track/..."
     
-    let embedUrl = "";
-    if (uri.startsWith('spotify:')) {
-        const parts = uri.split(':');
-        embedUrl = `https://open.spotify.com/embed/${parts[1]}/${parts[2]}`;
-    } else {
-        // Si pegaste el link HTTP directo
-        embedUrl = uri; 
-    }
-
-    playerContainer.style.display = 'block';
-    embedContainer.innerHTML = `
-        <iframe 
-            src="${embedUrl}" 
-            width="100%" 
-            height="152" 
-            frameBorder="0" 
-            allowfullscreen="" 
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-            loading="lazy">
-        </iframe>
+    playerContainer.innerHTML = `
+        <iframe style="border-radius:12px" 
+        src="${link}" 
+        width="100%" 
+        height="152" 
+        frameBorder="0" 
+        allowfullscreen="" 
+        allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
+        loading="lazy"></iframe>
     `;
 }
