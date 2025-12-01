@@ -370,8 +370,8 @@ async function main() {
                         const user = firebase.auth().currentUser;
                         if (!user) return alert("You must log in");
 
-                        const artistRef = firebase.database().ref(`users/${user.uid}/favourite_artists/${att.title}`);
-                        const snapshot = await artistRef.get();
+                        const artistRef = ref(db, `users/${user.uid}/favourite_artists/${att.title}`);
+                        const snapshot = await get(artistRef);
 
                         if (snapshot.exists()) {
                             alert("This artist is already in your favourites!");
@@ -384,7 +384,10 @@ async function main() {
                         };
 
                         // Save in firebase
-                        await artistRef.set(artistData);
+                        await set(artistRef, {
+                            name: att.title,
+                            image: att.imageURL
+                        });
 
                         alert("Artist added to favourites!");
                     } catch (err) {
@@ -408,20 +411,19 @@ async function main() {
                         const user = firebase.auth().currentUser;
                         if (!user) return alert("You must log in");
 
-                        const songRef = firebase.database()
-                            .ref(`users/${user.uid}/favoritos/${att.title}`);
-
-                        const snap = await songRef.get();
+                        const songRef = ref(db, `users/${user.uid}/favoritos/${att.title}`);
+                        const snap = await get(songRef);
+                        
                         if (snap.exists())
+                        
                             return alert("This song is already in your favourites!");
 
-                        await songRef.set({
+                        await set(songRef, {
                             name: att.title,
                             artist: att.author,
                             albumImageUrl: att.imageURL,
                             previewUrl: att.audioURL
                         });
-
                         alert("Song added to favourites!");
                     } catch (err) {
                         console.error(err);
