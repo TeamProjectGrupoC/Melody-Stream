@@ -457,6 +457,29 @@ function seekToPosition() {
 }
 
 /***********************
+ * UPDATE PROGRESS BAR (Web Playback SDK)
+ ***********************/
+setInterval(() => {
+    if (!window.spotifyPlayer || !isPremium) return;
+
+    window.spotifyPlayer.getCurrentState().then(state => {
+        if (!state || !state.duration) return;
+
+        // Actualizar barra de progreso
+        const progressPercent = (state.position / state.duration) * 100;
+        document.getElementById("progressBar").value = progressPercent;
+
+        // Actualizar tiempo actual y total (si existen)
+        const currentTimeEl = document.getElementById("currentTime");
+        const totalTimeEl = document.getElementById("totalTime");
+
+        if (currentTimeEl) currentTimeEl.textContent = formatTime(state.position);
+        if (totalTimeEl) totalTimeEl.textContent = formatTime(state.duration);
+    });
+}, 500);
+
+
+/***********************
  *  EVENTS
  ***********************/
 document.getElementById("searchBtn").addEventListener("click", searchTrack);
