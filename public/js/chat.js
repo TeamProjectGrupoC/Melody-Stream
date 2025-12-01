@@ -345,6 +345,11 @@ async function main() {
             const author = document.createElement("p");
             author.textContent = att.author;
             meta.appendChild(author);
+
+            const btn = document.createElement("button");
+            btn.textContent = "Add to favourites1";
+            btn.style.marginTop = "10px";
+            btn.className = "main-button";
         }
 
         // Reproduce songs
