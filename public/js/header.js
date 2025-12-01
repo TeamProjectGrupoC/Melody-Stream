@@ -77,9 +77,15 @@ document.addEventListener("DOMContentLoaded", () => {
       ev.preventDefault();
       try {
         await signOut(auth);
+
+        localStorage.removeItem("spotify_access_token");
+
         window.location.reload();
       } catch (err) {
         console.error("Sign out error:", err);
+
+        localStorage.removeItem("spotify_access_token");
+
         window.location.reload();
       }
     });
