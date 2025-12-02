@@ -1,6 +1,4 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, get, child, set, push, onValue, off, update, onChildAdded } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
 /*
 DATABASE STRUCTURE AND LOGIC:
 
@@ -42,19 +40,32 @@ LOGIC WHEN SENDING A MESSAGE:
 */
 
 
-async function main() {
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDatabase, ref, get, child, set, push, onValue, off, update, onChildAdded } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+console.log("✅ chat.js cargado correctamente");
 
-    // --- Load Firebase config ---
+async function main() {
     let firebaseConfig;
+    let app;
+
     try {
         const response = await fetch('/__/firebase/init.json');
         firebaseConfig = await response.json();
     } catch (e) {
-        console.error("Could not load Firebase config.", e);
-        return;
+        console.warn("No se pudo cargar /__/firebase/init.json:", e);
     }
 
-    const app = initializeApp(firebaseConfig);
+    // Inicializar solo si no hay apps; si ya existe, reutilizarla
+    if (!getApps().length) {
+        if (!firebaseConfig) {
+            console.error("No hay configuración de Firebase disponible para inicializar la app.");
+            return;
+        }
+        app = initializeApp(firebaseConfig);
+    } else {
+        app = getApp();
+    }
     const auth = getAuth(app);
     const db = getDatabase(app);
 

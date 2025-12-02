@@ -225,7 +225,7 @@ async function saveSongToDatabase(track) {
     albumImageUrl: track.album.images[0].url,
     previewUrl: track.preview_url,
   });
-  console.log(`Song ${track.name} saved to database.`);
+  console.log(`Song ${track.preview_url} saved to database.`);
 }
 
 /***********************

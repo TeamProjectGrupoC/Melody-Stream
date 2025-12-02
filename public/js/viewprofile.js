@@ -197,7 +197,7 @@ followBtn.addEventListener("click", async () => {
       
       // Actualizar UI visualmente
       followBtn.textContent = "Follow";
-      followBtn.className = ""; // <--- VUELVE AL COLOR DEGRADADO
+      followBtn.className = "";
 
 
     } else if (followBtn.textContent === "Following") {
@@ -206,7 +206,7 @@ followBtn.addEventListener("click", async () => {
       
       // Actualizar UI visualmente
       followBtn.textContent = "Follow";
-      followBtn.className = ""; // <--- VUELVE AL COLOR DEGRADADO
+      followBtn.className = ""; 
     }
 
     // Refresh followers count (esto recalculará todo por seguridad, pero el cambio visual ya se hizo arriba)
