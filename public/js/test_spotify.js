@@ -372,13 +372,13 @@ async function toggleFavorite(songId, button) {
 	const favRef = ref(database, `users/${user.uid}/favoritos/${songId}`);
 	const nowFavorite = button.classList.contains("not-fav");
 
-  const favSnapshot = await get(favRef);
-  if (favSnapshot.exists()) {
-    alert("This song is already in your favourites.");
-    return;
-  } 
-
 	if (nowFavorite) {
+      const favSnapshot = await get(favRef);
+      if (favSnapshot.exists()) {
+        alert("This song is already in your favourites.");
+        return;
+      }
+
 		// Agregar a favoritos
 		await set(favRef, true);
 		button.innerHTML = '<i class="bi bi-heart-fill"></i>';
