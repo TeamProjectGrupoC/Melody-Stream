@@ -353,6 +353,14 @@ function attachFavoriteButtons() {
 	});
 }
 
+async function getTrackById(songId) {
+  const res = await fetch(`https://api.spotify.com/v1/tracks/${songId}`, {
+    headers: { Authorization: `Bearer ${accessToken}` },
+  });
+  const track = await res.json();
+  return track;
+}
+
 async function toggleFavorite(songId, button) {
 	const user = auth.currentUser; 
 
@@ -376,8 +384,10 @@ async function toggleFavorite(songId, button) {
       alert("You must log in to add songs to your favorites");
       return;
       }
-
+    
+    const track = await getTrackById(songId);
     await saveFavouriteSong(user.uid,track);
+    
   } else {
 		// Quitar de favoritos
 		await set(favRef, null);
@@ -387,14 +397,6 @@ async function toggleFavorite(songId, button) {
 
     alert("This song has been removed from favorites")
 	}
-}
-
-async function getTrackById(songId) {
-  const res = await fetch(`https://api.spotify.com/v1/tracks/${songId}`, {
-    headers: { Authorization: `Bearer ${accessToken}` },
-  });
-  const track = await res.json();
-  return track;
 }
 
 /***********************
