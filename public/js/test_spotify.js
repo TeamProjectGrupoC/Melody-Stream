@@ -377,7 +377,7 @@ async function toggleFavorite(songId, button) {
       return;
       }
 
-    await saveFavouriteSong(userId,track);
+    await saveFavouriteSong(user.uid,track);
   } else {
 		// Quitar de favoritos
 		await set(favRef, null);
