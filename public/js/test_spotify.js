@@ -2,7 +2,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-import { saveFavouriteSong } from "./favourites.js";
 
 // --- FIREBASE CONFIGURATION ---
 const firebaseConfig = {
@@ -240,6 +239,21 @@ async function searchTrack() {
   }
 }
 
+// Save the song data to the "canciones" node in Firebase
+async function saveSongToDatabase(track) {
+  const db = getDatabase();
+  const songRef = ref(db, `canciones/${track.id}`);
+  
+  await set(songRef, {
+    title: track.name,
+    artist: track.artists.map((artist) => artist.name).join(", "),
+    album: track.album.name,
+    albumImageUrl: track.album.images[0].url,
+    previewUrl: track.preview_url,
+  });
+  console.log(`Song ${track.name} saved to database.`);
+}
+
 /***********************
  *  5. Reproduce song
  ***********************/
@@ -343,9 +357,10 @@ async function addToFavorite(songId){
 		return;
     }
 
-    // Fetch song details from Spotify and save it
-    const track = await getTrackById(songId); 
-    await saveFavouriteSong(user.uid,track);
+    const favSongRef = ref(database, `users/${user.uid}/favoritos/${songId}`);
+    await set(favSongRef, true);
+
+    alert("Song added to your favorites");
 }
 
 async function isFavorite(songId, userId){
@@ -376,15 +391,25 @@ async function toggleFavorite(songId, button) {
 		return;
 	}
 
+	const favRef = ref(database, `users/${user.uid}/favoritos/${songId}`);
 	const nowFavorite = button.classList.contains("not-fav");
 
 	if (nowFavorite) {
 		// Agregar a favoritos
+		await set(favRef, true);
 		button.innerHTML = '<i class="bi bi-heart-fill"></i>';
 		button.classList.remove("not-fav");
 		button.classList.add("is-fav");
-
     addToFavorite(songId);
+
+    const songRef = ref(database, `canciones/${songId}`);
+    const snapshot = await get(songRef);
+
+    if (!snapshot.exists()) {
+      // Fetch song details from Spotify and save it
+      const track = await getTrackById(songId); 
+      await saveSongToDatabase(track);
+    }
 	} 
   else {
 		// Quitar de favoritos
