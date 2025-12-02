@@ -391,6 +391,11 @@ async function main() {
                             return;
                         }
 
+                        if (!foundArtist.followers) foundArtist.followers = 0;
+                        if (!foundArtist.genres) foundArtist.genres = [];
+                        if (!foundArtist.image) foundArtist.image = att.imageURL; // fallback seguro
+
+
                         // 2. Llamar a favourites.js (misma función que usa profile.js)
                         await saveFavouriteArtist(user.uid, foundArtist);
 
@@ -398,7 +403,7 @@ async function main() {
 
                     } catch (err) {
                         console.error(err);
-                        alert("Error saving song");
+                        alert("Error saving artist");
                     }
 
                 });
@@ -436,6 +441,11 @@ async function main() {
                             alert("The sender does not have this song saved in favourites.");
                             return;
                         }
+
+                        if (!foundSong.artist) foundSong.artist = "Unknown Artist";
+                        if (!foundSong.album) foundSong.album = "Unknown Album";
+                        if (!foundSong.albumImageUrl) foundSong.albumImageUrl = att.imageURL;
+                        if (!foundSong.previewUrl) foundSong.previewUrl = att.audioURL;
 
                         await saveFavouriteSong(user.uid, foundSong);
 
