@@ -2,6 +2,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { saveFavouriteSong } from "./favourites.js";
 
 // --- FIREBASE CONFIGURATION ---
 const firebaseConfig = {
@@ -239,21 +240,6 @@ async function searchTrack() {
   }
 }
 
-// Save the song data to the "canciones" node in Firebase
-async function saveSongToDatabase(track) {
-  const db = getDatabase();
-  const songRef = ref(db, `canciones/${track.id}`);
-  
-  await set(songRef, {
-    title: track.name,
-    artist: track.artists.map((artist) => artist.name).join(", "),
-    album: track.album.name,
-    albumImageUrl: track.album.images[0].url,
-    previewUrl: track.preview_url,
-  });
-  console.log(`Song ${track.name} saved to database.`);
-}
-
 /***********************
  *  5. Reproduce song
  ***********************/
@@ -408,7 +394,7 @@ async function toggleFavorite(songId, button) {
     if (!snapshot.exists()) {
       // Fetch song details from Spotify and save it
       const track = await getTrackById(songId); 
-      await saveSongToDatabase(track);
+      await saveFavouriteSong(track);
     }
 	} 
   else {
