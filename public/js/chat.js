@@ -316,6 +316,39 @@ async function main() {
             cachedUser = user;
     });
 
+    function normalizeArtistForFavourites(artist, att) {
+        return {
+            id: artist.id,
+            name: artist.name,
+            images: [
+                { url: artist.image || att.imageURL }
+            ],
+            followers: {
+                total: artist.followers || 0
+            },
+            genres: Array.isArray(artist.genres) ? artist.genres : []
+        };
+    }
+
+    function normalizeSongForFavourites(song, att) {
+        return {
+            id: song.id,
+            name: song.title,
+            artists: [
+                { name: song.artist || att.author || "Unknown Artist" }
+            ],
+            album: {
+                name: song.album || "Unknown Album",
+                images: [
+                    { url: song.albumImageUrl || att.imageURL }
+                ]
+            },
+            preview_url: song.previewUrl || att.audioURL || null
+        };
+    }
+
+
+
     function buildAttachmentCard(att, senderId) {
 
         if (!att || !att.imageURL) {
@@ -391,13 +424,10 @@ async function main() {
                             return;
                         }
 
-                        if (!foundArtist.followers) foundArtist.followers = 0;
-                        if (!foundArtist.genres) foundArtist.genres = [];
-                        if (!foundArtist.image) foundArtist.image = att.imageURL; // fallback seguro
-
-
                         // 2. Llamar a favourites.js (misma función que usa profile.js)
-                        await saveFavouriteArtist(user.uid, foundArtist);
+                        const normalized = normalizeArtistForFavourites(foundArtist, att);
+                        await saveFavouriteArtist(user.uid, normalized);
+
 
                         alert("Artist added to favourites!");
 
@@ -442,12 +472,9 @@ async function main() {
                             return;
                         }
 
-                        if (!foundSong.artist) foundSong.artist = "Unknown Artist";
-                        if (!foundSong.album) foundSong.album = "Unknown Album";
-                        if (!foundSong.albumImageUrl) foundSong.albumImageUrl = att.imageURL;
-                        if (!foundSong.previewUrl) foundSong.previewUrl = att.audioURL;
+                        const normalized = normalizeSongForFavourites(foundSong, att);
+                        await saveFavouriteSong(user.uid, normalized);
 
-                        await saveFavouriteSong(user.uid, foundSong);
 
                         alert("Song added to favourites!");
 
