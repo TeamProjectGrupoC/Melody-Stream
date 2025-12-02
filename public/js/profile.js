@@ -592,9 +592,21 @@ function loadFavouriteArtists(userId) {
   const db = getDatabase();
   const favRef = ref(db, `users/${userId}/favourite_artists`);
 
-  onValue(favRef, snapshot => {
-    const data = snapshot.val() || {};
-    renderSavedArtists(Object.values(data));
+  onValue(favRef, async snapshot => {
+    const favData = snapshot.val() || {};
+
+    const artistIds = Object.keys(favData);
+
+    const artists = [];
+
+    for (const id of artistIds) {
+      const artistSnap = await get(ref(db, `artistas/${id}`));
+      if (artistSnap.exists()) {
+        artists.push({ id, ...artistSnap.val() });
+      }
+    }
+
+    renderSavedArtists(artists);
   });
 }
 
@@ -630,19 +642,19 @@ function renderSavedArtists(artists) {
     div.classList.add("artistCard");
 
     div.innerHTML = `
-      <img src="${a.image}" style="width:80px;border-radius:50%">
+      <img src="${a.image || 'images/default_artist.png'}" style="width:80px;border-radius:50%">
       <p>${a.name}</p>
 
       <button class="shareArtistBtn">Share</button>
       <button class="removeArtistBtn">Remove</button>
     `;
 
-    // -------- REMOVE --------
+    // REMOVE
     div.querySelector(".removeArtistBtn").addEventListener("click", async () => {
       removeFavouriteArtist(a.id);
     });
 
-    // -------- SHARE --------
+    // SHARE
     div.querySelector(".shareArtistBtn").addEventListener("click", () => {
       openShareArtistModal(a);
     });
@@ -650,6 +662,7 @@ function renderSavedArtists(artists) {
     container.appendChild(div);
   });
 }
+
 
 
 document.getElementById("btnSearchArtist").addEventListener("click", async () => {
