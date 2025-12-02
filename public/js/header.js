@@ -87,7 +87,14 @@ document.addEventListener("DOMContentLoaded", () => {
         // Redirigir si estamos en test_spotify.html
         if (window.location.pathname.endsWith("test_spotify.html")) {
           window.location.href = "test_register_spotify.html";
-        } else {
+        } 
+        else if (window.location.pathname.endsWith("profile.html")){
+          window.location.href = "login.html"
+        }
+        else if (window.location.pathname.endsWith("chat.html")){
+          window.location.href = "login.html"
+        }
+        else {
           window.location.reload();
         }
       } catch (err) {

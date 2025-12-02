@@ -1,43 +1,105 @@
-.artist-buttons {
-    padding: 10px 25px; 
-    font-size: 16px;    
+main.content {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    padding: 3rem 1rem;
+    gap: 1.5rem; 
+    max-width: 1000px; 
+    width: 90%;
+    margin: 0 auto;
+}
+
+/*MUSIC LIBRARY*/
+.library-header h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--color-azul2, #3e9ade); 
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 2rem;
+}
+
+/*AVALIABLE ARTIST*/
+.module-title-internal { 
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--color-azul2, #3e9ade); 
+    text-align: center;
+    margin-top: 1rem;
+    margin-bottom: 1.5rem; 
+
+    width: 100%;
+
+}
+
+#artistsContainer, .artist-buttons {
+    width: 100%;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
     
-    background-color: #1a1a1a; 
-    color: #00ffc8;          
-    border: 1px solid #00ffc8; 
-    border-radius: 50px; 
-    box-shadow: 0 0 8px rgba(0, 255, 200, 0.6); 
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08); 
+    border-radius: 16px; 
+    padding: 1.5rem; 
+    
+    box-shadow: 
+        0 8px 20px rgba(0, 0, 0, 0.4), 
+        0 0 15px rgba(62, 154, 222, 0.4); 
+    
+    display: flex;
+    flex-direction: column; 
+    flex-wrap: wrap;
+    gap: 15px;
+
+    align-items: flex-start;
+    
+}
+
+.artist-buttons {
+    align-items: center;
+}
+
+
+.artist-buttons img {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    margin-right: 8px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.artist-buttons button { 
     
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 8px; 
-    
+    padding: 6px 10px;
+    border-radius: 25px; 
     cursor: pointer;
-    transition: all 0.2s ease;
-    border: none; 
+    white-space: nowrap; 
+    
+    background-color: var(--color-azul1, #007bff); 
+    color: var(--color-blanco, white);
+    border: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+    
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.2s ease, background-color 0.3s ease;
 }
 
-.artist-buttons:hover {
-    background-color: #00ffc8; 
-    color: #1a1a1a; 
-    transform: scale(1.05);
+.artist-buttons button:hover {
+    background-color: var(--color-azul2, #0056b3);
+    transform: translateY(-1px);
+    box-shadow: 0 0 8px rgba(62, 154, 222, 0.6); 
 }
 
-.artist-buttons img {
-    width: 20px; 
-    height: 20px;
-    border-radius: 50%; 
-    object-fit: cover;
-}
-#artistButtons {
-    display: flex; 
-    flex-direction: row;
-    justify-content: space-around; 
-    align-items: center;
+.artist-chips-wrapper {
     width: 100%; 
-    margin-top: 30px; 
-    flex-wrap: wrap; 
-    gap: 15px; 
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: flex-start;
 }
-

@@ -517,7 +517,7 @@ if (goToChatBtn) {
   });
 }
 
-const logOutBtn = document.getElementById('logOutBtn');
+/*const logOutBtn = document.getElementById('logOutBtn');
 if (logOutBtn) {
   logOutBtn.addEventListener('click', async () => {
     const msgElemento = document.getElementById('msg');
@@ -535,12 +535,13 @@ if (logOutBtn) {
       const userDataDiv = document.getElementById('userData');
       if (userDataDiv) userDataDiv.style.display = "none";
 
+      window.location.href = 'login.html';
     } catch (error) {
       console.error("Log out error:", error);
       if (msgElemento) msgElemento.textContent = "Error logging out.";
     }
   });
-}
+}*/
 
 // Evento para abrir modal al hacer click en botón .view-folder (delegación)
 document.addEventListener('click', (e) => {
