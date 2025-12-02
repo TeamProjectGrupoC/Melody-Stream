@@ -791,13 +791,11 @@ async function shareArtistToChat(chatId, artist) {
     sender: currentUser.uid,
     timestamp,
     attachment: {
-      id: artist.id,
       title: artist.name,
       imageURL: artist.image,
       author: "Favourite Artist",
       audioURL: "" // no hay audio
     },
-    
     text: `Shared artist: ${artist.name}`
   };
 
@@ -877,7 +875,6 @@ async function saveFavouriteSong(userId, track) {
   }
 
   const songData = {
-    id: track.id,
     title: track.name,
     artist: track.artists.map((artist) => artist.name).join(", "),
     album: track.album.name,

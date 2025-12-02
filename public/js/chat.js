@@ -387,7 +387,6 @@ async function main() {
                         // 3. Guardar si NO existe
                         const newFav = push(favRef);
                         set(newFav, {
-                            id: att.id,
                             name: att.title,
                             image: att.imageURL,
                         });
