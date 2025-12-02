@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, get, child, set, push, onValue, off, update, onChildAdded } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { saveFavouriteArtist, saveFavouriteSong } from "./favourites.js";
 
 /*
 DATABASE STRUCTURE AND LOGIC:
@@ -371,7 +372,7 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        MelodyStreamAPI.saveFavouriteArtist(user.uid, {
+                        await saveFavouriteArtist(user.uid, {
                             id: att.id,
                             name: att.title,
                             image: att.imageURL,
@@ -413,7 +414,7 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        MelodyStreamAPI.saveFavouriteSong(user.uid, {
+                        await saveFavouriteSong(user.uid, {
                             id: att.id,
                             name: att.title,
                             artists: att.author.split(", ").map(a => ({ name: a })),

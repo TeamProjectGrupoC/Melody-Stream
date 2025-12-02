@@ -2,6 +2,7 @@
 // Módulos de App y Autenticación (como los tenías)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { saveFavouriteSong, saveFavouriteArtist } from "./favourites.js";
 
 // Módulos de Realtime Database (RTDB)
 import { getDatabase, ref, onValue, set, get, update, push, remove } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
@@ -586,34 +587,6 @@ async function searchArtist(query) {
   return data.artists.items;
 }
 
-async function saveFavouriteArtist(userId, artist) {
-  const db = getDatabase();
-  const favRef = ref(db, `users/${userId}/favourite_artists/`);
-
-  // 1. Leer favoritos actuales
-  const snapshot = await get(favRef);
-  const data = snapshot.val() || {};
-
-  // 2. Comprobar si ya existe
-  const alreadySaved = Object.values(data).some(a => a.id === artist.id);
-
-  if (alreadySaved) {
-    alert("This artist is already in your favourites.");
-    return;
-  }
-
-  // 3. Guardar si NO existe
-  const newFav = push(favRef);
-  return set(newFav, {
-    id: artist.id,
-    name: artist.name,
-    image: artist.images?.[0]?.url || "",
-    followers: artist.followers.total,
-    genres: artist.genres
-  });
-}
-
-
 function loadFavouriteArtists(userId) {
   const db = getDatabase();
   const favRef = ref(db, `users/${userId}/favourite_artists`);
@@ -864,32 +837,6 @@ async function searchSong(query) {
   return data.tracks.items;
 }
 
-async function saveFavouriteSong(userId, track) {
-  const db = getDatabase();
-  const songRef = ref(db, `canciones/${track.id}`);
-  const favSongRef = ref(db, `users/${userId}/favoritos/${track.id}`);
-
-  const favSnapshot = await get(favSongRef);
-  if (favSnapshot.exists()) {
-    alert("This song is already in your favourites.");
-    return;
-  }
-
-  const songData = {
-    title: track.name,
-    artist: track.artists.map((artist) => artist.name).join(", "),
-    album: track.album.name,
-    albumImageUrl: track.album.images[0].url,
-    previewUrl: track.preview_url,
-  }
-
-  await set(songRef, songData);
-  await set(favSongRef, songData);
-
-  console.log(`Song ${track.name} added to favorites for user ${userId}`);
-
-}
-
 function loadFavouriteSongs(userId) {
   const db = getDatabase();
   const favRef = ref(db, `users/${userId}/favoritos`);
@@ -1098,8 +1045,5 @@ document.getElementById("shareSongConfirm").addEventListener("click", async () =
 if (!globalThis.MelodyStreamAPI) {
     globalThis.MelodyStreamAPI = {};
 }
-
-MelodyStreamAPI.saveFavouriteArtist = saveFavouriteArtist;
-MelodyStreamAPI.saveFavouriteSong = saveFavouriteSong;
 
 
