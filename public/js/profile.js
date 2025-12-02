@@ -791,6 +791,7 @@ async function shareArtistToChat(chatId, artist) {
     sender: currentUser.uid,
     timestamp,
     attachment: {
+      id: artist.id,
       title: artist.name,
       imageURL: artist.image,
       author: "Favourite Artist",
@@ -1040,6 +1041,7 @@ async function shareSongToChat(chatId, track) {
     sender: currentUser.uid,
     timestamp,
     attachment: {
+      id: song.id,
       title: track.title,
       imageURL: track.albumImageUrl || track.albumImageURL || track.albumImage || "",
       author: Array.isArray(track.artist) ? track.artist.join(", ") : track.artist || "Unknown Artist",
@@ -1095,3 +1097,5 @@ document.getElementById("shareSongConfirm").addEventListener("click", async () =
 
 
 
+window.saveFavouriteArtist = saveFavouriteArtist;
+window.saveFavouriteSong = saveFavouriteSong;

@@ -370,21 +370,15 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        const artistRef = ref(db, `users/${user.uid}/favourite_artists/${att.title}`);
-
-                        //NO FUNCIONA LA RUTA NO ES EL ID
-                        if (snapshot.exists()) {
-                            alert("This artist is already in your favourites!");
-                            return;
-                        }
-
-                        // 3. Guardar si NO existe
-                        await set(artistRef, {
+                        const artistObj = {
+                            id: att.id,
                             name: att.title,
-                            image: att.imageURL
-                        });
+                            image: att.imageURL,
+                            followers: 0,
+                            genres: []
+                        };
 
-                        alert("Artist added to favourites!");
+                        window.saveFavouriteArtist(user.uid, artistObj);
                     } catch (err) {
                         console.error(err);
                         alert("Error saving artist");
@@ -406,23 +400,18 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        const songRef = ref(db, `users/${user.uid}/favoritos/${att.title}`);
-                        const snap = await get(songRef);
-
-                        //NO FUNCIONA LA RUTA NO ES EL ID
-                        if (snap.exists()){
-                            alert("This song is already in your favourites!");
-                            return;
-                        }
-
-                        await set(songRef, {
+                        const trackObj = {
+                            id: att.id,
                             name: att.title,
-                            artist: att.author,
-                            albumImageUrl: att.imageURL,
-                            //previewUrl: att.audioURL
-                        });
-                        
-                        alert("Song added to favourites!");
+                            artists: att.author.split(", ").map(a => ({ name: a })),
+                            album: {
+                                name: "Unknown album",
+                                images: [ { url: att.imageURL } ]
+                            },
+                            preview_url: att.audioURL
+                        };
+
+                        window.saveFavouriteSong(user.uid, trackObj);
                     } catch (err) {
                         console.error(err);
                         alert("Error saving song");
