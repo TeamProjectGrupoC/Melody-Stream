@@ -988,7 +988,7 @@ async function shareSongToChat(chatId, track) {
     sender: currentUser.uid,
     timestamp,
     attachment: {
-      id: song.id,
+      id: track.id,
       title: track.title,
       imageURL: track.albumImageUrl || track.albumImageURL || track.albumImage || "",
       author: Array.isArray(track.artist) ? track.artist.join(", ") : track.artist || "Unknown Artist",

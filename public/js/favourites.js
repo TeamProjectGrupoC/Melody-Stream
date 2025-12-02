@@ -63,7 +63,7 @@ export async function saveFavouriteArtist(userId, artist) {
 
 
 export async function searchArtistByName(name) {
-  const token = localStorage.getItem("spotifyAccessToken");
+  const token = localStorage.getItem("spotify_access_token");
   if (!token) throw new Error("No Spotify token available.");
 
   const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(name)}&type=artist&limit=1`;
@@ -88,7 +88,7 @@ export async function searchArtistByName(name) {
 
 
 export async function searchSongByName(name) {
-  const token = localStorage.getItem("spotifyAccessToken");
+  const token = localStorage.getItem("spotify_access_token");
   if (!token) throw new Error("No Spotify token available.");
 
   const url = `https://api.spotify.com/v1/search?q=${encodeURIComponent(name)}&type=track&limit=1`;
