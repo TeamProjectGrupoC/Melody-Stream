@@ -618,22 +618,9 @@ function loadFavouriteArtists(userId) {
 
 async function removeFavouriteArtist(artistId) {
   const db = getDatabase();
-  const favRef = ref(db, `users/${currentUser.uid}/favourite_artists`);
 
-  // obtenemos los favoritos actuales para saber la key exacta
-  const snapshot = await get(favRef);
-  const favs = snapshot.val() || {};
-
-  // buscar la key que corresponde a ese artista
-  const keyToDelete = Object.keys(favs).find(key => favs[key].id === artistId);
-
-  if (!keyToDelete) {
-    console.warn("Artist not found in favourites:", artistId);
-    return;
-  }
-
-  // eliminar el artista
-  await set(ref(db, `users/${currentUser.uid}/favourite_artists/${keyToDelete}`), null);
+  const favRef = ref(db, `users/${currentUser.uid}/favourite_artists/${artistId}`);
+  await remove(favRef);
 
   alert("Artist removed from favourites");
 }
@@ -873,9 +860,6 @@ async function removeFavSongs(songId){
 
   const favSongRef = ref(db, `users/${currentUser.uid}/favoritos/${songId}`);
   await remove(favSongRef);
-
-  const songRef = ref(db, `canciones/${songId}`);
-  await remove(songRef);
 
   console.log(`Song with id ${songId} removed from favorites`);
 }
