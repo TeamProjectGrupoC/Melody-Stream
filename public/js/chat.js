@@ -457,6 +457,7 @@ async function main() {
                         const favSnap = await get(senderFavRef);
                         const data = favSnap.val() || {};
 
+                        let foundKey = null;
                         let foundSong = null;
 
                         console.log("ATTACHMENT TITLE:", att.title);
