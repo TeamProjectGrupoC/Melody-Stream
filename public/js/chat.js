@@ -342,8 +342,7 @@ async function main() {
                 images: [
                     { url: song.albumImageUrl || att.imageURL }
                 ]
-            },
-            preview_url: song.previewUrl || att.audioURL || null
+            }
         };
     }
 

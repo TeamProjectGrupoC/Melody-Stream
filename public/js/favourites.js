@@ -21,7 +21,6 @@ export async function saveFavouriteSong(userId, track) {
     artist: track.artists.map(a => a.name).join(", "),
     album: track.album.name,
     albumImageUrl: track.album.images[0].url,
-    previewUrl: track.preview_url
   };
 
   await set(songRef, songData);
