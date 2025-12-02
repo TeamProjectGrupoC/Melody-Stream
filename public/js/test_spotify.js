@@ -372,6 +372,12 @@ async function toggleFavorite(songId, button) {
 	const favRef = ref(database, `users/${user.uid}/favoritos/${songId}`);
 	const nowFavorite = button.classList.contains("not-fav");
 
+  const favSnapshot = await get(favRef);
+  if (favSnapshot.exists()) {
+    alert("This song is already in your favourites.");
+    return;
+  } 
+
 	if (nowFavorite) {
 		// Agregar a favoritos
 		await set(favRef, true);
@@ -387,7 +393,7 @@ async function toggleFavorite(songId, button) {
     
     const track = await getTrackById(songId);
     await saveFavouriteSong(user.uid,track);
-    
+
   } else {
 		// Quitar de favoritos
 		await set(favRef, null);

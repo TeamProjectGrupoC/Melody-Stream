@@ -7,12 +7,6 @@ export async function saveFavouriteSong(userId, track) {
   const songRef = ref(db, `canciones/${track.id}`);
   const favSongRef = ref(db, `users/${userId}/favoritos/${track.id}`);
 
-  const favSnapshot = await get(favSongRef);
-  if (favSnapshot.exists()) {
-    alert("This song is already in your favourites.");
-    return;
-  } 
-
   // Add to the user favourites
   await set(favSongRef, true);
 
@@ -20,14 +14,15 @@ export async function saveFavouriteSong(userId, track) {
   if (!songSnapshot.exists()) {
 
       const songData = {
-      title: track.name,
-      artist: track.artists.map(a => a.name).join(", "),
-      album: track.album.name,
-      albumImageUrl: track.album.images[0].url,
-      previewUrl: track.preview_url,
-    };
+        title: track.name,
+        artist: track.artists.map(a => a.name).join(", "),
+        album: track.album.name,
+        albumImageUrl: track.album.images[0].url,
+        previewUrl: track.preview_url,
+      };
 
     // Save the song data to the "canciones" node in Firebase
+    console.log("Voy a guardar en canciones:", track.id, track);
     await set(songRef, songData);
   }
 
