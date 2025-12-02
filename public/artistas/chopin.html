@@ -7,125 +7,80 @@
       name="author"
       content="Carolina Alba García, Celtia Castelo Gajino, Guillermo Arcos Salgado, Ines Vilariño, Mario Seoane, Francisco"
     />
-    <meta
-      name="description"
-      content="Melody Stream: listen to music; upload your own podcast; and chat and share your favourite songs with your friends"
-    />
-    <meta name="keywords" content="Melody Stream, music, podcast, friends" />
-    <title>Login with Spotify</title>
-
-    <link rel="stylesheet" href="../css/general.css" />
+    <meta name="description" content="Melody Stream: listen to music; upload your own podcast; and chat and share your favourite songs with your friends" />
+  <meta name="keywords" content="Melody Stream, music, podcast, friends" />
+    <title>Artista — Frédéric Chopin</title>     <link rel="stylesheet" href="../css/general.css" />
     <link rel="stylesheet" href="artista.css" />
-    <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg" />
-  </head>
+    <link rel="icon" type="image/png" href="../images/logos/melodystream.svg" />   </head>
   <body>
+
     <header id="headerPrincipal">
       <figure>
-        <img src="../images/logos/logo.png" alt="Webpage logo" />
-      </figure>
-      <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
+        <img src="../images/logos/logo.png" alt="Webpage logo" />       </figure>
+    <p id="menuToggle"><a href="#" class="hamburguesa"> ☰ </a></p>
       <nav id="NavPrincipal">
         <ul>
           <li><a href="../index.html">HOME</a></li>
           <li><a href="../test_register_spotify.html">MUSIC</a></li>
           <li><a href="../podcast.html">PODCAST</a></li>
           <li><a href="../login.html">LOG IN</a></li>
+          <li><a href="users.html">USERS</a></li>
         </ul>
       </nav>
-
       <div id="headerProfileIm">
         <a href="../profile.html">
           <img
             id="headerUserPic"
             src="../images/logos/silueta.png"
             alt="User Profile Icon"
-          />
-        </a>
-      </div>
-    </header>
+         />
+       </a>
+     </div>
+   </header>
 
-
-
-<main>       
-    <section class="PerfilArtista">
-        <h1>Frédéric Chopin</h1>
-        <div class="artist-image">
-            <img src="../images/chopin.jpeg" alt="Chopin Image">
-        </div>
-    </section> 
-    
-    <section class="MusicSelector" style="padding: 20px; text-align: center; color: white;">
-        <h2>Discography</h2>
-        
-        <div class="selector-container">
-            <label for="albumSelect">Select an album:</label>
-            <select id="albumSelect" style="margin-top: 10px; padding: 10px; border-radius: 5px; font-size: 16px;">
-                <option value="" disabled selected>-- Select an album --</option>
-            </select>
-        </div>
-
-        <div id="songsContainer" style="margin-top: 20px; display: none; background-color: rgba(255, 255, 255, 0.1); border-radius: 10px; padding: 15px;">
-            <h3>Songs</h3>
-            <ul id="songList" style="list-style: none; padding: 0;">
-                </ul>
-        </div>
-        
-        <div id="playerContainer" style="margin-top: 30px;">
+    <main> 
+        <section class="PerfilArtista">
+            <h1>Frédéric Chopin</h1>
+            <div class="artist-image">
+                <img src="../images/chopin.jpeg" alt="Chopin Image">
             </div>
-    </section>
-</main>
+        </section> 
+        
+        <section class="MusicSelector">
+            
+            <h2 class="section-title">Discography</h2> <div class="selector-container discography-controls"> <label for="albumSelect">Select an album:</label>
+                <select id="albumSelect">
+                    <option value="" disabled selected>-- Select an album --</option>
+                    </select>
+            </div>
 
-<script src="chopin.js"></script>
-            <footer id="footerPrincipal">
-      <h2 id="footer-title">MELODY STREAM</h2>
-      <div id="footer-follow">
-        <p>FOLLOW US</p>
-        <ul>
-          <!-- Logo 1 (Spotify) -->
-          <li>
-            <figure>
-              <a href="https://www.spotify.com" target="_blank">
-                <img src="../images/logos/Spotify.svg" alt="Spotify" />
-              </a>
-            </figure>
-          </li>
-          <!-- Logo 2 (Facebook) -->
-          <li>
-            <figure>
-              <a href="https://www.facebook.com" target="_blank">
-                <img src="../images/logos/Facebook.svg" alt="Facebook" />
-              </a>
-            </figure>
-          </li>
-          <!-- Logo 3 (Instagram) -->
-          <li>
-            <figure>
-              <a href="https://www.instagram.com" target="_blank">
-                <img src="../images/logos/Instagram.svg" alt="Instagram" />
-              </a>
-            </figure>
-          </li>
-          <!-- Logo 4 (Twitter) -->
-          <li>
-            <figure>
-              <a href="https://www.twitter.com" target="_blank">
-                <img src="../images/logos/Twitter.svg" alt="Twitter" />
-              </a>
-            </figure>
-          </li>
-          <!-- Logo 5 (YouTube) -->
-          <li>
-            <figure>
-              <a href="https://www.youtube.com" target="_blank">
-                <img src="../images/logos/Youtube.svg" alt="YouTube" />
-              </a>
-            </figure>
-          </li>
-        </ul>
-      </div>
-    </footer>
+            <div id="songsContainer" class="songs-list-module" style="display: none;">
+                <h3>Songs</h3>
+                <ul id="songList">
+                    </ul>
+            </div>
+            
+            <div id="playerContainer" class="player-module">
+            </div>
+        </section>
+    </main>
+
+    <footer id="footerPrincipal">
+        <h2 id="footer-title">MELODY STREAM</h2>
+        <div id="footer-follow">
+            <p>FOLLOW US</p>
+            <ul>
+                <li><figure><a href="https://www.spotify.com" target="_blank"><img src="../images/logos/Spotify.svg" alt="Spotify" /></a></figure></li>
+                <li><figure><a href="https://www.facebook.com" target="_blank"><img src="../images/logos/Facebook.svg" alt="Facebook" /></a></figure></li>
+                <li><figure><a href="https://www.instagram.com" target="_blank"><img src="../images/logos/Instagram.svg" alt="Instagram" /></a></figure></li>
+                <li><figure><a href="https://www.twitter.com" target="_blank"><img src="../images/logos/Twitter.svg" alt="Twitter" /></a></figure></li>
+                <li><figure><a href="https://www.youtube.com" target="_blank"><img src="../images/logos/Youtube.svg" alt="YouTube" /></a></figure></li>
+            </ul>
         </div>
-    </div>
+    </footer>
+
+    <script type="module" src="chopin.js"></script>
+    <script src="../js/headerPic.js"></script>
+    <script type="module" src="../js/header.js"></script>
 </body>
-<script type="module" src="chopin.js"></script>
 </html>

@@ -40,6 +40,23 @@ async function main() {
   const usernameInput = document.getElementById('usernameInput');
   const phoneInput = document.getElementById('phoneInput');
   const saveExtraBtn = document.getElementById('saveExtraBtn');
+  const profileLink = document.getElementById('profileLink');
+
+  onAuthStateChanged(auth, (user) => {
+    if (profileLink) {
+      if (user) {
+        profileLink.href = '../profile.html';
+        profileLink.onclick = null;
+      } 
+    else {
+        profileLink.href = 'login.html';
+        profileLink.onclick = (e) => {
+          e.preventDefault();
+          displayStyledError("You must be logged in to access your profile");
+      };
+    }
+    }
+  });
 
   async function saveToDB(uid, email, username, phone) {
     return set(ref(db, 'users/' + uid), { email, username, phone, favorite_songs: {}, spotify: {} });
@@ -144,5 +161,19 @@ async function main() {
   });
 
 } // end main
+
+//Displays a temporary error meessaged to the user (when you are not log in and try to access profile.html)
+function displayStyledError(message) {
+    const errorDisplay = document.getElementById('authErrorDisplay');
+    if (errorDisplay) {
+        errorDisplay.innerHTML = message;
+        errorDisplay.style.display = 'block';
+
+        setTimeout(() => {
+            errorDisplay.style.display = 'none';
+            errorDisplay.innerHTML = '';
+        }, 4000);
+    }
+}
 
 main();

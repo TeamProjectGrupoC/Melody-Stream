@@ -1,8 +1,6 @@
 /* ===============================
    MelodyStream — Profile Page
    =============================== */
-
-/* Layout general */
 main {
   display: flex;
   flex-direction: column;
