@@ -376,7 +376,6 @@ async function toggleFavorite(songId, button) {
 		return;
 	}
 
-	const favRef = ref(database, `users/${user.uid}/favoritos/${songId}`);
 	const nowFavorite = button.classList.contains("not-fav");
 
 	if (nowFavorite) {
