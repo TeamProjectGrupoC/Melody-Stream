@@ -36,6 +36,12 @@ export async function saveFavouriteSong(userId, track) {
 
 export async function saveFavouriteArtist(userId, artist) {
   const db = getDatabase();
+
+  if (!artist?.id) {
+    console.error("Artist without valid ID:", artist);
+    return;
+  }
+
   const artistRef = ref(db, `artistas/${artist.id}`);
   const favArtistRef = ref(db, `users/${userId}/favourite_artists/${artist.id}`);
 
