@@ -380,9 +380,20 @@ async function main() {
 
                         window.saveFavouriteArtist(user.uid, artistObj);
                     } catch (err) {
-                        console.error(err);
-                        alert("Error saving artist");
+                        console.error("🔥 ERROR saving artist (full error):", err);
+                        console.error("🔥 Error name:", err?.name);
+                        console.error("🔥 Error code:", err?.code);
+                        console.error("🔥 Error message:", err?.message);
+                        console.error("🔥 Error stack:", err?.stack);
+
+                        alert(
+                            "Error saving artist:\n" +
+                            "name: " + (err?.name || "n/a") + "\n" +
+                            "code: " + (err?.code || "n/a") + "\n" +
+                            "message: " + (err?.message || "n/a")
+                        );
                     }
+
                 });
 
                 meta.appendChild(btn);
