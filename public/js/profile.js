@@ -586,7 +586,7 @@ async function searchArtist(query) {
   return data.artists.items;
 }
 
-export async function saveFavouriteArtist(userId, artist) {
+async function saveFavouriteArtist(userId, artist) {
   const db = getDatabase();
   const favRef = ref(db, `users/${userId}/favourite_artists/`);
 
@@ -864,7 +864,7 @@ async function searchSong(query) {
   return data.tracks.items;
 }
 
-export async function saveFavouriteSong(userId, track) {
+async function saveFavouriteSong(userId, track) {
   const db = getDatabase();
   const songRef = ref(db, `canciones/${track.id}`);
   const favSongRef = ref(db, `users/${userId}/favoritos/${track.id}`);
@@ -1093,5 +1093,13 @@ document.getElementById("shareSongConfirm").addEventListener("click", async () =
   modal.style.display = "none";
   alert("Song shared!");
 });
+
+// Crea un objeto global compartido entre módulos
+if (!globalThis.MelodyStreamAPI) {
+    globalThis.MelodyStreamAPI = {};
+}
+
+MelodyStreamAPI.saveFavouriteArtist = saveFavouriteArtist;
+MelodyStreamAPI.saveFavouriteSong = saveFavouriteSong;
 
 
