@@ -55,8 +55,8 @@ export async function saveFavouriteArtist(userId, artist) {
   return set(newFav, {
     id: artist.id,
     name: artist.name,
-    image: artist.image,
-    followers: artist.followers || 0,
-    genres: artist.genres || []
+    image: artist.images?.[0]?.url || "",
+    followers: artist.followers.total,
+    genres: artist.genres
   });
 }
