@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, get, child, set, push, onValue, off, update, onChildAdded } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-import { saveFavouriteArtist, saveFavouriteSong } from "./favourites.js";
+import { saveFavouriteArtist, saveFavouriteSong, searchArtistByName, searchSongByName} from "./favourites.js";
 
 /*
 DATABASE STRUCTURE AND LOGIC:
@@ -372,13 +372,15 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        await saveFavouriteArtist(user.uid, {
-                            id: att.id,
-                            name: att.title,
-                            image: att.imageURL,
-                            followers: 0,
-                            genres: []
-                        });
+                        const fullArtist = await searchArtistByName(att.title);
+
+                        if (!fullArtist) {
+                            alert("Artist not found in Spotify");
+                            return;
+                        }
+
+                        // 2. Llamar a favourites.js (misma función que usa profile.js)
+                        await saveFavouriteArtist(user.uid, fullArtist);
 
                         alert("Artist added to favourites!");
 
@@ -414,13 +416,14 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        await saveFavouriteSong(user.uid, {
-                            id: att.id,
-                            name: att.title,
-                            artists: att.author.split(", ").map(a => ({ name: a })),
-                            album: { name:"Unknown Album", images:[{ url: att.imageURL }] },
-                            preview_url: att.audioURL
-                        });
+                        const track = await searchSongByName(att.title);
+
+                        if (!track) {
+                            alert("Song not found in Spotify");
+                            return;
+                        }
+
+                        await saveFavouriteSong(user.uid, track);
 
                         alert("Song added to favourites!");
 
