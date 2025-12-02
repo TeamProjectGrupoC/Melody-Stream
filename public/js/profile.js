@@ -791,11 +791,13 @@ async function shareArtistToChat(chatId, artist) {
     sender: currentUser.uid,
     timestamp,
     attachment: {
+      id: artist.id,
       title: artist.name,
       imageURL: artist.image,
       author: "Favourite Artist",
       audioURL: "" // no hay audio
     },
+    
     text: `Shared artist: ${artist.name}`
   };
 
@@ -868,17 +870,14 @@ async function saveFavouriteSong(userId, track) {
   const songRef = ref(db, `canciones/${track.id}`);
   const favSongRef = ref(db, `users/${userId}/favoritos/${track.id}`);
 
-  const snapshot = await get(songRef);
-  const data = snapshot.val() || {};
-
-  const alreadySaved = Object.values(data).some(a => a.id === track.id);
-
-  if (alreadySaved) {
-      alert("This song is already in your favourites.");
-      return;
+  const favSnapshot = await get(favSongRef);
+  if (favSnapshot.exists()) {
+    alert("This song is already in your favourites.");
+    return;
   }
 
   const songData = {
+    id: track.id,
     title: track.name,
     artist: track.artists.map((artist) => artist.name).join(", "),
     album: track.album.name,

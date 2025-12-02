@@ -370,14 +370,14 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        const favRef = ref(db, `users/${user.uid}/favourite_artists/`);
+                        const favRef = ref(db, `users/${user.uid}/favourite_artists`);
 
                         // 1. Leer favoritos actuales
                         const snapshot = await get(favRef);
                         const data = snapshot.val() || {};
 
                         // 2. Comprobar si ya existe
-                        const alreadySaved = Object.values(data).some(a => a.id === artist.id);
+                        const alreadySaved = Object.values(data).some(a => a.id === att.id);
 
                         if (alreadySaved) {
                             alert("This artist is already in your favourites.");
@@ -387,11 +387,9 @@ async function main() {
                         // 3. Guardar si NO existe
                         const newFav = push(favRef);
                         set(newFav, {
-                            id: artist.id,
-                            name: artist.name,
-                            image: artist.images?.[0]?.url || "",
-                            followers: artist.followers.total,
-                            genres: artist.genres
+                            id: att.id,
+                            name: att.title,
+                            image: att.imageURL,
                         });
 
                         alert("Artist added to favourites!");
@@ -416,7 +414,7 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        const songRef = ref(db, `users/${user.uid}/favoritos/`);
+                        const songRef = ref(db, `users/${user.uid}/favoritos`);
                         const snapshot = await get(songRef);
                         const data = snapshot.val() || {};
 
@@ -429,11 +427,11 @@ async function main() {
                         const newFav = push(songRef);
                         set(newFav, {
                             id: att.id,
-                            title: att.name,
-                            artist: att.artists.map((artist) => att.author).join(", "),
+                            title: att.title,
+                            artist: att.author,
                             album: att.album.name,
-                            albumImageUrl: att.album.images[0].url,
-                            previewUrl: att.preview_url,
+                            albumImageUrl: att.imageURL,
+                            previewUrl: att.audioURL,
                         });
                         
                         alert("Song added to favourites!");
