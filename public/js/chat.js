@@ -464,10 +464,8 @@ async function main() {
                         console.log(data);
 
                         for (const key in data) {
-                            const stored = data[key].title?.toLowerCase().trim();
-                            const incoming = att.title?.toLowerCase().trim();
-
-                            if (stored.includes(incoming) || incoming.includes(stored)) {
+                            if (data[key].title?.toLowerCase() === att.title.toLowerCase()) {
+                                foundKey = key;
                                 foundSong = data[key];
                                 break;
                             }
@@ -477,6 +475,9 @@ async function main() {
                             alert("The sender does not have this song saved in favourites.");
                             return;
                         }
+
+                        // 🔥 ENGADIR O ID DO NODO AO OBXECTO
+                        foundSong.id = foundKey;
 
                         const normalized = normalizeSongForFavourites(foundSong, att);
                         await saveFavouriteSong(user.uid, normalized);
