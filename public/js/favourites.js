@@ -60,12 +60,3 @@ export async function saveFavouriteArtist(userId, artist) {
     genres: artist.genres || []
   });
 }
-
-
-/* -------------------------------------------------------------
-   EXPOSE TO GLOBAL (for chat.js direct access)
-----------------------------------------------------------------*/
-
-if (!globalThis.MelodyStreamAPI) {
-  globalThis.MelodyStreamAPI = {};
-}
