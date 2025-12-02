@@ -1,9 +1,7 @@
 // favourites.js
 import { getDatabase, ref, get, set, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
-/* -------------------------------------------------------------
-   SAVE FAVOURITE SONG (idéntico al de profile.js)
-----------------------------------------------------------------*/
+
 export async function saveFavouriteSong(userId, track) {
   const db = getDatabase();
   const songRef = ref(db, `canciones/${track.id}`);
@@ -13,51 +11,57 @@ export async function saveFavouriteSong(userId, track) {
   if (favSnapshot.exists()) {
     alert("This song is already in your favourites.");
     return;
+  } 
+
+  // Add to the user favourites
+  await set(favSongRef, true);
+
+  const songSnapshot = await get(songRef);
+  if (!songSnapshot.exists()) {
+
+      const songData = {
+      title: track.name,
+      artist: track.artists.map(a => a.name).join(", "),
+      album: track.album.name,
+      albumImageUrl: track.album.images[0].url,
+      previewUrl: track.preview_url,
+    };
+
+    // Save the song data to the "canciones" node in Firebase
+    await set(songRef, songData);
   }
-
-  const songData = {
-    id: track.id,
-    title: track.name,
-    artist: track.artists.map(a => a.name).join(", "),
-    album: track.album.name,
-    albumImageUrl: track.album.images[0].url,
-  };
-
-  await set(songRef, songData);
-  await set(favSongRef, songData);
 
   console.log(`Song ${track.name} added to favorites for user ${userId}`);
 }
 
-
-/* -------------------------------------------------------------
-   SAVE FAVOURITE ARTIST (idéntico al de profile.js)
-----------------------------------------------------------------*/
 export async function saveFavouriteArtist(userId, artist) {
   const db = getDatabase();
-  const favRef = ref(db, `users/${userId}/favourite_artists/`);
+  const artistRef = ref(db, `artistas/${artist.id}`);
+  const favArtistRef = ref(db, `users/${userId}/favourite_artists/${artist.id}`);
 
-  // 1. Leer favoritos actuales
-  const snapshot = await get(favRef);
-  const data = snapshot.val() || {};
-
-  // 2. Comprobar si ya existe por ID
-  const alreadySaved = Object.values(data).some(a => a.id === artist.id);
-
-  if (alreadySaved) {
+  const favSnapshot = await get(favArtistRef);
+  if (favSnapshot.exists()) {
     alert("This artist is already in your favourites.");
     return;
-  }
+  } 
 
-  // 3. Guardar
-  const newFav = push(favRef);
-  return set(newFav, {
-    id: artist.id,
-    name: artist.name,
-    image: artist.images?.[0]?.url || "",
-    followers: artist.followers.total,
-    genres: artist.genres
-  });
+    // Add to the user favourites
+    await set(favArtistRef, true);
+
+    const artistSnapshot = await get(songRef);
+    if (!artistSnapshot.exists()) {
+
+        const artistData = {
+          name: artist.name,
+          image: artist.images?.[0]?.url || "",
+          followers: artist.followers.total,
+          genres: artist.genres
+      };
+
+      // Save the song data to the "artistas" node in Firebase
+      await set(artistRef, artistData);
+    }
+
+    console.log(`Artist ${artist.name} added to favorites for user ${userId}`);
 }
-
 

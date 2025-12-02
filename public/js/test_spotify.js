@@ -2,6 +2,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
+import { saveFavouriteSong } from "./favourites.js";
+
 
 // --- FIREBASE CONFIGURATION ---
 const firebaseConfig = {
@@ -239,21 +241,6 @@ async function searchTrack() {
   }
 }
 
-// Save the song data to the "canciones" node in Firebase
-async function saveSongToDatabase(track) {
-  const db = getDatabase();
-  const songRef = ref(db, `canciones/${track.id}`);
-  
-  await set(songRef, {
-    title: track.name,
-    artist: track.artists.map((artist) => artist.name).join(", "),
-    album: track.album.name,
-    albumImageUrl: track.album.images[0].url,
-    previewUrl: track.preview_url,
-  });
-  console.log(`Song ${track.preview_url} saved to database.`);
-}
-
 /***********************
  *  5. Reproduce song
  ***********************/
@@ -346,23 +333,6 @@ function playPauseSong() {
     });
 }
 
-/***********************
- * ADD FAVORITE SONG
- ***********************/
-async function addToFavorite(songId){
-
-    const user = auth.currentUser;
-    if (!user) {
-		alert("You must log in to add songs to your favorites");
-		return;
-    }
-
-    const favSongRef = ref(database, `users/${user.uid}/favoritos/${songId}`);
-    await set(favSongRef, true);
-
-    alert("Song added to your favorites");
-}
-
 async function isFavorite(songId, userId){
     return new Promise((resolve) => {
         const favRef = ref(database, `users/${userId}/favoritos/${songId}`);
@@ -400,18 +370,15 @@ async function toggleFavorite(songId, button) {
 		button.innerHTML = '<i class="bi bi-heart-fill"></i>';
 		button.classList.remove("not-fav");
 		button.classList.add("is-fav");
-    addToFavorite(songId);
 
-    const songRef = ref(database, `canciones/${songId}`);
-    const snapshot = await get(songRef);
+    const user = auth.currentUser;
+    if (!user) {
+      alert("You must log in to add songs to your favorites");
+      return;
+      }
 
-    if (!snapshot.exists()) {
-      // Fetch song details from Spotify and save it
-      const track = await getTrackById(songId); 
-      await saveSongToDatabase(track);
-    }
-	} 
-  else {
+    await saveFavouriteSong(userId,track);
+  } else {
 		// Quitar de favoritos
 		await set(favRef, null);
 		button.innerHTML = '<i class="bi bi-heart"></i>';
