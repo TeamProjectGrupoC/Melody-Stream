@@ -48,7 +48,7 @@ export async function saveFavouriteArtist(userId, artist) {
     // Add to the user favourites
     await set(favArtistRef, true);
 
-    const artistSnapshot = await get(songRef);
+    const artistSnapshot = await get(artistRef);
     if (!artistSnapshot.exists()) {
 
         const artistData = {
