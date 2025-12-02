@@ -372,31 +372,33 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        const fullArtist = await searchArtistByName(att.title);
+                        // 1. BUSCAR EL ARTISTA ENTRE LOS FAVORITOS DEL SENDER
+                        const senderFavRef = ref(db, `users/${senderId}/favourite_artists`);
+                        const favSnap = await get(senderFavRef);
+                        const data = favSnap.val() || {};
 
-                        if (!fullArtist) {
-                            alert("Artist not found in Spotify");
+                        let foundArtist = null;
+
+                        for (const key in data) {
+                            if (data[key].name?.toLowerCase() === att.title.toLowerCase()) {
+                                foundArtist = data[key];
+                                break;
+                            }
+                        }
+
+                        if (!foundArtist) {
+                            alert("The sender does not have this artist saved in favourites.");
                             return;
                         }
 
                         // 2. Llamar a favourites.js (misma función que usa profile.js)
-                        await saveFavouriteArtist(user.uid, fullArtist);
+                        await saveFavouriteArtist(user.uid, foundArtist);
 
                         alert("Artist added to favourites!");
 
                     } catch (err) {
-                        console.error("🔥 ERROR saving artist (full error):", err);
-                        console.error("🔥 Error name:", err?.name);
-                        console.error("🔥 Error code:", err?.code);
-                        console.error("🔥 Error message:", err?.message);
-                        console.error("🔥 Error stack:", err?.stack);
-
-                        alert(
-                            "Error saving artist:\n" +
-                            "name: " + (err?.name || "n/a") + "\n" +
-                            "code: " + (err?.code || "n/a") + "\n" +
-                            "message: " + (err?.message || "n/a")
-                        );
+                        console.error(err);
+                        alert("Error saving song");
                     }
 
                 });
@@ -416,14 +418,26 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        const track = await searchSongByName(att.title);
+                        // 1. BUSCAR ENTRE LOS FAVORITOS DEL SENDER
+                        const senderFavRef = ref(db, `users/${senderId}/favoritos`);
+                        const favSnap = await get(senderFavRef);
+                        const data = favSnap.val() || {};
 
-                        if (!track) {
-                            alert("Song not found in Spotify");
+                        let foundSong = null;
+
+                        for (const key in data) {
+                            if (data[key].title?.toLowerCase() === att.title.toLowerCase()) {
+                                foundSong = data[key];
+                                break;
+                            }
+                        }
+
+                        if (!foundSong) {
+                            alert("The sender does not have this song saved in favourites.");
                             return;
                         }
 
-                        await saveFavouriteSong(user.uid, track);
+                        await saveFavouriteSong(user.uid, foundSong);
 
                         alert("Song added to favourites!");
 
