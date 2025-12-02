@@ -459,8 +459,15 @@ async function main() {
 
                         let foundSong = null;
 
+                        console.log("ATTACHMENT TITLE:", att.title);
+                        console.log("CANCIONES DEL SENDER:");
+                        console.log(data);
+
                         for (const key in data) {
-                            if (data[key].title?.toLowerCase() === att.title.toLowerCase()) {
+                            const stored = data[key].title?.toLowerCase().trim();
+                            const incoming = att.title?.toLowerCase().trim();
+
+                            if (stored.includes(incoming) || incoming.includes(stored)) {
                                 foundSong = data[key];
                                 break;
                             }
