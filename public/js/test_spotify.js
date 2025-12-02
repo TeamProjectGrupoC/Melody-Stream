@@ -392,9 +392,13 @@ async function toggleFavorite(songId, button) {
     const snapshot = await get(songRef);
 
     if (!snapshot.exists()) {
+      const user = auth.currentUser;
+      if (!user) return alert("You must log in");
+
       // Fetch song details from Spotify and save it
       const track = await getTrackById(songId); 
-      await saveFavouriteSong(track);
+
+      await saveFavouriteSong(user.uid, track);
     }
 	} 
   else {
