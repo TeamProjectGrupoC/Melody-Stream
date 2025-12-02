@@ -343,10 +343,9 @@ async function addToFavorite(songId){
 		return;
     }
 
-    const favSongRef = ref(database, `users/${user.uid}/favoritos/${songId}`);
-    await set(favSongRef, true);
-
-    alert("Song added to your favorites");
+    // Fetch song details from Spotify and save it
+    const track = await getTrackById(songId); 
+    await saveFavouriteSong(user.uid,track);
 }
 
 async function isFavorite(songId, userId){
@@ -386,20 +385,8 @@ async function toggleFavorite(songId, button) {
 		button.innerHTML = '<i class="bi bi-heart-fill"></i>';
 		button.classList.remove("not-fav");
 		button.classList.add("is-fav");
+
     addToFavorite(songId);
-
-    const songRef = ref(database, `canciones/${songId}`);
-    const snapshot = await get(songRef);
-
-    if (!snapshot.exists()) {
-      const user = auth.currentUser;
-      if (!user) return alert("You must log in");
-
-      // Fetch song details from Spotify and save it
-      const track = await getTrackById(songId); 
-
-      await saveFavouriteSong(user.uid, track);
-    }
 	} 
   else {
 		// Quitar de favoritos

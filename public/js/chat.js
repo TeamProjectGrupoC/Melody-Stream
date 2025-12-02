@@ -460,10 +460,6 @@ async function main() {
                         let foundKey = null;
                         let foundSong = null;
 
-                        console.log("ATTACHMENT TITLE:", att.title);
-                        console.log("CANCIONES DEL SENDER:");
-                        console.log(data);
-
                         for (const key in data) {
                             if (data[key].title?.toLowerCase() === att.title.toLowerCase()) {
                                 foundKey = key;
