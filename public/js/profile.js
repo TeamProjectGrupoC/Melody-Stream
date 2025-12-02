@@ -588,27 +588,33 @@ async function searchArtist(query) {
   return data.artists.items;
 }
 
+async function fetchArtistData(artistIds) {
+  const db = getDatabase();
+  const artists = [];
+
+  for (const id of artistIds) {
+    const artistSnap = await get(ref(db, `artistas/${id}`));
+    if (artistSnap.exists()) {
+      artists.push({ id, ...artistSnap.val() });
+    }
+  }
+
+  renderSavedArtists(artists);
+}
+
 function loadFavouriteArtists(userId) {
   const db = getDatabase();
   const favRef = ref(db, `users/${userId}/favourite_artists`);
 
-  onValue(favRef, async snapshot => {
+  onValue(favRef, snapshot => {
     const favData = snapshot.val() || {};
-
     const artistIds = Object.keys(favData);
 
-    const artists = [];
-
-    for (const id of artistIds) {
-      const artistSnap = await get(ref(db, `artistas/${id}`));
-      if (artistSnap.exists()) {
-        artists.push({ id, ...artistSnap.val() });
-      }
-    }
-
-    renderSavedArtists(artists);
+    // LLAMAMOS A UNA FUNCIÓN ASYNC EXTERNA
+    fetchArtistData(artistIds);
   });
 }
+
 
 async function removeFavouriteArtist(artistId) {
   const db = getDatabase();
