@@ -1,20 +1,141 @@
-/* Selecciona la imagen dentro del div con la clase artist-image */
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    max-width: 1000px;
+    width: 90%;
+    margin: 3rem auto 5rem;
+}
+
+/*ARTIST TITLE */
+.PerfilArtista h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--color-blanco, white); 
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+/*SECTION TITLE*/
+.MusicSelector .section-title {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--color-azul2, #3e9ade); 
+    text-align: center;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 5px rgba(62, 154, 222, 0.5); 
+    width: 100%;
+}
+
+.artist-image {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
 .artist-image img {
-    /* 1. Hace la imagen completamente circular */
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
     border-radius: 50%; 
     
-    /* 2. Asegura que la imagen sea un cuadrado y no se distorsione */
-    width: 200px; /* Define un tamaño fijo para el ancho */
-    height: 200px; /* Define un tamaño fijo para la altura (mismo valor que el ancho) */
-    object-fit: cover; /* Recorta la imagen para cubrir el área sin distorsionarla */
+    border: 3px solid var(--color-blanco, white); 
+    box-shadow: 
+        0 0 0 5px rgba(62, 154, 222, 0.4),
+        0 0 20px rgba(0, 0, 0, 0.7); 
     
-    /* 3. Agrega un borde llamativo alrededor del círculo */
-    border: 5px solid #ffffff; /* Borde interior blanco */
-    box-shadow: 0 0 0 7px #4a4a4a; /* Borde exterior (un gris oscuro o color de acento) */
+    transition: transform 0.3s ease;
+}
+
+.artist-image img:hover {
+    transform: scale(1.05);
+}
+
+.discography-controls {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 500px; 
+    margin: 0 auto;
     
-    /* 4. Agrega una sutil sombra de profundidad */
-    filter: drop-shadow(4px 4px 6px rgba(0, 0, 0, 0.4)); /* Sombra para levantar la imagen */
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+}
+
+.discography-controls label {
+    color: var(--color-blanco, white);
+    font-weight: 500;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.discography-controls select {
+    width: 100%;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 1rem;
     
-    /* 5. Pequeña animación (opcional) */
-    transition: all 0.3s ease; /* Transición suave para cualquier cambio */
+    background-color: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: var(--color-blanco, white);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    
+    appearance: none; 
+}
+
+.discography-controls select:focus {
+    border-color: var(--color-azul1);
+    box-shadow: 0 0 0 3px rgba(62, 154, 222, 0.3);
+    outline: none;
+}
+
+.selector-container {
+    margin-bottom: 20px;
+}
+
+select#albumSelect {
+    padding: 10px;
+    border-radius: 5px;
+    border: none;
+    background-color: #333;
+    color: white;
+    font-size: 16px;
+    width: 80%;
+    margin-top: 10px;
+}
+
+/* Lista de canciones */
+.songs-list {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.song-item {
+    list-style: none;
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.song-item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    font-weight: bold;
+}
+
+/* Reproductor */
+.spotify-player {
+    margin-top: 20px;
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }

@@ -17,10 +17,6 @@ main {
     box-sizing: border-box;
 }
 
-main {
-    padding-top: 100px; /* deja espacio desde el header */
-}
-
 /* Contenedor del formulario */
 #loginContainer {
   background-color: rgba(255, 255, 255, 0.05);
@@ -42,7 +38,7 @@ main {
 }
 
 #loginContainer {
-  margin-top: 120px; /* separa desde el header */
+  margin-top: 50px;
 }
 
 /* Etiquetas */
@@ -107,10 +103,15 @@ main {
 #signOutBtn {
   background-color: var(--color-morado);
   color: var(--color-blanco);
+
+  border: 1px solid var(--color-morado); 
+    
+  box-shadow: 0 0 5px rgba(138, 43, 226, 0.5);
 }
 
 #signOutBtn:hover {
   background-color: #4324a8;
+  box-shadow: 0 0 15px rgba(138, 43, 226, 0.8);
 }
 
 /* Mensaje y bloques adicionales */
@@ -179,4 +180,22 @@ main {
     display: flex;           
     align-items: center;    
     margin-right: 20px;
+}
+
+#authErrorDisplay {
+    background-color: rgba(220, 53, 69, 0.1); 
+    border: 1px solid #dc3545; 
+    border-radius: 8px;
+    padding: 10px 15px;
+    margin-top: 0;
+    margin-top: 0;
+    
+    color: #f0f0f0; 
+    font-weight: 500;
+    text-align: center;
+    font-size: 0.95rem;
+    
+    box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3);
+
+    align-items: center;
 }

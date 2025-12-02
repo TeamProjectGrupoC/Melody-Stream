@@ -40,6 +40,23 @@ async function main() {
   const usernameInput = document.getElementById('usernameInput');
   const phoneInput = document.getElementById('phoneInput');
   const saveExtraBtn = document.getElementById('saveExtraBtn');
+  const profileLink = document.getElementById('profileLink');
+
+  onAuthStateChanged(auth, (user) => {
+    if (profileLink) {
+      if (user) {
+        profileLink.href = '../profile.html';
+        profileLink.onclick = null;
+      } 
+    else {
+        profileLink.href = 'login.html';
+        profileLink.onclick = (e) => {
+          e.preventDefault();
+          displayStyledError("You must be logged in to access your profile");
+      };
+    }
+    }
+  });
 
   async function saveToDB(uid, email, username, phone) {
     return set(ref(db, 'users/' + uid), { email, username, phone, favorite_songs: {}, spotify: {} });
@@ -59,11 +76,10 @@ async function main() {
   function showUserData(ud, uid) {
     dataDiv.style.display = 'block';
     dataDiv.innerHTML = `
-            <h3>My Data (${uid})</h3>
+            <h3>My Data</h3>
             <p><strong>Username:</strong> ${ud.username}</p>
             <p><strong>Phone:</strong> ${ud.phone}</p>
             <p><strong>Email:</strong> ${ud.email}</p>
-            <p><strong>Favorite Songs:</strong> ${JSON.stringify(ud.favorite_songs, null, 2)}</p>
         `;
     signOutBtn.style.display = 'inline-block';
   }
@@ -119,8 +135,9 @@ async function main() {
       if (extraInfoForm) extraInfoForm.style.display = 'none';
       const ud = await fetchUserData(user.uid);
       showUserData(ud, user.uid);
-      if (msg) msg.textContent = `Profile saved! Logged in as ${user.email}.`;
-    } catch (err) {
+      if (msg) msg.innerHTML = `Profile saved! Logged in as <span class="user-email">${user.email}</span>.`;
+    } 
+    catch (err) {
       console.error(err);
       if (msg) msg.textContent = `Error saving profile: ${err.message}`;
     }
@@ -144,5 +161,19 @@ async function main() {
   });
 
 } // end main
+
+//Displays a temporary error meessaged to the user (when you are not log in and try to access profile.html)
+function displayStyledError(message) {
+    const errorDisplay = document.getElementById('authErrorDisplay');
+    if (errorDisplay) {
+        errorDisplay.innerHTML = message;
+        errorDisplay.style.display = 'block';
+
+        setTimeout(() => {
+            errorDisplay.style.display = 'none';
+            errorDisplay.innerHTML = '';
+        }, 4000);
+    }
+}
 
 main();

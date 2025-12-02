@@ -35,13 +35,16 @@ document.querySelector(".profile-info").appendChild(followersCountP);
 let currentUserUID = null;
 let hasRequested = false;
 
+let isMaster = false; // for identifying the master account
+
+
 // Message if no profile UID provided
 if (!profileUID) {
   document.getElementById("msg").textContent = "No profile selected.";
 }
 
 // ----------------------------------------------------
-// 🔥 Wait for user authentication
+//  Wait for user authentication
 // ----------------------------------------------------
 onAuthStateChanged(auth, (user) => {
   if (!user) {
@@ -52,11 +55,17 @@ onAuthStateChanged(auth, (user) => {
   }
 
   currentUserUID = user.uid;
+
+  // Detect master
+  if (user.email === "teamprojectgrupoc@gmail.com") {
+    isMaster = true;
+  }
+
   loadProfile();
 });
 
 // ----------------------------------------------------
-// 🧍 Load profile information
+//  Load profile information
 // ----------------------------------------------------
 
 function loadProfile() {
@@ -111,7 +120,7 @@ async function loadFollowers() {
   const isFollowing = followers.hasOwnProperty(currentUserUID);
 
   // --- PRIVACY CHECK ---
-  if (isMe || isFollowing) {
+  if (isMe || isFollowing || isMaster) {
     // ACCESS GRANTED: Load the content
     loadFavoriteSongs(profileUID);
     loadFavoriteArtists(profileUID);

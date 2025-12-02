@@ -35,6 +35,11 @@ onAuthStateChanged(auth, (user) => {
     return;
   }
 
+  // Detect master
+  if (user.email === "teamprojectgrupoc@gmail.com") {
+    document.getElementById("masterText").textContent = "Master User : You can see all information without following";
+  }
+
   console.log("Auth OK. Cargando usuarios...");
   loadInitialUsers();
 });

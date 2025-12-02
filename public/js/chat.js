@@ -1,3 +1,7 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+import { getDatabase, ref, get, child, set, push, onValue, off, update, onChildAdded } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { saveFavouriteArtist, saveFavouriteSong } from "./favourites.js";
 
 /*
 DATABASE STRUCTURE AND LOGIC:
@@ -301,7 +305,7 @@ async function main() {
             }
 
             if (data.attachment) {
-                const card = buildAttachmentCard(data.attachment);
+                const card = buildAttachmentCard(data.attachment, data.sender);
                 div.appendChild(card);
             }
 
@@ -320,15 +324,63 @@ async function main() {
             typeof att.author === "string";
     }
 
-    function buildAttachmentCard(att) {
+    let cachedUser = null;
+        onAuthStateChanged(auth, (user) => {
+            cachedUser = user;
+    });
+
+    function normalizeArtistForFavourites(artist, att) {
+        return {
+            id: artist.id,
+            name: artist.name,
+            images: [
+                { url: artist.image || att.imageURL }
+            ],
+            followers: {
+                total: artist.followers || 0
+            },
+            genres: Array.isArray(artist.genres) ? artist.genres : []
+        };
+    }
+
+    function normalizeSongForFavourites(song, att) {
+        return {
+            id: song.id,
+            name: song.title,
+            artists: [
+                { name: song.artist || att.author || "Unknown Artist" }
+            ],
+            album: {
+                name: song.album || "Unknown Album",
+                images: [
+                    { url: song.albumImageUrl || att.imageURL }
+                ]
+            }
+        };
+    }
+
+
+
+    function buildAttachmentCard(att, senderId) {
+
+        if (!att || !att.imageURL) {
+            console.warn("⚠ Attachment inválido:", att);
+            return document.createTextNode("[Attachment vacío]");
+        }
+
         const card = document.createElement("div");
         card.className = "attachment-card";
 
+        // Logic to know who wheter i am the receptor or the sender
+        const isMine = senderId === cachedUser.uid;
+
+        // Image
         const img = document.createElement("img");
         img.src = att.imageURL;
         img.className = "attachment-image";
         card.appendChild(img);
 
+        // Text
         const meta = document.createElement("div");
         meta.className = "attachment-meta";
 
@@ -342,12 +394,121 @@ async function main() {
             meta.appendChild(author);
         }
 
-        if (att.audioURL && att.audioURL !== "") {
+        // Reproduce songs
+        const isSong = att.audioURL && att.audioURL !== "";
+        if (isSong) {
             const audio = document.createElement('audio');
             audio.controls = true;
             audio.src = att.audioURL;
             meta.appendChild(audio);
         }
+
+
+        if (!isMine) {
+            // Add artist to favourites
+            if (att.author === "Favourite Artist") {
+                const btn = document.createElement("button");
+                btn.textContent = "Add to favourite artists";
+                btn.style.marginTop = "10px";
+                btn.className = "main-button";
+
+                btn.addEventListener("click", async () => {
+                    try {
+                        const user = auth.currentUser;
+                        if (!user) return alert("You must log in");
+
+                        // 1. BUSCAR EL ARTISTA ENTRE LOS FAVORITOS DEL SENDER
+                        const senderFavRef = ref(db, `users/${senderId}/favourite_artists`);
+                        const favSnap = await get(senderFavRef);
+                        const data = favSnap.val() || {};
+
+                        let foundArtist = null;
+
+                        for (const key in data) {
+                            if (data[key].name?.toLowerCase() === att.title.toLowerCase()) {
+                                foundArtist = data[key];
+                                break;
+                            }
+                        }
+
+                        if (!foundArtist) {
+                            alert("The sender does not have this artist saved in favourites.");
+                            return;
+                        }
+
+                        // 2. Llamar a favourites.js (misma función que usa profile.js)
+                        const normalized = normalizeArtistForFavourites(foundArtist, att);
+                        await saveFavouriteArtist(user.uid, normalized);
+
+
+                        alert("Artist added to favourites!");
+
+                    } catch (err) {
+                        console.error(err);
+                        alert("Error saving artist");
+                    }
+
+                });
+
+                meta.appendChild(btn);
+            }
+
+            // Add song to favourites
+            if (isSong) {
+                const btnSong = document.createElement("button");
+                btnSong.textContent = "Add to favourite songs";
+                btnSong.className = "main-button";
+                btnSong.style.marginTop = "10px";
+
+                btnSong.addEventListener("click", async () => {
+                    try {
+                        const user = auth.currentUser;
+                        if (!user) return alert("You must log in");
+
+                        // 1. BUSCAR ENTRE LOS FAVORITOS DEL SENDER
+                        const senderFavRef = ref(db, `users/${senderId}/favoritos`);
+                        const favSnap = await get(senderFavRef);
+                        const data = favSnap.val() || {};
+
+                        let foundKey = null;
+                        let foundSong = null;
+
+                        console.log("ATTACHMENT TITLE:", att.title);
+                        console.log("CANCIONES DEL SENDER:");
+                        console.log(data);
+
+                        for (const key in data) {
+                            if (data[key].title?.toLowerCase() === att.title.toLowerCase()) {
+                                foundKey = key;
+                                foundSong = data[key];
+                                break;
+                            }
+                        }
+
+                        if (!foundSong) {
+                            alert("The sender does not have this song saved in favourites.");
+                            return;
+                        }
+
+                        // 🔥 ENGADIR O ID DO NODO AO OBXECTO
+                        foundSong.id = foundKey;
+
+                        const normalized = normalizeSongForFavourites(foundSong, att);
+                        await saveFavouriteSong(user.uid, normalized);
+
+
+                        alert("Song added to favourites!");
+
+                    } catch (err) {
+                        console.error(err);
+                        alert("Error saving song");
+                    }
+                });
+
+                meta.appendChild(btnSong);
+            }
+        }
+        
 
         card.appendChild(meta);
 

@@ -22,6 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
   const header = document.getElementById("headerPrincipal") || document.querySelector("header");
   // asegurar que exista el nav/ul
   const nav = header?.querySelector("#NavPrincipal") || header?.querySelector("nav");
+
+  let isMaster = false;
+  
   // buscar o crear el enlace de login/profile
   let loginProfileLink = document.getElementById("loginProfileLink");
   if (!loginProfileLink) {
@@ -65,7 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  function createLogoutListItem() {
+    function createLogoutListItem() {
     const li = document.createElement("li");
     li.id = "logoutLi";
     const a = document.createElement("a");
@@ -73,16 +76,40 @@ document.addEventListener("DOMContentLoaded", () => {
     a.href = "#";
     a.textContent = "LOG OUT";
     a.style.cursor = "pointer";
+
     a.addEventListener("click", async (ev) => {
       ev.preventDefault();
       try {
         await signOut(auth);
-        window.location.reload();
+
+        localStorage.removeItem("spotify_access_token");
+
+        // Redirigir si estamos en test_spotify.html
+        if (window.location.pathname.endsWith("test_spotify.html")) {
+          window.location.href = "test_register_spotify.html";
+        } 
+        else if (window.location.pathname.endsWith("profile.html")){
+          window.location.href = "login.html"
+        }
+        else if (window.location.pathname.endsWith("chat.html")){
+          window.location.href = "login.html"
+        }
+        else {
+          window.location.reload();
+        }
       } catch (err) {
         console.error("Sign out error:", err);
-        window.location.reload();
+
+        localStorage.removeItem("spotify_access_token");
+
+        if (window.location.pathname.endsWith("test_spotify.html")) {
+          window.location.href = "test_register_spotify.html";
+        } else {
+          window.location.reload();
+        }
       }
     });
+
     li.appendChild(a);
     return li;
   }
@@ -133,6 +160,24 @@ document.addEventListener("DOMContentLoaded", () => {
       if (headerPic) headerPic.src = "images/logos/silueta.png";
       document.body.classList.add("header-ready");
       return;
+    }
+
+    // Detect master
+    if (user.email === "teamprojectgrupoc@gmail.com") {
+      isMaster = true;
+      header.style.background = `
+        linear-gradient(
+          135deg,
+          #FFD700 0%,
+          #FFB700 25%,
+          #FFE599 50%,  /* tono amarillo claro en vez de blanco */
+          #FFD700 75%,
+          #FFA500 100%
+        )
+      `;
+      header.style.border = "2px solid #B8860B"; // borde dorado oscuro
+      header.style.color = "#fff"; // texto visible
+      header.style.fontWeight = "bold";
     }
 
     if (loginProfileLink) {
