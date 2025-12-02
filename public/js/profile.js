@@ -586,7 +586,7 @@ async function searchArtist(query) {
   return data.artists.items;
 }
 
-async function saveFavouriteArtist(userId, artist) {
+export async function saveFavouriteArtist(userId, artist) {
   const db = getDatabase();
   const favRef = ref(db, `users/${userId}/favourite_artists/`);
 
@@ -864,7 +864,7 @@ async function searchSong(query) {
   return data.tracks.items;
 }
 
-async function saveFavouriteSong(userId, track) {
+export async function saveFavouriteSong(userId, track) {
   const db = getDatabase();
   const songRef = ref(db, `canciones/${track.id}`);
   const favSongRef = ref(db, `users/${userId}/favoritos/${track.id}`);
@@ -1095,7 +1095,3 @@ document.getElementById("shareSongConfirm").addEventListener("click", async () =
 });
 
 
-
-
-window.saveFavouriteArtist = saveFavouriteArtist;
-window.saveFavouriteSong = saveFavouriteSong;

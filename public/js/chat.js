@@ -1,6 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, get, child, set, push, onValue, off, update, onChildAdded } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { saveFavouriteSong, saveFavouriteArtist } from "./profile.js";
 /*
 DATABASE STRUCTURE AND LOGIC:
 
@@ -378,7 +379,9 @@ async function main() {
                             genres: []
                         };
 
-                        window.saveFavouriteArtist(user.uid, artistObj);
+                        await saveFavouriteArtist(user.uid, artistObj);
+                        alert("Artist added to favourites!");
+
                     } catch (err) {
                         console.error("🔥 ERROR saving artist (full error):", err);
                         console.error("🔥 Error name:", err?.name);
@@ -422,7 +425,9 @@ async function main() {
                             preview_url: att.audioURL
                         };
 
-                        window.saveFavouriteSong(user.uid, trackObj);
+                        await saveFavouriteSong(user.uid, trackObj);
+                        alert("Song added to favourites!");
+
                     } catch (err) {
                         console.error(err);
                         alert("Error saving song");
