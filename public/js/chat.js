@@ -370,18 +370,28 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        const artistRef = ref(db, `users/${user.uid}/favourite_artists/${att.title}`);
-                        const snapshot = await get(artistRef);
+                        const favRef = ref(db, `users/${user.uid}/favourite_artists/`);
 
-                        if (snapshot.exists()) {
-                            alert("This artist is already in your favourites!");
+                        // 1. Leer favoritos actuales
+                        const snapshot = await get(favRef);
+                        const data = snapshot.val() || {};
+
+                        // 2. Comprobar si ya existe
+                        const alreadySaved = Object.values(data).some(a => a.id === artist.id);
+
+                        if (alreadySaved) {
+                            alert("This artist is already in your favourites.");
                             return;
                         }
 
-                        // Save in firebase
-                        await set(artistRef, {
-                            name: att.title,
-                            image: att.imageURL
+                        // 3. Guardar si NO existe
+                        const newFav = push(favRef);
+                        set(newFav, {
+                            id: artist.id,
+                            name: artist.name,
+                            image: artist.images?.[0]?.url || "",
+                            followers: artist.followers.total,
+                            genres: artist.genres
                         });
 
                         alert("Artist added to favourites!");
@@ -406,19 +416,24 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        const songRef = ref(db, `users/${user.uid}/favoritos/${att.title}`);
-                        const snap = await get(songRef);
+                        const songRef = ref(db, `users/${user.uid}/favoritos/`);
+                        const snapshot = await get(songRef);
+                        const data = snapshot.val() || {};
 
-                        if (snap.exists()){
-                            alert("This song is already in your favourites!");
+                        const alreadySaved = Object.values(data).some(a => a.id === att.id);
+                        if (alreadySaved) {
+                            alert("This song is already in your favourites.");
                             return;
                         }
 
-                        await set(songRef, {
-                            name: att.title,
-                            artist: att.author,
-                            albumImageUrl: att.imageURL,
-                            previewUrl: att.audioURL
+                        const newFav = push(songRef);
+                        set(newFav, {
+                            id: att.id,
+                            title: att.name,
+                            artist: att.artists.map((artist) => att.author).join(", "),
+                            album: att.album.name,
+                            albumImageUrl: att.album.images[0].url,
+                            previewUrl: att.preview_url,
                         });
                         
                         alert("Song added to favourites!");
