@@ -1,7 +1,7 @@
 // --- IMPORTS ---
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, get, onChildChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
@@ -20,12 +20,14 @@ const db = getDatabase();
 
 document.addEventListener("DOMContentLoaded", () => {
   const header = document.getElementById("headerPrincipal") || document.querySelector("header");
-  // asegurar que exista el nav/ul
   const nav = header?.querySelector("#NavPrincipal") || header?.querySelector("nav");
 
   let isMaster = false;
   
-  // buscar o crear el enlace de login/profile
+  // Variable to control the message button timer
+  let messageButtonTimeout;
+
+  // --- LOGIN/PROFILE LINK LOGIC ---
   let loginProfileLink = document.getElementById("loginProfileLink");
   if (!loginProfileLink) {
     if (nav) {
@@ -48,7 +50,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // asegurar imagen de header (headerUserPic)
+  // --- HEADER PROFILE PICTURE LOGIC ---
   let headerPic = document.getElementById("headerUserPic");
   if (!headerPic) {
     const profileWrap = document.getElementById("headerProfileIm");
@@ -68,7 +70,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-    function createLogoutListItem() {
+  function createLogoutListItem() {
     const li = document.createElement("li");
     li.id = "logoutLi";
     const a = document.createElement("a");
@@ -81,32 +83,21 @@ document.addEventListener("DOMContentLoaded", () => {
       ev.preventDefault();
       try {
         await signOut(auth);
-
         localStorage.removeItem("spotify_access_token");
-
-        // Redirigir si estamos en test_spotify.html
+        
         if (window.location.pathname.endsWith("test_spotify.html")) {
           window.location.href = "test_register_spotify.html";
-        } 
-        else if (window.location.pathname.endsWith("profile.html")){
+        } else if (window.location.pathname.endsWith("profile.html")){
           window.location.href = "login.html"
-        }
-        else if (window.location.pathname.endsWith("chat.html")){
+        } else if (window.location.pathname.endsWith("chat.html")){
           window.location.href = "login.html"
-        }
-        else {
+        } else {
           window.location.reload();
         }
       } catch (err) {
         console.error("Sign out error:", err);
-
         localStorage.removeItem("spotify_access_token");
-
-        if (window.location.pathname.endsWith("test_spotify.html")) {
-          window.location.href = "test_register_spotify.html";
-        } else {
-          window.location.reload();
-        }
+        window.location.reload();
       }
     });
 
@@ -119,6 +110,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (document.getElementById("logoutLi")) return;
     const targetNav = header.querySelector("#NavPrincipal") || header.querySelector("nav");
     const ul = targetNav?.querySelector("ul") || targetNav;
+    
     if (loginProfileLink) {
       const parentLi = loginProfileLink.closest("li");
       if (parentLi && parentLi.parentNode) {
@@ -148,6 +140,45 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- NEW FUNCTION: Show New Messages Button ---
+  function showNewMessagesButton() {
+    const targetNav = header.querySelector("#NavPrincipal") || header.querySelector("nav");
+    const ul = targetNav?.querySelector("ul");
+    
+    if (!ul) return;
+
+    // 1. Check if it already exists
+    let msgLi = document.getElementById("new-msg-li");
+
+    // 2. If not, create it
+    if (!msgLi) {
+        msgLi = document.createElement("li");
+        msgLi.id = "new-msg-li";
+        
+        const link = document.createElement("a");
+        link.href = "chat.html";
+        link.textContent = "New Messages!";
+        
+        // CSS Class applied here
+        link.className = "new-messages-btn";
+        
+        msgLi.appendChild(link);
+        
+        // Insert at the BEGINNING (before Home)
+        ul.prepend(msgLi);
+    }
+
+    // 3. Reset the timer
+    if (messageButtonTimeout) clearTimeout(messageButtonTimeout);
+
+    messageButtonTimeout = setTimeout(() => {
+        if (msgLi && msgLi.parentNode) {
+            msgLi.parentNode.removeChild(msgLi);
+        }
+    }, 10000); // 10 seconds
+  }
+
+  // --- AUTH LISTENER ---
   onAuthStateChanged(auth, async (user) => {
     if (!user) {
       if (loginProfileLink) {
@@ -162,21 +193,25 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Detect master
+    // LOGGED IN State
+    
+    // --- Listen for incoming messages ---
+    const userChatsRef = ref(db, `userChats/${user.uid}`);
+    onChildChanged(userChatsRef, (snapshot) => {
+        const chatData = snapshot.val();
+        const lastMsg = chatData.lastMessage;
+
+        if (lastMsg && lastMsg.sender !== user.uid) {
+            showNewMessagesButton();
+        }
+    });
+
+    // Detect master user
     if (user.email === "teamprojectgrupoc@gmail.com") {
       isMaster = true;
-      header.style.background = `
-        linear-gradient(
-          135deg,
-          #FFD700 0%,
-          #FFB700 25%,
-          #FFE599 50%,  /* tono amarillo claro en vez de blanco */
-          #FFD700 75%,
-          #FFA500 100%
-        )
-      `;
-      header.style.border = "2px solid #B8860B"; // borde dorado oscuro
-      header.style.color = "#fff"; // texto visible
+      header.style.background = `linear-gradient(135deg, #FFD700 0%, #FFB700 25%, #FFE599 50%, #FFD700 75%, #FFA500 100%)`;
+      header.style.border = "2px solid #B8860B"; 
+      header.style.color = "#fff";
       header.style.fontWeight = "bold";
     }
 
@@ -189,6 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
     insertLogoutButton();
     removeExtraLoginLinks();
 
+    // Load profile photo
     try {
       const userRef = ref(db, `users/${user.uid}`);
       const snap = await get(userRef);

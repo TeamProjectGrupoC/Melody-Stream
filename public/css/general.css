@@ -353,3 +353,23 @@ body:not(.header-ready) #headerPrincipal {
   visibility: hidden;
 }
 
+/* Botón de notificación de mensajes nuevos en el header */
+.new-messages-btn {
+    background-color: #7250f8;
+    color: white !important; /* Importante para sobreescribir colores de enlaces del header */
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-weight: bold;
+    font-size: 0.9rem;
+    box-shadow: 0 0 10px rgba(28, 55, 135, 0.5);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-block;
+    white-space: nowrap;
+}
+
+.new-messages-btn:hover {
+    background-color: #5b12b3;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(47, 5, 107, 0.8);
+}
