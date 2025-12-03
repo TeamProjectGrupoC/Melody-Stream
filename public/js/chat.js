@@ -175,7 +175,7 @@ async function main() {
         const lastMessageSpan = document.createElement("span");
         lastMessageSpan.className = "last-message";
         
-        // Optional: Visual dot prefix
+        // Visual dot prefix
         const prefix = user.isUnread ? "• " : "";
 
         lastMessageSpan.textContent = prefix + (user.lastMessageText.length > 30
@@ -189,7 +189,6 @@ async function main() {
     userListDiv.appendChild(fragment);
     statusMessage.style.display = 'none';
 }
-    // --- Select user ---
    // --- Select user ---
     userListDiv.addEventListener("click", (e) => {
         const userLi = e.target.closest(".user");
@@ -472,7 +471,7 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        // 1. BUSCAR ENTRE LOS FAVORITOS DEL SENDER
+                        // search in the favs of thse sender
                         const senderFavRef = ref(db, `users/${senderId}/favoritos`);
                         const favSnap = await get(senderFavRef);
                         const data = favSnap.val() || {};
@@ -497,7 +496,6 @@ async function main() {
                             return;
                         }
 
-                        // 🔥 ENGADIR O ID DO NODO AO OBXECTO
                         foundSong.id = foundKey;
 
                         const normalized = normalizeSongForFavourites(foundSong, att);

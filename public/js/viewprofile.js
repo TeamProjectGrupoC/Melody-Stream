@@ -93,7 +93,7 @@ function loadProfile() {
 }
 
 // ----------------------------------------------------
-// 🧍 Load followers info AND Handle Content Privacy
+//  Load followers info AND Handle Content Privacy
 // ----------------------------------------------------
 async function loadFollowers() {
   // 1. Button Visibility
@@ -161,7 +161,7 @@ function renderLockedState(elementId, contentName) {
 }
 
 // ----------------------------------------------------
-// 🔘 Follow button click handler (Anti-Spam + No cancel request)
+//  Follow button click handler 
 // ----------------------------------------------------
 followBtn.addEventListener("click", async () => {
   if (!currentUserUID || currentUserUID === profileUID) return;
@@ -236,7 +236,7 @@ followBtn.addEventListener("click", async () => {
 });
 
 // ----------------------------------------------------
-// 🎵 Load favorite songs
+//  Load favorite songs
 // ----------------------------------------------------
 async function loadFavoriteSongs(uid) {
   const container = document.getElementById("viewUserSongs");
@@ -280,7 +280,7 @@ async function loadFavoriteSongs(uid) {
 }
 
 // ----------------------------------------------------
-// 🎤 Load favorite artists
+//  Load favorite artists
 // ----------------------------------------------------
 async function loadFavoriteArtists(uid) {
   const container = document.getElementById("viewUserArtists");

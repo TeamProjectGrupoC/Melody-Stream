@@ -27,13 +27,13 @@ const resultsContainer = document.getElementById("searchResults");
 searchBtn.addEventListener("click", searchUsers);
 
 // --------------------------------------------------
-// 🔥 WAIT FOR LOGGED IN USER
+//  WAIT FOR LOGGED IN USER
 // --------------------------------------------------
 onAuthStateChanged(auth, (user) => {
   if (!user) {
     console.warn("User not logged in.");
 
-    // --- MODIFICATION START: Show message and button on the web ---
+    // ---  Show message and button on the web ---
     resultsContainer.innerHTML = `
       <div style="text-align: center; margin-top: 20px;">
         <p style="color: red; font-weight: bold; margin-bottom: 10px;">
@@ -47,10 +47,9 @@ onAuthStateChanged(auth, (user) => {
 
     // Add event listener to the newly created button
     document.getElementById("btnLoginRedirect").addEventListener("click", () => {
-        // Change 'login.html' if your file has a different name
         window.location.href = "login.html"; 
     });
-    // --- MODIFICATION END ---
+   
 
     return; // Stop execution here
   }
@@ -68,7 +67,7 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // --------------------------------------------------
-// 🔥 1. Automatically load 10 users
+// 1. Automatically load 10 users
 // --------------------------------------------------
 async function loadInitialUsers() {
   resultsContainer.innerHTML = "Loading users...";
@@ -101,7 +100,7 @@ async function loadInitialUsers() {
 }
 
 // --------------------------------------------------
-// 🔍 2. Search users
+// 2. Search users
 // --------------------------------------------------
 async function searchUsers() {
   const searchTerm = searchInput.value.trim().toLowerCase();
@@ -147,7 +146,7 @@ async function searchUsers() {
 }
 
 // --------------------------------------------------
-// 🎨 3. Display users + redirect to viewprofile.html
+// 3. Display users + redirect to viewprofile.html
 // --------------------------------------------------
 function displayUsers(list) {
   resultsContainer.innerHTML = "";

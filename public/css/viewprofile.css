@@ -1,4 +1,4 @@
-/* --- Tarjeta principal que envuelve TODO el perfil --- */
+/* Main profile card wrapper */
 .profile-card {
     max-width: 900px;
     margin: 80px auto 40px;
@@ -9,7 +9,7 @@
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
-/* --- Mensaje de carga --- */
+/* Loading message */
 #msg {
     text-align: center;
     font-size: 1.3rem;
@@ -17,7 +17,7 @@
     margin-bottom: 20px;
 }
 
-/* --- Header: Foto + Info alineadas --- */
+/* Header: Photo + info aligned */
 .profile-header {
     display: flex;
     align-items: center;
@@ -25,13 +25,12 @@
     margin-bottom: 30px;
 }
 
-/* Foto del usuario */
+/* User photo */
 .profile-header img {
     width: 160px;
     height: 160px;
     border-radius: 50%;
     object-fit: cover;
-
     border: 4px solid #58a6ff;
     box-shadow: 0 8px 24px rgba(88, 166, 255, 0.3);
     transition: transform 0.3s ease;
@@ -41,7 +40,7 @@
     transform: scale(1.05);
 }
 
-/* Info a la derecha */
+/* Profile info */
 .profile-info h2 {
     font-size: 2.4rem;
     color: #b38cff;
@@ -55,7 +54,7 @@
     margin: 4px 0;
 }
 
-/* --- Títulos de secciones --- */
+/* Section titles */
 .profile-card h3 {
     margin-top: 35px;
     margin-bottom: 15px;
@@ -64,33 +63,30 @@
     color: #f0f6fc;
 }
 
-/* --- Contenedor flexible para canciones y podcasts --- */
+/* Flexible layout for songs/podcasts */
 .cards-container {
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
 }
 
-/* --- Mensajes cuando no hay elementos --- */
+/* Empty state messages */
 .empty-msg {
     color: #9ea7b3;
     font-size: 1.1rem;
     margin-top: 10px;
 }
 
-/* --- Tarjeta de canción o podcast --- */
+/* Item card (song/podcast) */
 .card-item {
     background-color: #1c1f26;
     border: 1px solid #30363d;
     border-radius: 15px;
-
     width: 220px;
     padding: 15px;
-
     display: flex;
     flex-direction: column;
     align-items: center;
-
     transition: transform 0.25s, box-shadow 0.25s;
 }
 
@@ -100,7 +96,7 @@
     border-color: #58a6ff;
 }
 
-/* Imagen cuadrada canción/podcast */
+/* Square image */
 .card-item img {
     width: 120px;
     height: 120px;
@@ -109,7 +105,7 @@
     margin-bottom: 10px;
 }
 
-/* Título */
+/* Title */
 .card-item-title {
     font-size: 1.2rem;
     font-weight: 600;
@@ -118,13 +114,13 @@
     margin-bottom: 10px;
 }
 
-/* Audio */
+/* Audio player */
 .card-item audio {
     width: 100%;
     margin-top: 5px;
 }
 
-/* --- Responsive: pantalla móvil --- */
+/* Mobile layout */
 @media (max-width: 768px) {
 
     .profile-card {
@@ -152,15 +148,14 @@
     }
 }
 
-
-/* --- Estilo Base del Botón Follow --- */
+/* Follow button */
 #followBtn {
     padding: 10px 28px;
     font-size: 14px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-radius: 50px; /* Forma de píldora */
+    border-radius: 50px;
     cursor: pointer;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
     border: none;
@@ -169,14 +164,11 @@
     align-items: center;
     justify-content: center;
     margin-top: 15px;
-    
-    /* Estado por defecto: FOLLOW (Degradado llamativo) */
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: #ffffff;
-    box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4); /* Sombra suave morada */
+    box-shadow: 0 4px 15px rgba(118, 75, 162, 0.4);
 }
 
-/* Efecto Hover para Follow */
 #followBtn:hover {
     transform: translateY(-2px) scale(1.02);
     box-shadow: 0 6px 20px rgba(118, 75, 162, 0.6);
@@ -186,8 +178,7 @@
     transform: translateY(1px);
 }
 
-/* --- Estado: FOLLOWING (Ya lo sigues) --- */
-/* Estilo "Outline": Fondo transparente con borde */
+/* FOLLOWING state */
 #followBtn.state-following {
     background: transparent;
     border: 2px solid #555560;
@@ -201,8 +192,7 @@
     transform: none;
 }
 
-/* --- Estado: REQUEST SENT (Pendiente) --- */
-/* Estilo grisáceo para indicar espera */
+/* REQUEST SENT (pending) state */
 #followBtn.state-pending {
     background: #2a2a35;
     color: #a0a0b0;
@@ -211,23 +201,18 @@
     cursor: default;
 }
 
-/* --- Estilos para el mensaje de Bloqueo (View Profile) --- */
+/* Locked content message */
 .locked-content {
     width: 100%;
-    /* Truco para Grid: Esto le dice que ocupe desde la primera columna hasta la última */
-    grid-column: 1 / -1; 
-    
+    grid-column: 1 / -1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    
     padding: 40px 20px;
     text-align: center;
     min-height: 150px;
-    
-    /* Opcional: un fondo sutil para diferenciarlo */
-    background: rgba(255, 255, 255, 0.02); 
+    background: rgba(255, 255, 255, 0.02);
     border-radius: 12px;
     margin-top: 10px;
 }
@@ -241,6 +226,6 @@
 .locked-content p {
     font-size: 16px;
     font-weight: 500;
-    color: #888; /* Color de texto gris suave */
+    color: #888;
     margin: 0;
 }
