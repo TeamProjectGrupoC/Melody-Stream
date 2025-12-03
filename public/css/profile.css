@@ -974,12 +974,12 @@ main a:hover {
 }
 
 .folder-list {
-    display: grid;
-    
-    grid-template-columns: repeat(3, 1fr); 
+     display: grid;
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
+    margin-top: 10px;
+    justify-content: center;
     justify-items: center;
-    align-items: start;
+    align-items: center;
     width: 100%;
-    margin-top: 0; 
 }
