@@ -44,34 +44,23 @@ LOGIC WHEN SENDING A MESSAGE:
 */
 
 
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, get, child, set, push, onValue, off, update, onChildAdded } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-console.log("✅ chat.js cargado correctamente");
 
 async function main() {
-    let firebaseConfig;
-    let app;
+        // Firebase configuration
+    const firebaseConfig = {
+    apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
+    authDomain: "melodystream123.firebaseapp.com",
+    databaseURL: "https://melodystream123-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "melodystream123",
+    storageBucket: "melodystream123.firebasestorage.app",
+    messagingSenderId: "640160988809",
+    appId: "1:640160988809:web:d0995d302123ccf0431058",
+    measurementId: "G-J97KEDLYMB"
+    };
 
-    try {
-        const response = await fetch('/__/firebase/init.json');
-        firebaseConfig = await response.json();
-    } catch (e) {
-        console.warn("No se pudo cargar /__/firebase/init.json:", e);
-    }
-
-    // Inicializar solo si no hay apps; si ya existe, reutilizarla
-    if (!getApps().length) {
-        if (!firebaseConfig) {
-            console.error("No hay configuración de Firebase disponible para inicializar la app.");
-            return;
-        }
-        app = initializeApp(firebaseConfig);
-    } else {
-        app = getApp();
-    }
-    const auth = getAuth(app);
+    const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
+    const auth = getAuth(app);
 
     // --- DOM selectors ---
     const statusMessage = document.getElementById('statusMessage');
@@ -128,61 +117,86 @@ async function main() {
 
     // --- Render user list based on userChats ---
     function renderUserList(userChats) {
-        if (!currentUser || !usersMap) return;
+    if (!currentUser || !usersMap) return;
 
-        const usersToRender = [];
+    const usersToRender = [];
 
-        for (const uid in usersMap) {
-            if (uid === currentUser.uid) continue;
-            const userData = usersMap[uid];
-            const chatId = getChatId(currentUser.uid, uid);
+    for (const uid in usersMap) {
+        if (uid === currentUser.uid) continue;
+        const userData = usersMap[uid];
+        const chatId = getChatId(currentUser.uid, uid);
 
-            const lastMessage = userChats[chatId]?.lastMessage;
-            const timestamp = lastMessage?.timestamp || 0;
-            const lastMessageText = lastMessage?.text || "Click to start a conversation";
+        // Get chat data
+        const chatData = userChats[chatId];
+        const lastMessage = chatData?.lastMessage;
+        const timestamp = lastMessage?.timestamp || 0;
+        const lastMessageText = lastMessage?.text || "Click to start a conversation";
 
-            usersToRender.push({
-                uid,
-                username: userData.username || "(no username)",
-                lastMessageTimestamp: timestamp,
-                lastMessageText
-            });
-        }
+        // It is considered unread if: 
+        // 1. chatData exists
+        // 2. isRead property is explicitly false
+        // 3. The last message was NOT sent by me
+        const isRead = chatData?.isRead !== false; // Default to true if undefined
+        const isMyMessage = lastMessage?.sender === currentUser.uid;
+        const isUnread = !isRead && !isMyMessage;
 
-        // Sort by last message
-        usersToRender.sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
-
-        // Render
-        userListDiv.innerHTML = "";
-        const fragment = document.createDocumentFragment();
-        usersToRender.forEach(user => {
-            const li = document.createElement("li");
-            li.className = "user";
-            li.dataset.uid = user.uid;
-            li.dataset.username = user.username;
-
-            const usernameSpan = document.createElement("span");
-            usernameSpan.className = "username";
-            usernameSpan.textContent = user.username;
-
-            const lastMessageSpan = document.createElement("span");
-            lastMessageSpan.className = "last-message";
-            lastMessageSpan.textContent = user.lastMessageText.length > 30
-                ? user.lastMessageText.substring(0, 30) + "..."
-                : user.lastMessageText;
-
-            li.appendChild(usernameSpan);
-            li.appendChild(lastMessageSpan);
-            fragment.appendChild(li);
+        usersToRender.push({
+            uid,
+            username: userData.username || "(no username)",
+            lastMessageTimestamp: timestamp,
+            lastMessageText,
+            isUnread: isUnread // Save this state
         });
-        userListDiv.appendChild(fragment);
-        statusMessage.style.display = 'none';
     }
 
+    // Sort by last message time
+    usersToRender.sort((a, b) => b.lastMessageTimestamp - a.lastMessageTimestamp);
+
+    // Render list
+    userListDiv.innerHTML = "";
+    const fragment = document.createDocumentFragment();
+    
+    usersToRender.forEach(user => {
+        const li = document.createElement("li");
+        li.className = "user";
+        
+        //APPLY CSS CLASS IF UNREAD 
+        if (user.isUnread) {
+            li.classList.add("unread");
+        }
+
+        li.dataset.uid = user.uid;
+        li.dataset.username = user.username;
+
+        const usernameSpan = document.createElement("span");
+        usernameSpan.className = "username";
+        usernameSpan.textContent = user.username;
+
+        const lastMessageSpan = document.createElement("span");
+        lastMessageSpan.className = "last-message";
+        
+        // Optional: Visual dot prefix
+        const prefix = user.isUnread ? "• " : "";
+
+        lastMessageSpan.textContent = prefix + (user.lastMessageText.length > 30
+            ? user.lastMessageText.substring(0, 30) + "..."
+            : user.lastMessageText);
+
+        li.appendChild(usernameSpan);
+        li.appendChild(lastMessageSpan);
+        fragment.appendChild(li);
+    });
+    userListDiv.appendChild(fragment);
+    statusMessage.style.display = 'none';
+}
     // --- Select user ---
+   // --- Select user ---
     userListDiv.addEventListener("click", (e) => {
         const userLi = e.target.closest(".user");
         if (!userLi) return;
+
+        // 1. Visual change: remove unread class immediately
+        userLi.classList.remove("unread");
 
         document.querySelectorAll('#userList .user.active').forEach(el => el.classList.remove('active'));
         userLi.classList.add('active');
@@ -190,6 +204,11 @@ async function main() {
         selectedUser = userLi.dataset.uid;
         const selectedUsername = userLi.dataset.username;
         const chatId = getChatId(currentUser.uid, selectedUser);
+
+        // 2. Database update: Mark chat as read for the current user
+        update(ref(db, `userChats/${currentUser.uid}/${chatId}`), {
+            isRead: true
+        });
 
         if (currentMessagesRef) off(currentMessagesRef);
 
@@ -212,11 +231,9 @@ async function main() {
                 div.classList.add("other");
             }
 
-            // --- Detect follow request message ---
-            // --- 1. Detect STATUS messages (Accepted/Rejected) ---
-            // If the text starts with confirmation emojis, we style it as a system notification
+            // --- Detect STATUS messages (Accepted/Rejected) ---
             if (data.text.startsWith("✅") || data.text.startsWith("❌")) {
-                div.classList.add("status-message"); // Special class to center it and remove bubble background
+                div.classList.add("status-message");
                 const p = document.createElement("p");
                 p.textContent = data.text;
                 div.appendChild(p);
@@ -225,9 +242,8 @@ async function main() {
                 return;
             }
 
-            // --- 2. Detect Follow Request ---
+            // --- Detect Follow Request ---
             if (data.text === "📩 Sent a follow request" && data.sender !== currentUser.uid) {
-                // Add a special container class for styling
                 div.classList.add("follow-request-card");
 
                 const title = document.createElement("h4");
@@ -235,55 +251,49 @@ async function main() {
                 div.appendChild(title);
 
                 const p = document.createElement("p");
-                // Safe access to username
                 p.textContent = `${usersMap[data.sender]?.username || "A user"} wants to follow you.`;
                 div.appendChild(p);
 
-                // Container for buttons (for flexbox layout)
                 const btnContainer = document.createElement("div");
                 btnContainer.className = "request-actions";
 
                 const acceptBtn = document.createElement("button");
                 acceptBtn.textContent = "Accept";
-                acceptBtn.className = "btn-action btn-accept"; // Added CSS classes
+                acceptBtn.className = "btn-action btn-accept";
 
                 const rejectBtn = document.createElement("button");
                 rejectBtn.textContent = "Reject";
-                rejectBtn.className = "btn-action btn-reject"; // Added CSS classes
+                rejectBtn.className = "btn-action btn-reject";
 
                 btnContainer.appendChild(rejectBtn);
                 btnContainer.appendChild(acceptBtn);
                 div.appendChild(btnContainer);
 
-                // --- Event Listeners ---
+                // --- Event Listeners for Buttons ---
                 acceptBtn.addEventListener("click", async () => {
-                    // Database updates
                     await set(ref(db, `users/${currentUser.uid}/followers/${data.sender}`), true);
                     await set(ref(db, `users/${currentUser.uid}/followRequests/${data.sender}`), null);
 
-                    // Send confirmation message to chat
                     const chatId = getChatId(currentUser.uid, data.sender);
-                    const messagesRef = ref(db, `chats/${chatId}/messages`);
-                    const newMsgKey = push(messagesRef).key;
+                    const msgRef = ref(db, `chats/${chatId}/messages`);
+                    const newMsgKey = push(msgRef).key;
 
-                    // Note: Sending with "✅" triggers the styling in block #1 above
                     await set(ref(db, `chats/${chatId}/messages/${newMsgKey}`), {
                         sender: currentUser.uid,
                         text: "✅ Follow request accepted",
                         timestamp: Date.now()
                     });
 
-                    div.remove(); // Optional: Remove the request card after answering
+                    div.remove();
                 });
 
                 rejectBtn.addEventListener("click", async () => {
                     await set(ref(db, `users/${currentUser.uid}/followRequests/${data.sender}`), null);
 
                     const chatId = getChatId(currentUser.uid, data.sender);
-                    const messagesRef = ref(db, `chats/${chatId}/messages`);
-                    const newMsgKey = push(messagesRef).key;
+                    const msgRef = ref(db, `chats/${chatId}/messages`);
+                    const newMsgKey = push(msgRef).key;
 
-                    // Note: Sending with "❌" triggers the styling in block #1 above
                     await set(ref(db, `chats/${chatId}/messages/${newMsgKey}`), {
                         sender: currentUser.uid,
                         text: "❌ Follow request rejected",
@@ -312,9 +322,6 @@ async function main() {
             messagesDiv.appendChild(div);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
         });
-
-
-
     });
 
     function isMusicAttachment(att) {
@@ -562,13 +569,14 @@ async function main() {
             });
 
             await update(ref(db, `userChats/${currentUser.uid}/${chatId}`), {
-                lastMessage: lastMessageData
+                lastMessage: lastMessageData,
+                isRead: true 
             });
 
             await update(ref(db, `userChats/${selectedUser}/${chatId}`), {
-                lastMessage: lastMessageData
+                lastMessage: lastMessageData,
+                isRead: false 
             });
-
             messageInput.value = "";
 
         } catch (e) {

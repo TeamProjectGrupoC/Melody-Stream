@@ -27,25 +27,48 @@ const resultsContainer = document.getElementById("searchResults");
 searchBtn.addEventListener("click", searchUsers);
 
 // --------------------------------------------------
-// 🔥 ESPERAR A QUE HAYA USUARIO LOGUEADO
+// 🔥 WAIT FOR LOGGED IN USER
 // --------------------------------------------------
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    console.warn("Usuario no logueado aún. No se cargan usuarios.");
-    return;
+    console.warn("User not logged in.");
+
+    // --- MODIFICATION START: Show message and button on the web ---
+    resultsContainer.innerHTML = `
+      <div style="text-align: center; margin-top: 20px;">
+        <p style="color: red; font-weight: bold; margin-bottom: 10px;">
+            You must be logged in to view this content.
+        </p>
+        <button id="btnLoginRedirect" style="padding: 10px 20px; background-color: #333; color: white; border: none; cursor: pointer; border-radius: 5px;">
+            Go to Login
+        </button>
+      </div>
+    `;
+
+    // Add event listener to the newly created button
+    document.getElementById("btnLoginRedirect").addEventListener("click", () => {
+        // Change 'login.html' if your file has a different name
+        window.location.href = "login.html"; 
+    });
+    // --- MODIFICATION END ---
+
+    return; // Stop execution here
   }
 
   // Detect master
   if (user.email === "teamprojectgrupoc@gmail.com") {
-    document.getElementById("masterText").textContent = "Master User : You can see all information without following";
+    const masterText = document.getElementById("masterText");
+    if (masterText) {
+        masterText.textContent = "Master User : You can see all information without following";
+    }
   }
 
-  console.log("Auth OK. Cargando usuarios...");
+  console.log("Auth OK. Loading users...");
   loadInitialUsers();
 });
 
 // --------------------------------------------------
-// 🔥 1. Mostrar automáticamente 10 usuarios
+// 🔥 1. Automatically load 10 users
 // --------------------------------------------------
 async function loadInitialUsers() {
   resultsContainer.innerHTML = "Loading users...";
@@ -78,7 +101,7 @@ async function loadInitialUsers() {
 }
 
 // --------------------------------------------------
-// 🔍 2. Buscar usuarios
+// 🔍 2. Search users
 // --------------------------------------------------
 async function searchUsers() {
   const searchTerm = searchInput.value.trim().toLowerCase();
@@ -124,7 +147,7 @@ async function searchUsers() {
 }
 
 // --------------------------------------------------
-// 🎨 3. Mostrar usuarios + redirigir a viewprofile.html
+// 🎨 3. Display users + redirect to viewprofile.html
 // --------------------------------------------------
 function displayUsers(list) {
   resultsContainer.innerHTML = "";

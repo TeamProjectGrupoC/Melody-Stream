@@ -34,9 +34,7 @@ document.querySelector(".profile-info").appendChild(followersCountP);
 
 let currentUserUID = null;
 let hasRequested = false;
-
-let isMaster = false; // for identifying the master account
-
+let isMaster = false; 
 
 // Message if no profile UID provided
 if (!profileUID) {
@@ -56,7 +54,7 @@ onAuthStateChanged(auth, (user) => {
 
   currentUserUID = user.uid;
 
-  // Detect master
+  // Detect master account
   if (user.email === "teamprojectgrupoc@gmail.com") {
     isMaster = true;
   }
@@ -67,7 +65,6 @@ onAuthStateChanged(auth, (user) => {
 // ----------------------------------------------------
 //  Load profile information
 // ----------------------------------------------------
-
 function loadProfile() {
   const img = document.getElementById("profileImg");
   const msg = document.getElementById("msg");
@@ -89,12 +86,9 @@ function loadProfile() {
     nameBig.textContent = data.username || "—";
     img.src = data.urlFotoPerfil || "images/logos/silueta.png";
 
-    // Call loadFollowers. This function will now decide 
-    // whether to show the private content or not.
     loadFollowers(); 
   });
 
-  // Podcasts usually remain public, but you can move this too if you want
   loadPodcasts(profileUID); 
 }
 
@@ -121,23 +115,25 @@ async function loadFollowers() {
 
   // --- PRIVACY CHECK ---
   if (isMe || isFollowing || isMaster) {
-    // ACCESS GRANTED: Load the content
+    // ACCESS GRANTED
     loadFavoriteSongs(profileUID);
     loadFavoriteArtists(profileUID);
   } else {
-    // ACCESS DENIED: Show lock message
+    // ACCESS DENIED
     renderLockedState("viewUserSongs", "Favorite Songs");
     renderLockedState("viewUserArtists", "Favorite Artists");
   }
 
   // 4. Update Button State (Visuals)
   followBtn.className = ""; // Reset classes
+  followBtn.disabled = false; // Ensure button is enabled on load
 
   if (isFollowing) {
     hasRequested = false;
     followBtn.textContent = "Following";
     followBtn.classList.add("state-following");
   } else {
+    // Check pending request status in DB
     const requestsRef = ref(db, `users/${profileUID}/followRequests/${currentUserUID}`);
     const requestSnap = await get(requestsRef);
     hasRequested = requestSnap.exists();
@@ -163,27 +159,46 @@ function renderLockedState(elementId, contentName) {
         `;
     }
 }
+
 // ----------------------------------------------------
-// 🔘 Follow button click handler
+// 🔘 Follow button click handler (Anti-Spam + No cancel request)
 // ----------------------------------------------------
 followBtn.addEventListener("click", async () => {
   if (!currentUserUID || currentUserUID === profileUID) return;
+
+  // Prevent ANY action if request is pending
+  if (hasRequested && followBtn.textContent === "Request Sent") {
+    console.log("Request already sent. Please wait for approval.");
+    return;
+  }
+
+  // Disable button immediately to prevent spam/double click
+  followBtn.disabled = true;
 
   const followersRef = ref(db, `users/${profileUID}/followers/${currentUserUID}`);
   const requestRef = ref(db, `users/${profileUID}/followRequests/${currentUserUID}`);
 
   try {
     if (followBtn.textContent === "Follow") {
-      // Send follow request
+      
+      // Double safety check: verify if request already exists in DB
+      const checkSnap = await get(requestRef);
+      if (checkSnap.exists() || hasRequested) {
+        followBtn.textContent = "Request Sent";
+        followBtn.className = "state-pending";
+        hasRequested = true;
+        return;
+      }
+
+      // Send follow request to DB
       await set(requestRef, true);
       hasRequested = true;
-      
-      // Actualizar UI visualmente
-      followBtn.textContent = "Request Sent";
-      followBtn.className = "state-pending"; // <--- CAMBIO VISUAL INMEDIATO
 
-      // ... (aquí va tu código de enviar mensaje al chat que ya tienes) ...
-      // --- Send follow request message via chat ---
+      // Update UI
+      followBtn.textContent = "Request Sent";
+      followBtn.className = "state-pending";
+
+      // 🔔 Send chat notification
       const chatId = currentUserUID < profileUID ? `${currentUserUID}_${profileUID}` : `${profileUID}_${currentUserUID}`;
       const messagesRef = ref(db, `chats/${chatId}/messages`);
       const timestamp = Date.now();
@@ -192,45 +207,33 @@ followBtn.addEventListener("click", async () => {
         text: "📩 Sent a follow request",
         timestamp
       };
+
       const newMessageKey = push(messagesRef).key;
       await set(ref(db, `chats/${chatId}/messages/${newMessageKey}`), message);
+      
       const lastMessage = { ...message };
       await update(ref(db, `userChats/${currentUserUID}/${chatId}`), { lastMessage });
       await update(ref(db, `userChats/${profileUID}/${chatId}`), { lastMessage });
-
-
-    } else if (followBtn.textContent === "Request Sent") {
-      // Cancel follow request
-      await set(requestRef, null);
-      hasRequested = false;
-      
-      // Actualizar UI visualmente
-      followBtn.textContent = "Follow";
-      followBtn.className = "";
-
-
-    } else if (followBtn.textContent === "Following") {
-      // Unfollow
-      await set(followersRef, null);
-      
-      // Actualizar UI visualmente
-      followBtn.textContent = "Follow";
-      followBtn.className = ""; 
     }
 
-    // Refresh followers count (esto recalculará todo por seguridad, pero el cambio visual ya se hizo arriba)
+    else if (followBtn.textContent === "Following") {
+      // Unfollow user
+      await set(followersRef, null);
+
+      followBtn.textContent = "Follow";
+      followBtn.className = "";
+    }
+
+    // Refresh followers count
     loadFollowers();
 
   } catch (err) {
     console.error("Error handling follow/unfollow:", err);
+  } finally {
+    // Re-enable button after operation completes
+    followBtn.disabled = false;
   }
 });
-// ----------------------------------------------------
-// 📩 Remove old sendFollowRequestMessage function
-// ----------------------------------------------------
-// function sendFollowRequestMessage(targetUID) { ... } → NO LONGER NEEDED
-
-
 
 // ----------------------------------------------------
 // 🎵 Load favorite songs
@@ -350,4 +353,3 @@ async function loadPodcasts(uid) {
 
   container.innerHTML = html || "<p class='empty-msg'>No podcasts uploaded.</p>";
 }
-

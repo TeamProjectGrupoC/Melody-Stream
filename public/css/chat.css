@@ -424,3 +424,15 @@ body {
 .attachment-meta button:hover {
     opacity: 0.9;
 }
+
+/*unread chats */
+.user.unread {
+    background-color: #2c2f33; 
+    border-left: 4px solid #1db954; 
+    font-weight: bold;
+}
+
+.user.unread .last-message {
+    color: #ffffff; 
+    font-weight: bold;
+}
