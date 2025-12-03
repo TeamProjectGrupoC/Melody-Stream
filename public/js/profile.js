@@ -588,34 +588,39 @@ async function searchArtist(query) {
   return data.artists.items;
 }
 
+async function fetchArtistData(artistIds) {
+  const db = getDatabase();
+  const artists = [];
+
+  for (const id of artistIds) {
+    const artistSnap = await get(ref(db, `artistas/${id}`));
+    if (artistSnap.exists()) {
+      artists.push({ id, ...artistSnap.val() });
+    }
+  }
+
+  renderSavedArtists(artists);
+}
+
 function loadFavouriteArtists(userId) {
   const db = getDatabase();
   const favRef = ref(db, `users/${userId}/favourite_artists`);
 
   onValue(favRef, snapshot => {
-    const data = snapshot.val() || {};
-    renderSavedArtists(Object.values(data));
+    const favData = snapshot.val() || {};
+    const artistIds = Object.keys(favData);
+
+    // LLAMAMOS A UNA FUNCIÓN ASYNC EXTERNA
+    fetchArtistData(artistIds);
   });
 }
 
+
 async function removeFavouriteArtist(artistId) {
   const db = getDatabase();
-  const favRef = ref(db, `users/${currentUser.uid}/favourite_artists`);
 
-  // obtenemos los favoritos actuales para saber la key exacta
-  const snapshot = await get(favRef);
-  const favs = snapshot.val() || {};
-
-  // buscar la key que corresponde a ese artista
-  const keyToDelete = Object.keys(favs).find(key => favs[key].id === artistId);
-
-  if (!keyToDelete) {
-    console.warn("Artist not found in favourites:", artistId);
-    return;
-  }
-
-  // eliminar el artista
-  await set(ref(db, `users/${currentUser.uid}/favourite_artists/${keyToDelete}`), null);
+  const favRef = ref(db, `users/${currentUser.uid}/favourite_artists/${artistId}`);
+  await remove(favRef);
 
   alert("Artist removed from favourites");
 }
@@ -630,19 +635,19 @@ function renderSavedArtists(artists) {
     div.classList.add("artistCard");
 
     div.innerHTML = `
-      <img src="${a.image}" style="width:80px;border-radius:50%">
+      <img src="${a.image || 'images/default_artist.png'}" style="width:80px;border-radius:50%">
       <p>${a.name}</p>
 
       <button class="shareArtistBtn">Share</button>
       <button class="removeArtistBtn">Remove</button>
     `;
 
-    // -------- REMOVE --------
+    // REMOVE
     div.querySelector(".removeArtistBtn").addEventListener("click", async () => {
       removeFavouriteArtist(a.id);
     });
 
-    // -------- SHARE --------
+    // SHARE
     div.querySelector(".shareArtistBtn").addEventListener("click", () => {
       openShareArtistModal(a);
     });
@@ -650,6 +655,7 @@ function renderSavedArtists(artists) {
     container.appendChild(div);
   });
 }
+
 
 
 document.getElementById("btnSearchArtist").addEventListener("click", async () => {
@@ -854,9 +860,6 @@ async function removeFavSongs(songId){
 
   const favSongRef = ref(db, `users/${currentUser.uid}/favoritos/${songId}`);
   await remove(favSongRef);
-
-  const songRef = ref(db, `canciones/${songId}`);
-  await remove(songRef);
 
   console.log(`Song with id ${songId} removed from favorites`);
 }
