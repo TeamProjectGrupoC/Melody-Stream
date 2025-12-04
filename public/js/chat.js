@@ -398,8 +398,13 @@ async function main() {
         const spotifyLogged = localStorage.getItem("spotify_logged_in") === "1";
         const isPremium = localStorage.getItem("spotify_is_premium") === "1";
 
+        console.log("ATT RECEIVED:", att);
+
         // Reproduce songs
         if (!att.trackURI) {
+            
+            console.log("!att.trackURI");
+
             const noPrev = document.createElement("p");
             noPrev.textContent = "NO PREVIEW AVAILABLE";
             noPrev.style.marginTop = "8px";
@@ -410,6 +415,9 @@ async function main() {
         } else {
             // --- Caso 1: Usuario no logueado en Spotify ---
             if (!spotifyLogged) {
+
+                console.log("!spotifyLogged");
+
                 const msg = document.createElement("p");
                 msg.textContent = "You must log in with Spotify Premium to listen to songs.";
                 msg.style.marginTop = "8px";
@@ -420,6 +428,9 @@ async function main() {
 
             // --- Caso 2: Usuario logueado pero NO Premium ---
             else if (!isPremium) {
+
+                console.log("!isPremium");
+
                 const noPrev = document.createElement("p");
                 noPrev.textContent = "NO PREVIEW AVAILABLE";
                 noPrev.style.marginTop = "8px";
@@ -430,6 +441,9 @@ async function main() {
 
             // --- Caso 3: Premium + Logueado → puede reproducir ---
             else {
+
+                console.log("!else");
+
                 const playBtn = document.createElement("button");
                 playBtn.textContent = "▶ Play on Spotify";
                 playBtn.className = "main-button";
