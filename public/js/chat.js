@@ -490,8 +490,14 @@ async function main() {
                             return;
                         }
 
-                        if (typeof window.playTrack !== "function") {
-                            alert("Spotify player not ready. Open the Spotify page first.");
+                        // Si el reproductor NO está preparado → NO reproducimos y NO mostramos alert
+                        if (!window.spotifyPlayer) {
+                            const msg = document.createElement("p");
+                            msg.textContent = "NO PREVIEW AVAILABLE";
+                            msg.style.marginTop = "8px";
+                            msg.style.fontStyle = "italic";
+                            msg.style.color = "#aaa";
+                            meta.appendChild(msg);
                             return;
                         }
 
@@ -500,7 +506,12 @@ async function main() {
 
                     } catch (err) {
                         console.error("Error playing track from chat:", err);
-                        alert("Error playing this song.");
+                        const msg = document.createElement("p");
+                        msg.textContent = "NO PREVIEW AVAILABLE";
+                        msg.style.marginTop = "8px";
+                        msg.style.fontStyle = "italic";
+                        msg.style.color = "#aaa";
+                        meta.appendChild(msg);
                     }
                 });
 
