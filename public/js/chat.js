@@ -365,6 +365,66 @@ async function main() {
         };
     }
 
+    // Recupera el track real de Spotify a partir del attachment del chat
+    async function fetchSpotifyTrackForAttachment(att) {
+        const token = localStorage.getItem("spotify_access_token");
+        if (!token) {
+            console.warn("No Spotify token available in localStorage");
+            return null;
+        }
+
+        // Si ya tenemos un id válido, usamos /v1/tracks/{id}
+        if (att.id && att.id !== "undefined") {
+            try {
+                const res = await fetch(`https://api.spotify.com/v1/tracks/${att.id}`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                if (!res.ok) {
+                    console.error("Error fetching track by id:", await res.text());
+                    return null;
+                }
+                const track = await res.json();
+                return track;
+            } catch (err) {
+                console.error("Error calling Spotify /tracks/{id}:", err);
+                return null;
+            }
+        }
+
+        // Si no tenemos id, buscamos por título + autor
+        const qParts = [];
+        if (att.title) qParts.push(att.title);
+        if (att.author) qParts.push(att.author);
+        const query = qParts.join(" ");
+
+        if (!query) {
+            console.warn("No data to search track on Spotify");
+            return null;
+        }
+
+        try {
+            const res = await fetch(
+                `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=1`,
+                {
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+            if (!res.ok) {
+                console.error("Error searching track on Spotify:", await res.text());
+                return null;
+            }
+            const data = await res.json();
+            const spTrack = data.tracks?.items?.[0];
+            if (!spTrack) {
+                console.warn("No Spotify track found for query:", query);
+                return null;
+            }
+            return spTrack;
+        } catch (err) {
+            console.error("Error calling Spotify search API:", err);
+            return null;
+        }
+    }
 
 
     function buildAttachmentCard(att, senderId) {
@@ -394,59 +454,52 @@ async function main() {
         title.textContent = att.title;
         meta.appendChild(title);
 
-        // Información guardada por test_spotify.js
-        const spotifyLogged = localStorage.getItem("spotify_logged_in") === "1";
-        const isPremium = localStorage.getItem("spotify_is_premium") === "1";
-
-        console.log("ATT RECEIVED:", att);
-
-        // Reproduce songs
-        if (!att.trackURI) {
-            
-            console.log("!att.trackURI");
-
-            const noPrev = document.createElement("p");
-            noPrev.textContent = "NO PREVIEW AVAILABLE";
-            noPrev.style.marginTop = "8px";
-            noPrev.style.fontStyle = "italic";
-            noPrev.style.color = "#aaa";
-            meta.appendChild(noPrev);
-
+        if (att.author) {
+            const author = document.createElement("p");
+            author.textContent = att.author;
+            meta.appendChild(author);
         } else {
-            // --- Caso 1: Usuario no logueado en Spotify ---
-            if (!spotifyLogged) {
-                const msg = document.createElement("p");
-                msg.textContent = "You must log in with Spotify Premium to listen to songs.";
-                msg.style.marginTop = "8px";
-                msg.style.fontStyle = "italic";
-                msg.style.color = "#e67e22";
-                meta.appendChild(msg);
-            }
+            
+            const token = localStorage.getItem("spotify_access_token");
+            const isPremium = localStorage.getItem("spotify_is_premium") === "1";
 
-            // --- Caso 2: Usuario logueado pero NO Premium ---
-            else if (!isPremium) {
+            // Si no hay token o no es premium → NO PREVIEW AVAILABLE (sin avisos)
+            if (!token || !isPremium) {
                 const noPrev = document.createElement("p");
                 noPrev.textContent = "NO PREVIEW AVAILABLE";
                 noPrev.style.marginTop = "8px";
                 noPrev.style.fontStyle = "italic";
                 noPrev.style.color = "#aaa";
                 meta.appendChild(noPrev);
-            }
-
-            // --- Caso 3: Premium + Logueado → puede reproducir ---
-            else {
+            } else {
+                // Hay token y es premium → botón Play que recupera el track de Spotify
                 const playBtn = document.createElement("button");
                 playBtn.textContent = "▶ Play on Spotify";
                 playBtn.className = "main-button";
                 playBtn.style.marginTop = "10px";
 
-                playBtn.addEventListener("click", () => {
-                    // Verificar que el reproductor está cargado
-                    if (typeof window.playTrack !== "function") {
-                        alert("Spotify player not ready. Open the Spotify page first.");
-                        return;
+                playBtn.addEventListener("click", async () => {
+                    try {
+                        // Recuperar track real de Spotify
+                        const spTrack = await fetchSpotifyTrackForAttachment(att);
+                        if (!spTrack || !spTrack.uri) {
+                            console.warn("Spotify track not found or missing uri", spTrack);
+                            alert("Could not find this track on Spotify.");
+                            return;
+                        }
+
+                        if (typeof window.playTrack !== "function") {
+                            alert("Spotify player not ready. Open the Spotify page first.");
+                            return;
+                        }
+
+                        // Usar la función de test_spotify.js
+                        window.playTrack(spTrack.uri);
+
+                    } catch (err) {
+                        console.error("Error playing track from chat:", err);
+                        alert("Error playing this song.");
                     }
-                    window.playTrack(att.trackURI);
                 });
 
                 meta.appendChild(playBtn);
