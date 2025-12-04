@@ -1,9 +1,9 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, push, set, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, push, set, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
-// Firebase configuration
+// Firebase configuration (single source)
 const firebaseConfig = {
   apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
   authDomain: "melodystream123.firebaseapp.com",
@@ -15,46 +15,72 @@ const firebaseConfig = {
   measurementId: "G-J97KEDLYMB"
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+// Reuse existing app if present
+const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getDatabase(app);
 const storage = getStorage(app);
 
-const nameInput = document.getElementById('podcastName');
-const descInput = document.getElementById('podcastDesc');
-const iconInput = document.getElementById('podcastIcon');
-const fileInput = document.getElementById('podcastFile');
-const uploadBtn = document.getElementById('uploadBtn');
-const msg = document.getElementById('msg');
-const formContainer = document.getElementById('formContainer');
-const loginBtn = document.getElementById('loginBtn');
-
-// NUEVO: elementos para carpeta (si los tienes en el HTML)
-const folderInput = document.getElementById('podcastFolder');
-const folderIconInput = document.getElementById('folderIcon');
+// DOM elements (may be null until DOM ready)
+let nameInput, descInput, iconInput, fileInput, uploadBtn, msg, formContainer, loginBtn;
+let folderInput, folderIconInput, folderSelect, hiddenFolderInput, viewPodcastsBtn;
 
 let currentUser = null;
 
-// Detect active session
-onAuthStateChanged(auth, (user) => {
-  if (user) {
-    currentUser = user;
-    msg.textContent = `✅ Logged in as ${user.email}`;
-    formContainer.style.display = 'block';
-    loginBtn.style.display = 'none';
-  } else {
-    currentUser = null;
-    msg.textContent = "⚠️ You must be logged in to upload a podcast.";
-    formContainer.style.display = 'none';
-    loginBtn.style.display = 'inline-block';
-  }
-});
+function bindDomElements() {
+  nameInput = document.getElementById('podcastName');
+  descInput = document.getElementById('podcastDesc');
+  iconInput = document.getElementById('podcastIcon');
+  fileInput = document.getElementById('podcastFile');
+  uploadBtn = document.getElementById('uploadBtn');
+  msg = document.getElementById('msg');
+  formContainer = document.getElementById('formContainer');
+  loginBtn = document.getElementById('loginBtn');
 
-// NUEVA FUNCIÓN: asegurar carpeta (buscar por nombre o crearla)
+  // carpeta: puede ser un select (folderSelect) o input libre (podcastFolder)
+  folderInput = document.getElementById('podcastFolder'); // optional name-based input
+  folderIconInput = document.getElementById('folderIcon'); // optional
+  folderSelect = document.getElementById('folderSelect'); // preferred select
+  hiddenFolderInput = document.getElementById('podcastFolderId'); // hidden id field
+  viewPodcastsBtn = document.getElementById('viewPodcastsBtn');
+}
+
+// Poblar select de carpetas (si existe). Si uid pasado, filtra solo carpetas del usuario (como en profile.js).
+async function populateFolderSelect(uid = null) {
+  if (!folderSelect) return;
+  folderSelect.innerHTML = '<option value="">-- No folder --</option>';
+  try {
+    const snap = await get(ref(db, 'folders'));
+    if (!snap.exists()) return;
+    const folders = snap.val();
+    for (const fid in folders) {
+      if (!Object.prototype.hasOwnProperty.call(folders, fid)) continue;
+      const f = folders[fid];
+      if (uid && f.createdBy && String(f.createdBy) !== String(uid)) continue; // same logic as profile.js
+      const opt = document.createElement('option');
+      opt.value = fid;
+      opt.textContent = f.name || `(folder ${fid})`;
+      folderSelect.appendChild(opt);
+    }
+  } catch (err) {
+    console.error('Error loading folders for select:', err);
+  }
+
+  // sincronizar hidden input con la selección
+  if (hiddenFolderInput) {
+    folderSelect.addEventListener('change', () => {
+      hiddenFolderInput.value = folderSelect.value || '';
+    });
+  } else {
+    // si no hay hidden input, mantener dataset
+    folderSelect.addEventListener('change', () => {});
+  }
+}
+
+// Asegurar carpeta por nombre (copia de la lógica existente: buscar o crear)
 async function ensureFolder(folderName, folderIconFile) {
   if (!folderName) return { folderId: null, folderIconURL: null };
   try {
-    // Buscar carpeta existente (case-insensitive)
     const foldersRef = ref(db, 'folders');
     const foldersSnap = await get(foldersRef);
     if (foldersSnap.exists()) {
@@ -66,16 +92,14 @@ async function ensureFolder(folderName, folderIconFile) {
       }
     }
 
-    // Crear nueva carpeta
     const newFolderRef = push(ref(db, 'folders'));
     const folderId = newFolderRef.key;
     let uploadedIconURL = null;
-
     if (folderIconFile) {
       const folderIconPath = `podcastsFolders/${folderId}/icon.jpg`;
-      const folderIconRef = storageRef(storage, folderIconPath);
-      await uploadBytes(folderIconRef, folderIconFile);
-      uploadedIconURL = await getDownloadURL(folderIconRef);
+      const fRef = storageRef(storage, folderIconPath);
+      await uploadBytes(fRef, folderIconFile);
+      uploadedIconURL = await getDownloadURL(fRef);
     }
 
     await set(newFolderRef, {
@@ -87,94 +111,122 @@ async function ensureFolder(folderName, folderIconFile) {
 
     return { folderId, folderIconURL: uploadedIconURL };
   } catch (e) {
-    console.warn('ensureFolder error, continuing sin carpeta:', e);
+    console.warn('ensureFolder error:', e);
     return { folderId: null, folderIconURL: null };
   }
 }
 
-// Save podcast
-uploadBtn.addEventListener('click', async () => {
+// Handler de subida: usa el folder seleccionado (select) si existe, si no lee folderInput (nombre)
+async function handleUpload() {
   if (!currentUser) {
-    msg.textContent = "❌ Error: You are not logged in.";
+    if (msg) msg.textContent = "❌ Error: You are not logged in.";
     return;
   }
 
-  const nombre = nameInput.value.trim();
-  const descripcion = descInput.value.trim();
-  const iconFile = iconInput.files[0];
-  const audioFile = fileInput.files[0];
+  const nombre = nameInput?.value?.trim();
+  const descripcion = descInput?.value?.trim();
+  const iconFile = iconInput?.files?.[0];
+  const audioFile = fileInput?.files?.[0];
 
   if (!nombre || !descripcion || !iconFile || !audioFile) {
-    msg.textContent = "All fields are required.";
+    if (msg) msg.textContent = "All fields are required.";
     return;
   }
 
   try {
-    // obtener folder si el input existe y tiene valor
+    // obtener folderId: prioridad select -> hidden -> input nombre (crear si necesario)
     let folderId = null;
-    if (folderInput && folderInput.value && folderInput.value.trim()) {
+    if (folderSelect && folderSelect.value) {
+      folderId = folderSelect.value || null;
+    } else if (hiddenFolderInput && hiddenFolderInput.value) {
+      folderId = hiddenFolderInput.value || null;
+    } else if (folderInput && folderInput.value.trim()) {
       const folderName = folderInput.value.trim();
       const folderFile = folderIconInput?.files?.[0];
       const res = await ensureFolder(folderName, folderFile);
       folderId = res.folderId;
     }
 
-    // Generate a unique ID for the podcast using push()
+    // crear entry del podcast
     const podcastsRef = ref(db, 'podcasts');
-    const newPodcastRef = push(podcastsRef); // This generates a unique ID
+    const newPodcastRef = push(podcastsRef);
     const podcastId = newPodcastRef.key;
 
-    // Upload the podcast icon
+    // subir icon
     const iconPath = `podcasts/${podcastId}/icon.jpg`;
     const iconRef = storageRef(storage, iconPath);
     await uploadBytes(iconRef, iconFile);
     const iconURL = await getDownloadURL(iconRef);
 
-    // Upload the podcast audio
+    // subir audio
     const audioPath = `podcasts/${podcastId}/audio.mp3`;
     const audioRef = storageRef(storage, audioPath);
     await uploadBytes(audioRef, audioFile);
     const audioURL = await getDownloadURL(audioRef);
 
+    // obtener uploaderName
     let uploaderName = currentUser.displayName || currentUser.email || currentUser.uid;
     try {
       const userRef = ref(db, `users/${currentUser.uid}`);
       const userSnap = await get(userRef);
       if (userSnap.exists()) {
         const userData = userSnap.val();
-        uploaderName = userData.username || userData.displayName || currentUser.displayName || currentUser.email || currentUser.uid;
+        uploaderName = userData.username || userData.displayName || uploaderName;
       }
     } catch (e) {
-      console.warn('No se pudo leer users/{uid} para uploaderName, usando fallback', e);
+      console.warn('No se pudo leer users/{uid} para uploaderName', e);
     }
 
     await set(newPodcastRef, {
-      nombre: nombre,
-      descripcion: descripcion,
-      iconURL: iconURL,
-      audioURL: audioURL,
+      nombre,
+      descripcion,
+      iconURL,
+      audioURL,
       idcreador: currentUser.uid,
-      uploaderName: uploaderName,
+      uploaderName,
       folderId: folderId || null,
       createdAt: Date.now()
     });
 
-    msg.textContent = "✅ Podcast saved successfully!";
-    nameInput.value = '';
-    descInput.value = '';
-    iconInput.value = '';
-    fileInput.value = '';
+    if (msg) msg.textContent = "✅ Podcast saved successfully!";
+    if (nameInput) nameInput.value = '';
+    if (descInput) descInput.value = '';
+    if (iconInput) iconInput.value = '';
+    if (fileInput) fileInput.value = '';
+    // actualizar select disponible por si se creó carpeta nueva
+    await populateFolderSelect(currentUser.uid);
   } catch (err) {
     console.error(err);
-    msg.textContent = `❌ Error saving podcast: ${err.message}`;
+    if (msg) msg.textContent = `❌ Error saving podcast: ${err.message || err}`;
   }
-});
+}
 
-// Botones de navegación
-loginBtn.addEventListener('click', () => window.location.href = 'login.html');
+document.addEventListener('DOMContentLoaded', () => {
+  bindDomElements();
 
-// Nuevo botón para ir a la pestaña de ver podcasts
-const viewPodcastsBtn = document.getElementById('viewPodcastsBtn');
-viewPodcastsBtn.addEventListener('click', () => {
-  window.location.href = 'podcast.html'; // Redirige a la página de ver podcasts
+  // poblar carpetas inicialmente (si ya hay sesion se filtrará en onAuth)
+  populateFolderSelect().catch(e => console.error(e));
+
+  // listeners
+  onAuthStateChanged(auth, (user) => {
+    currentUser = user;
+    // si quieres que solo se muestren carpetas del usuario, pasa user.uid
+    populateFolderSelect(user ? user.uid : null).catch(e => console.error(e));
+
+    if (msg && formContainer && loginBtn) {
+      if (user) {
+        msg.textContent = `✅ Logged in as ${user.email}`;
+        if (formContainer) formContainer.style.display = 'block';
+        if (loginBtn) loginBtn.style.display = 'none';
+      } else {
+        msg.textContent = "⚠️ You must be logged in to upload a podcast.";
+        if (formContainer) formContainer.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+      }
+    }
+  });
+
+  if (uploadBtn) uploadBtn.addEventListener('click', (e) => { e.preventDefault(); handleUpload(); });
+  if (loginBtn) loginBtn.addEventListener('click', () => window.location.href = 'login.html');
+  if (viewPodcastsBtn) viewPodcastsBtn.addEventListener('click', () => window.location.href = 'podcast.html');
 });
