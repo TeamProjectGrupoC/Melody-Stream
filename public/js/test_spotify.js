@@ -130,6 +130,11 @@ async function getUserProfile() {
     userName = data.display_name;
     userEmail = data.email; 
 
+    // --- GUARDAR INFO EN LOCALSTORAGE PARA EL CHAT ---
+    localStorage.setItem("spotify_logged_in", "1");
+    localStorage.setItem("spotify_is_premium", isPremium ? "1" : "0");
+
+
   } catch (err) {
     console.error("Error checking user profile", err);
   }

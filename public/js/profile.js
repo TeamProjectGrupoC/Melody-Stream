@@ -996,6 +996,7 @@ async function shareSongToChat(chatId, track) {
       title: track.title,
       imageURL: track.albumImageUrl || track.albumImageURL || track.albumImage || "",
       author: Array.isArray(track.artist) ? track.artist.join(", ") : track.artist || "Unknown Artist",
+      trackURI: track.uri || track.trackURI || null,
       ...(track.previewUrl && { audioURL: track.previewUrl }) 
     },
     text: `Shared song: ${track.title}`

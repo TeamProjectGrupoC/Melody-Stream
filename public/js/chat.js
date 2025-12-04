@@ -394,19 +394,58 @@ async function main() {
         title.textContent = att.title;
         meta.appendChild(title);
 
-        if (att.author) {
-            const author = document.createElement("p");
-            author.textContent = att.author;
-            meta.appendChild(author);
-        }
+        // Información guardada por test_spotify.js
+        const spotifyLogged = localStorage.getItem("spotify_logged_in") === "1";
+        const isPremium = localStorage.getItem("spotify_is_premium") === "1";
 
         // Reproduce songs
-        const isSong = att.audioURL && att.audioURL !== "";
-        if (isSong) {
-            const audio = document.createElement('audio');
-            audio.controls = true;
-            audio.src = att.audioURL;
-            meta.appendChild(audio);
+        if (!att.trackURI) {
+            const noPrev = document.createElement("p");
+            noPrev.textContent = "NO PREVIEW AVAILABLE";
+            noPrev.style.marginTop = "8px";
+            noPrev.style.fontStyle = "italic";
+            noPrev.style.color = "#aaa";
+            meta.appendChild(noPrev);
+
+        } else {
+            // --- Caso 1: Usuario no logueado en Spotify ---
+            if (!spotifyLogged) {
+                const msg = document.createElement("p");
+                msg.textContent = "You must log in with Spotify Premium to listen to songs.";
+                msg.style.marginTop = "8px";
+                msg.style.fontStyle = "italic";
+                msg.style.color = "#e67e22";
+                meta.appendChild(msg);
+            }
+
+            // --- Caso 2: Usuario logueado pero NO Premium ---
+            else if (!isPremium) {
+                const noPrev = document.createElement("p");
+                noPrev.textContent = "NO PREVIEW AVAILABLE";
+                noPrev.style.marginTop = "8px";
+                noPrev.style.fontStyle = "italic";
+                noPrev.style.color = "#aaa";
+                meta.appendChild(noPrev);
+            }
+
+            // --- Caso 3: Premium + Logueado → puede reproducir ---
+            else {
+                const playBtn = document.createElement("button");
+                playBtn.textContent = "▶ Play on Spotify";
+                playBtn.className = "main-button";
+                playBtn.style.marginTop = "10px";
+
+                playBtn.addEventListener("click", () => {
+                    // Verificar que el reproductor está cargado
+                    if (typeof window.playTrack !== "function") {
+                        alert("Spotify player not ready. Open the Spotify page first.");
+                        return;
+                    }
+                    window.playTrack(att.trackURI);
+                });
+
+                meta.appendChild(playBtn);
+            }
         }
 
 
@@ -460,6 +499,7 @@ async function main() {
             }
 
             // Add song to favourites
+            const isSong = att.audioURL && att.audioURL !== "";
             if (isSong) {
                 const btnSong = document.createElement("button");
                 btnSong.textContent = "Add to favourite songs";
