@@ -57,6 +57,9 @@ onAuthStateChanged(auth, (user) => {
       uploadBtn.disabled = false;
     }
   }
+
+  // <-- CHANGED: re-render podcasts when auth state changes so delete buttons update
+  listPodcasts().catch(e => console.error('Error reloading podcasts after auth change:', e));
 });
 
 // Load users map
@@ -90,6 +93,16 @@ async function loadFolders() {
     console.error("Error loading folders:", error);
     foldersList.innerHTML = "<p>Failed to load folders.</p>";
   }
+}
+
+// helper: determina si el usuario actual es "master"
+function isMasterUser() {
+  // permite al account con ese email (header dorado) borrar todo,
+  // o a cualquier usuario marcado como isMaster/role/isAdmin en usersMap
+  if (!currentUser || !usersMap) return false;
+  const emailMaster = currentUser.email && currentUser.email.toLowerCase() === "teamprojectgrupoc@gmail.com";
+  const u = usersMap[currentUser.uid] || {};
+  return emailMaster || !!(u.isMaster || u.role === "master" || u.isAdmin || u.goldenHeader);
 }
 
 // Display folders (same style as podcasts)
@@ -135,14 +148,38 @@ function displayFolders(folders) {
       folderItem.appendChild(description);
     }
 
-    // View button
+    // View button (mismas clases que los botones de podcasts)
     const viewButton = document.createElement("button");
     viewButton.textContent = "View";
-    viewButton.className = "btn btn-outline-primary mt-3";
+    viewButton.className = "btn btn-outline-primary mt-2";
     viewButton.addEventListener("click", () => {
       openFolderModal(folderId, folder.name || "Folder");
     });
+
+    // Añadir view directamente a la tarjeta (igual que los botones de podcast)
     folderItem.appendChild(viewButton);
+
+    // Delete button — solo si el usuario actual es el creador O es master
+    const canDeleteFolder = isMasterUser() || (currentUser && folder.createdBy && String(folder.createdBy) === String(currentUser.uid));
+    if (canDeleteFolder) {
+      const deleteButton = document.createElement("button");
+      deleteButton.textContent = "Delete";
+      deleteButton.className = "btn btn-outline-danger mt-3";
+      deleteButton.addEventListener("click", async () => {
+        if (!confirm(`Are you sure you want to delete the folder "${folder.name || folderId}"?`)) return;
+        try {
+          await deleteFolder(folderId, folder.iconURL);
+          // refrescar vistas
+          await loadFolders();
+          await listPodcasts();
+          alert(`Folder "${folder.name || folderId}" deleted.`);
+        } catch (err) {
+          console.error("Error deleting folder:", err);
+          alert("Failed to delete folder.");
+        }
+      });
+      folderItem.appendChild(deleteButton);
+    }
 
     foldersList.appendChild(folderItem);
   }
@@ -258,11 +295,6 @@ function displayPodcasts(podcasts) {
   for (const podcastId in podcasts) {
     const podcast = podcasts[podcastId];
 
-    // Filtrar: solo mostrar si NO tiene folderId o idcarpeta
-    if (podcast.folderId || podcast.idcarpeta) {
-      continue; // Saltar este podcast
-    }
-
     const podcastItem = document.createElement("div");
     podcastItem.classList.add("podcast-card");
 
@@ -308,16 +340,23 @@ function displayPodcasts(podcasts) {
       podcastItem.appendChild(audio);
     }
 
-    // Delete button
-    const deleteButton = document.createElement("button");
-    deleteButton.textContent = "Delete";
-    deleteButton.className = "btn btn-outline-danger mt-3";
-    deleteButton.addEventListener("click", () => {
-      deletePodcast(podcastId, podcast.audioURL, podcast.iconURL);
-    });
-    podcastItem.appendChild(deleteButton);
+    // Delete button: show si uploader o master
+    const canDelete = isMasterUser() || (currentUser && podcast.idcreador && String(podcast.idcreador) === String(currentUser.uid));
+    if (canDelete) {
+      const deleteButton = document.createElement("button");
+      deleteButton.textContent = "Delete";
+      deleteButton.className = "btn btn-outline-danger mt-3";
+      deleteButton.addEventListener("click", () => {
+        // double-check before delete
+        if (!isMasterUser() && (!currentUser || String(podcast.idcreador) !== String(currentUser.uid))) {
+          return alert("You are not allowed to delete this podcast.");
+        }
+        deletePodcast(podcastId, podcast.audioURL, podcast.iconURL);
+      });
+      podcastItem.appendChild(deleteButton);
+    }
 
-    // Share button
+    // Share button (unchanged)
     const shareButton = document.createElement("button");
     shareButton.textContent = "Share";
     shareButton.className = "btn btn-outline-primary mt-2";
@@ -572,4 +611,46 @@ if (createFolderBtn) {
       window.location.href = "login.html";
     }
   });
+}
+
+// Borra carpeta, su icon en storage (si procede) y limpia folderId en podcasts que la referencian
+async function deleteFolder(folderId, iconURL) {
+  try {
+    // borrar icon en storage si existe
+    if (iconURL) {
+      try {
+        const iconRef = storageRef(storage, iconURL);
+        await deleteObject(iconRef);
+      } catch (e) {
+        // puede fallar si iconURL es URL pública; intentar ignorar y continuar
+        console.warn("Could not delete folder icon from storage (may be URL):", e);
+      }
+    }
+
+    // eliminar entrada de folder
+    const folderRef = ref(db, `folders/${folderId}`);
+    await remove(folderRef);
+
+    // buscar podcasts que referencien esta carpeta y quitar folderId
+    for (const pid in allPodcasts) {
+      if (!Object.prototype.hasOwnProperty.call(allPodcasts, pid)) continue;
+      const p = allPodcasts[pid];
+      if (String(p.folderId) === String(folderId) || String(p.idcarpeta) === String(folderId)) {
+        try {
+          const podcastRef = ref(db, `podcasts/${pid}`);
+          await update(podcastRef, { folderId: null, idcarpeta: null, folderName: null });
+          // actualizar en memoria
+          if (allPodcasts[pid]) {
+            allPodcasts[pid].folderId = null;
+            allPodcasts[pid].idcarpeta = null;
+            allPodcasts[pid].folderName = null;
+          }
+        } catch (e) {
+          console.warn(`Failed to clear folderId for podcast ${pid}:`, e);
+        }
+      }
+    }
+  } catch (err) {
+    throw err;
+  }
 }

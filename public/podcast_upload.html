@@ -64,6 +64,13 @@
         <label>Podcast File (.mp3)</label>
         <input id="podcastFile" type="file" accept=".mp3" required />
         
+        <!-- NUEVO: seleccionar carpeta donde guardar (o ninguna) -->
+        <label for="folderSelect">Upload to folder (optional)</label>
+        <select id="folderSelect">
+          <option value="">-- No folder --</option>
+        </select>
+        <input type="hidden" id="podcastFolderId" name="folderId" value="">
+        
         <div style="margin-top: 10px">
           <button id="uploadBtn">Save Podcast</button>
           <button id="viewPodcastsBtn">View Podcasts</button>
