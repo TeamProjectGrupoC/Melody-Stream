@@ -458,12 +458,14 @@ async function main() {
             const author = document.createElement("p");
             author.textContent = att.author;
             meta.appendChild(author);
-        } else {
-            
-            const token = localStorage.getItem("spotify_access_token");
-            const isPremium = localStorage.getItem("spotify_is_premium") === "1";
+        }
 
-            // Si no hay token o no es premium → NO PREVIEW AVAILABLE (sin avisos)
+        const isSong = att.audioURL && att.audioURL !== "";
+        const token = localStorage.getItem("spotify_access_token");
+        const isPremium = localStorage.getItem("spotify_is_premium") === "1";
+
+        // Si no hay token o no es premium → NO PREVIEW AVAILABLE (sin avisos)
+        if(isSong) {
             if (!token || !isPremium) {
                 const noPrev = document.createElement("p");
                 noPrev.textContent = "NO PREVIEW AVAILABLE";
@@ -557,7 +559,6 @@ async function main() {
             }
 
             // Add song to favourites
-            const isSong = att.audioURL && att.audioURL !== "";
             if (isSong) {
                 const btnSong = document.createElement("button");
                 btnSong.textContent = "Add to favourite songs";
