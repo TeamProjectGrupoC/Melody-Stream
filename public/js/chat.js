@@ -43,6 +43,7 @@ LOGIC WHEN SENDING A MESSAGE:
 6. Messages are displayed in real-time via onValue listener on /chats/{chatId}/messages.
 */
 
+
 async function main() {
         // Firebase configuration
     const firebaseConfig = {
@@ -449,8 +450,17 @@ async function main() {
         isPlaying = true;
     }
 
+    async function isSpotifyTokenValid(token) {
+        if (!token) return false;
 
-    function buildAttachmentCard(att, senderId) {
+        const res = await fetch("https://api.spotify.com/v1/me", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        return res.status === 200;
+    }
+
+    async function buildAttachmentCard(att, senderId) {
 
         if (!att || !att.imageURL) {
             console.warn("⚠ Attachment inválido:", att);
@@ -486,17 +496,24 @@ async function main() {
         const isSong = att.audioURL && att.audioURL !== "";
 
         // Si no hay token o no es premium → NO PREVIEW AVAILABLE (sin avisos)
-        if(isSong) {
-            if (!token || !isPremium) {
-                const noPrev = document.createElement("p");
-                noPrev.textContent = "NO PREVIEW AVAILABLE";
-                noPrev.style.marginTop = "8px";
-                noPrev.style.fontStyle = "italic";
-                noPrev.style.color = "#aaa";
-                meta.appendChild(noPrev);
-                
-            } else {
-                // Hay token y es premium → botón Play que recupera el track de Spotify
+        if (isSong) {
+            // Si NO hay token o el token es inválido → Botón para volver a loguear
+            if (!token || !isPremium || !(await isSpotifyTokenValid(token))) {
+
+                const reconnectBtn = document.createElement("button");
+                reconnectBtn.textContent = "Conectar Spotify";
+                reconnectBtn.className = "main-button";
+                reconnectBtn.style.marginTop = "10px";
+
+                reconnectBtn.addEventListener("click", () => {
+                    window.location.href = "test_register_spotify.html";
+                });
+
+                meta.appendChild(reconnectBtn);
+            }
+
+            // Si el token es válido → botón Play normal
+            else {
                 const playBtn = document.createElement("button");
                 playBtn.textContent = "▶ Play";
                 playBtn.className = "main-button";
@@ -509,13 +526,9 @@ async function main() {
                         });
                         const track = await res.json();
 
-                        if (!track || !track.uri) {
-                            console.warn("Spotify track missing uri", track);
-                            return;
-                        }
+                        if (!track || !track.uri) return;
 
                         playTrack(track.uri);
-
                     } catch (err) {
                         console.error("Error playing song:", err);
                     }
@@ -524,6 +537,7 @@ async function main() {
                 meta.appendChild(playBtn);
             }
         }
+
 
 
         if (!isMine) {
