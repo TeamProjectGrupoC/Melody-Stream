@@ -92,9 +92,16 @@ async function main() {
     token = localStorage.getItem("spotify_access_token");
     isPremium = localStorage.getItem("spotify_is_premium") === "1";
 
-    if(isPremium){
-        initSpotifyPlaybackSDK();
+    async function isSpotifyTokenValid(token) {
+        if (!token) return false;
+
+        const res = await fetch("https://api.spotify.com/v1/me", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+
+        return res.status === 200;
     }
+
 
     function initSpotifyPlaybackSDK() {
         const script = document.createElement("script");
@@ -117,6 +124,16 @@ async function main() {
             spotifyPlayer.connect();
         };
     }
+
+    
+    (async () => {
+        if (token && isPremium && await isSpotifyTokenValid(token)) {
+            console.log("Spotify token OK — Loading Web Playback SDK...");
+            initSpotifyPlaybackSDK();
+        } else {
+            console.log("Spotify not available — premium or token invalid.");
+        }
+    })();
 
     // --- Auth listener ---
     onAuthStateChanged(auth, async (user) => {
