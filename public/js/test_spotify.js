@@ -462,15 +462,11 @@ setInterval(() => {
 /***********************
  *  EVENTS
  ***********************/
-if (document.getElementById("searchBtn")) {
-    document.getElementById("searchBtn").addEventListener("click", searchTrack);
-}
-if (document.getElementById("playPauseBtn")) {
-    document.getElementById("playPauseBtn").addEventListener("click", playPauseSong);
-}
-if (document.getElementById("progressBar")) {
-    document.getElementById("progressBar").addEventListener("change", seekToPosition);
-}
+document.getElementById("searchBtn").addEventListener("click", searchTrack);
+document.getElementById("playPauseBtn").addEventListener("click", playPauseSong);
+document.getElementById("progressBar").addEventListener("change", seekToPosition);
+
+
 
 // Start getting token
 getToken();
@@ -479,8 +475,3 @@ getToken();
 // Exponer funciones al scope global
 window.playTrack = playTrack;
 window.searchTrack = searchTrack;
-
-export {
-  playTrack,
-  getTrackById,
-};

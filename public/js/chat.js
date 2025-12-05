@@ -45,7 +45,9 @@ LOGIC WHEN SENDING A MESSAGE:
 6. Messages are displayed in real-time via onValue listener on /chats/{chatId}/messages.
 */
 
-
+let token = null;
+let isPremium = false;
+let deviceId = null;
 
 async function main() {
         // Firebase configuration
@@ -325,13 +327,6 @@ async function main() {
         });
     });
 
-    function isMusicAttachment(att) {
-        return att &&
-            typeof att.title === "string" &&
-            typeof att.imageURL === "string" &&
-            typeof att.author === "string";
-    }
-
     let cachedUser = null;
         onAuthStateChanged(auth, (user) => {
             cachedUser = user;
@@ -365,6 +360,51 @@ async function main() {
                 ]
             }
         };
+    }
+
+    function loadWebPlaybackSDK() {
+        const script = document.createElement("script");
+        script.src = "https://sdk.scdn.co/spotify-player.js";
+        document.body.appendChild(script);
+
+        window.onSpotifyWebPlaybackSDKReady = () => {
+            window.spotifyPlayer = new Spotify.Player({
+            name: "MelodyStream Player",
+            getOAuthToken: (cb) => cb(token),
+            volume: 0.8,
+            });
+
+            // When ready
+            spotifyPlayer.addListener("ready", ({ device_id }) => {
+                console.log("Device ready:", device_id);
+                deviceId = device_id;
+                document.getElementById("playerBar").style.display = "block";
+            });
+
+            spotifyPlayer.connect();
+        };
+    }
+
+    async function playTrack(uri) {
+        
+        loadWebPlaybackSDK();
+
+        await fetch(
+        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, 
+        {
+            method: "PUT",
+            headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+            uris: [uri],
+            }),
+        }
+        );
+        document.getElementById("playPauseBtn").textContent = "||";
+        console.log("Playing full track on Premium device.");
+
     }
 
     function buildAttachmentCard(att, senderId) {
@@ -401,8 +441,8 @@ async function main() {
         }
 
         const isSong = att.audioURL && att.audioURL !== "";
-        const token = localStorage.getItem("spotify_access_token");
-        const isPremium = localStorage.getItem("spotify_is_premium") === "1";
+        token = localStorage.getItem("spotify_access_token");
+        isPremium = localStorage.getItem("spotify_is_premium") === "1";
 
         // Si no hay token o no es premium → NO PREVIEW AVAILABLE (sin avisos)
         if(isSong) {
@@ -424,15 +464,19 @@ async function main() {
                 playBtn.addEventListener("click", async () => {
                     try {
                         // Recuperar track real de Spotify
-                        const spTrack = await getTrackById(att.id);
-                        if (!spTrack) {
+                        const res = await fetch(`https://api.spotify.com/v1/tracks/${att.id}`, {
+                            headers: { Authorization: `Bearer ${token}` },
+                        });
+                        const track_uri = await res.json();
+
+                        if (!track_uri) {
                             console.warn("Spotify track not found or missing uri", spTrack);
                             alert("Could not find this track on Spotify.");
                             return;
                         }
 
-                        // Usar la función de test_spotify.js
-                        playTrack(spTrack);
+                        // Reproducimos
+                        playTrack(track_uri.uri);
 
                     } catch (err) {
                         console.error("Error playing track from chat:", err);
