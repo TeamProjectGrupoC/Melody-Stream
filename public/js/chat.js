@@ -508,7 +508,7 @@ async function main() {
             if (!token || !isPremium || !(await isSpotifyTokenValid(token))) {
 
                 const reconnectBtn = document.createElement("button");
-                reconnectBtn.textContent = "Conectar Spotify";
+                reconnectBtn.textContent = "Log in Spotify";
                 reconnectBtn.className = "main-button";
                 reconnectBtn.style.marginTop = "10px";
 
