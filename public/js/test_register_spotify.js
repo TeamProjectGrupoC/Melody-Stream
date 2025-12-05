@@ -32,25 +32,53 @@ spotifyBtn.disabled = true;
 spotifyBtn.style.opacity = "0.5";
 spotifyBtn.style.cursor = "not-allowed";
 
+async function updateSpotifyButton() {
+  const savedToken = localStorage.getItem("spotify_access_token");
+  
+  if (!spotifyBtn) return;
+
+  if (savedToken) {
+    // Validar token
+    const res = await fetch("https://api.spotify.com/v1/me", {
+      headers: { Authorization: `Bearer ${savedToken}` },
+    });
+
+    if (res.ok) {
+      spotifyBtn.textContent = "Continue with Spotify";
+      spotifyBtn.disabled = false;
+      spotifyBtn.style.opacity = "1";
+      spotifyBtn.style.cursor = "pointer";
+      if (msgDiv) msgDiv.textContent = "Welcome back! Continue with your Spotify account.";
+      return;
+    } else {
+      // Token inválido → borrar
+      localStorage.removeItem("spotify_access_token");
+    }
+  }
+
+  // Sin token → texto normal
+  spotifyBtn.textContent = "Login with Spotify";
+  spotifyBtn.disabled = true; 
+  spotifyBtn.style.opacity = "0.5";
+  spotifyBtn.style.cursor = "not-allowed";
+  if (msgDiv) msgDiv.textContent = "You must be logged in to connect your Spotify account.";
+}
+
+
 // Detect Firebase login state
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (!user) {
-    // User NOT logged in → disable Spotify button
     spotifyBtn.disabled = true;
     spotifyBtn.style.opacity = "0.5";
     spotifyBtn.style.cursor = "not-allowed";
-
     if (msgDiv) msgDiv.textContent = "You must be logged in to connect your Spotify account.";
     return;
   }
 
-  // User logged in → enable button
-  spotifyBtn.disabled = false;
-  spotifyBtn.style.opacity = "1";
-  spotifyBtn.style.cursor = "pointer";
-
-  if (msgDiv) msgDiv.textContent = ""; // clear message
+  // User logged in → revisar token
+  await updateSpotifyButton();
 });
+
 
 // Button event
 spotifyBtn.addEventListener("click", () => {

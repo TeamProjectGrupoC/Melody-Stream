@@ -502,7 +502,6 @@ async function main() {
 
         const isSong = att.audioURL && att.audioURL !== "";
 
-        // Si no hay token o no es premium → NO PREVIEW AVAILABLE (sin avisos)
         if (isSong) {
 
             // Validate token
