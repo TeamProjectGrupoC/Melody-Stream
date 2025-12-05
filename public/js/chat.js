@@ -2,8 +2,6 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, get, child, set, push, onValue, off, update, onChildAdded } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { saveFavouriteArtist, saveFavouriteSong } from "./favourites.js";
-import { playTrack, getTrackById } from "./test_spotify.js";
-
 
 /*
 DATABASE STRUCTURE AND LOGIC:
