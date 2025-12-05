@@ -475,3 +475,8 @@ getToken();
 // Exponer funciones al scope global
 window.playTrack = playTrack;
 window.searchTrack = searchTrack;
+
+export {
+  playTrack,
+  getTrackById,
+};

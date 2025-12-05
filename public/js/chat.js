@@ -2,6 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, get, child, set, push, onValue, off, update, onChildAdded } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { saveFavouriteArtist, saveFavouriteSong } from "./favourites.js";
+import { playTrack, getTrackById } from "./test_spotify.js";
+
 
 /*
 DATABASE STRUCTURE AND LOGIC:
@@ -365,68 +367,6 @@ async function main() {
         };
     }
 
-    // Recupera el track real de Spotify a partir del attachment del chat
-    async function fetchSpotifyTrackForAttachment(att) {
-        const token = localStorage.getItem("spotify_access_token");
-        if (!token) {
-            console.warn("No Spotify token available in localStorage");
-            return null;
-        }
-
-        // Si ya tenemos un id válido, usamos /v1/tracks/{id}
-        if (att.id && att.id !== "undefined") {
-            try {
-                const res = await fetch(`https://api.spotify.com/v1/tracks/${att.id}`, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                if (!res.ok) {
-                    console.error("Error fetching track by id:", await res.text());
-                    return null;
-                }
-                const track = await res.json();
-                return track;
-            } catch (err) {
-                console.error("Error calling Spotify /tracks/{id}:", err);
-                return null;
-            }
-        }
-
-        // Si no tenemos id, buscamos por título + autor
-        const qParts = [];
-        if (att.title) qParts.push(att.title);
-        if (att.author) qParts.push(att.author);
-        const query = qParts.join(" ");
-
-        if (!query) {
-            console.warn("No data to search track on Spotify");
-            return null;
-        }
-
-        try {
-            const res = await fetch(
-                `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=1`,
-                {
-                    headers: { Authorization: `Bearer ${token}` }
-                }
-            );
-            if (!res.ok) {
-                console.error("Error searching track on Spotify:", await res.text());
-                return null;
-            }
-            const data = await res.json();
-            const spTrack = data.tracks?.items?.[0];
-            if (!spTrack) {
-                console.warn("No Spotify track found for query:", query);
-                return null;
-            }
-            return spTrack;
-        } catch (err) {
-            console.error("Error calling Spotify search API:", err);
-            return null;
-        }
-    }
-
-
     function buildAttachmentCard(att, senderId) {
 
         if (!att || !att.imageURL) {
@@ -473,6 +413,7 @@ async function main() {
                 noPrev.style.fontStyle = "italic";
                 noPrev.style.color = "#aaa";
                 meta.appendChild(noPrev);
+                
             } else {
                 // Hay token y es premium → botón Play que recupera el track de Spotify
                 const playBtn = document.createElement("button");
@@ -483,26 +424,15 @@ async function main() {
                 playBtn.addEventListener("click", async () => {
                     try {
                         // Recuperar track real de Spotify
-                        const spTrack = await fetchSpotifyTrackForAttachment(att);
-                        if (!spTrack || !spTrack.uri) {
+                        const spTrack = await getTrackById(att.id);
+                        if (!spTrack) {
                             console.warn("Spotify track not found or missing uri", spTrack);
                             alert("Could not find this track on Spotify.");
                             return;
                         }
 
-                        // Si el reproductor NO está preparado → NO reproducimos y NO mostramos alert
-                        if (!window.spotifyPlayer) {
-                            const msg = document.createElement("p");
-                            msg.textContent = "NO PREVIEW AVAILABLE";
-                            msg.style.marginTop = "8px";
-                            msg.style.fontStyle = "italic";
-                            msg.style.color = "#aaa";
-                            meta.appendChild(msg);
-                            return;
-                        }
-
                         // Usar la función de test_spotify.js
-                        window.playTrack(spTrack.uri);
+                        playTrack(spTrack);
 
                     } catch (err) {
                         console.error("Error playing track from chat:", err);
