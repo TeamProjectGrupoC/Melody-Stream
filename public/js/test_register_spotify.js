@@ -25,13 +25,8 @@ const scopes = "user-read-private user-read-email streaming user-read-playback-s
 
 // Elements
 const spotifyBtn = document.getElementById("spotifyLogin");
-const msgDiv = document.getElementById("spotifyMsg");
+const msgDiv = document.getElementById("spotifyMsg"); // Add a <div id="spotifyMsg"></div> in HTML
 const titleSpotify = document.getElementById("title_spotify");
-
-// Default: button disabled until we know user state
-spotifyBtn.disabled = true;
-spotifyBtn.style.opacity = "0.5";
-spotifyBtn.style.cursor = "not-allowed";
 
 async function updateSpotifyButton() {
   const savedToken = localStorage.getItem("spotify_access_token");
@@ -39,7 +34,7 @@ async function updateSpotifyButton() {
   if (!spotifyBtn) return;
 
   if (savedToken) {
-    // Validate token
+    // Validar token
     const res = await fetch("https://api.spotify.com/v1/me", {
       headers: { Authorization: `Bearer ${savedToken}` },
     });
@@ -49,30 +44,37 @@ async function updateSpotifyButton() {
       spotifyBtn.disabled = false;
       spotifyBtn.style.opacity = "1";
       spotifyBtn.style.cursor = "pointer";
-      titleSpotify.textContent = "Welcome back! Continue with your Spotify account";
+      titleSpotify.textContent = "Welcome back! Continue with your Spotify account.";
       return;
     } else {
       // Token inválido → borrar
       localStorage.removeItem("spotify_access_token");
+
+      spotifyBtn.textContent = "Login with Spotify";
+      spotifyBtn.disabled = false;
+      spotifyBtn.style.opacity = "1";
+      spotifyBtn.style.cursor = "pointer";
+      titleSpotify.textContent = "Login with Spotify";
     }
   }
 }
 
 
 // Detect Firebase login state
-onAuthStateChanged(auth, async (user) => {
+onAuthStateChanged(auth, (user) => {
   if (!user) {
+    // User NOT logged in → disable Spotify button
     spotifyBtn.disabled = true;
     spotifyBtn.style.opacity = "0.5";
     spotifyBtn.style.cursor = "not-allowed";
+
     if (msgDiv) msgDiv.textContent = "You must be logged in to connect your Spotify account.";
     return;
   }
-
+  if (msgDiv) msgDiv.textContent = ""; // clear message
   // User logged in → revisar token
-  await updateSpotifyButton();
+  updateSpotifyButton();
 });
-
 
 // Button event
 spotifyBtn.addEventListener("click", () => {
