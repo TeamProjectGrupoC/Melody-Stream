@@ -25,7 +25,8 @@ const scopes = "user-read-private user-read-email streaming user-read-playback-s
 
 // Elements
 const spotifyBtn = document.getElementById("spotifyLogin");
-const msgDiv = document.getElementById("spotifyMsg"); // Add a <div id="spotifyMsg"></div> in HTML
+const msgDiv = document.getElementById("spotifyMsg");
+const titleSpotify = document.getElementById("title_spotify");
 
 // Default: button disabled until we know user state
 spotifyBtn.disabled = true;
@@ -48,7 +49,7 @@ async function updateSpotifyButton() {
       spotifyBtn.disabled = false;
       spotifyBtn.style.opacity = "1";
       spotifyBtn.style.cursor = "pointer";
-      if (msgDiv) msgDiv.textContent = "Welcome back! Continue with your Spotify account.";
+      titleSpotify.textContent = "Welcome back! Continue with your Spotify account";
       return;
     } else {
       // Token inválido → borrar
