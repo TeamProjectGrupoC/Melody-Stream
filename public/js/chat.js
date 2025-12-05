@@ -92,8 +92,9 @@ async function main() {
     token = localStorage.getItem("spotify_access_token");
     isPremium = localStorage.getItem("spotify_is_premium") === "1";
 
-
-    initSpotifyPlaybackSDK();
+    if(isPremium){
+        initSpotifyPlaybackSDK();
+    }
 
     function initSpotifyPlaybackSDK() {
         const script = document.createElement("script");
