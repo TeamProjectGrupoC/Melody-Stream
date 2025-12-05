@@ -368,8 +368,13 @@ async function main() {
             }
 
             if (data.attachment) {
-                const card = buildAttachmentCard(data.attachment, data.sender);
-                div.appendChild(card);
+                const card = await buildAttachmentCard(data.attachment, data.sender);
+
+                if (card instanceof Node) {
+                    div.appendChild(card);
+                } else {
+                    console.warn("Attachment card no es un nodo:", card);
+                }
             }
 
             messagesDiv.appendChild(div);
@@ -463,8 +468,10 @@ async function main() {
     async function buildAttachmentCard(att, senderId) {
 
         if (!att || !att.imageURL) {
-            console.warn("⚠ Attachment inválido:", att);
-            return document.createTextNode("[Attachment vacío]");
+            const empty = document.createElement("p");
+            empty.textContent = "[Attachment vacío]";
+            empty.style.fontStyle = "italic";
+            return empty;
         }
 
         const card = document.createElement("div");
