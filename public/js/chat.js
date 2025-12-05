@@ -89,6 +89,10 @@ async function main() {
     let isPremium = false;
     let deviceId = null;
 
+    token = localStorage.getItem("spotify_access_token");
+    isPremium = localStorage.getItem("spotify_is_premium") === "1";
+
+
     initSpotifyPlaybackSDK();
 
     function initSpotifyPlaybackSDK() {
@@ -387,28 +391,6 @@ async function main() {
         };
     }
 
-    function loadWebPlaybackSDK() {
-        const script = document.createElement("script");
-        script.src = "https://sdk.scdn.co/spotify-player.js";
-        document.body.appendChild(script);
-
-        window.onSpotifyWebPlaybackSDKReady = () => {
-            window.spotifyPlayer = new Spotify.Player({
-            name: "MelodyStream Player",
-            getOAuthToken: (cb) => cb(token),
-            volume: 0.8,
-            });
-
-            // When ready
-            spotifyPlayer.addListener("ready", ({ device_id }) => {
-                console.log("Device ready:", device_id);
-                deviceId = device_id;
-            });
-
-            spotifyPlayer.connect();
-        };
-    }
-
     async function playTrack(uri) {
 
         if (!playerReady || !deviceId) {
@@ -482,8 +464,6 @@ async function main() {
         }
 
         const isSong = att.audioURL && att.audioURL !== "";
-        token = localStorage.getItem("spotify_access_token");
-        isPremium = localStorage.getItem("spotify_is_premium") === "1";
 
         // Si no hay token o no es premium → NO PREVIEW AVAILABLE (sin avisos)
         if(isSong) {
