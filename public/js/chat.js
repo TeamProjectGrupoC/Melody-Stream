@@ -89,6 +89,9 @@ async function main() {
     let token = null;
     let isPremium = false;
     let deviceId = null;
+    let currentPlayingUri = null;
+    let currentActivePlayButton = null;
+
 
     token = localStorage.getItem("spotify_access_token");
     isPremium = localStorage.getItem("spotify_is_premium") === "1";
@@ -417,28 +420,46 @@ async function main() {
         };
     }
 
-    async function playTrack(uri) {
+    async function playTrack(uri, playButton) {
 
         if (!playerReady || !deviceId) {
             console.warn("Spotify player not ready yet.");
             return;
         }
 
-        // Alternar Play/Pause
-        if (isPlaying) {
+        // --- Si haces clic en otra canción ---
+        if (currentPlayingUri && currentPlayingUri !== uri) {
+
+            // Pausar la reproducción actual
             await fetch(
                 `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`,
-                {
-                    method: "PUT",
-                    headers: { Authorization: `Bearer ${token}` }
-                }
+                { method: "PUT", headers: { Authorization: `Bearer ${token}` } }
             );
-            console.log("Paused");
+
             isPlaying = false;
+
+            // Restaurar botón anterior (si existe)
+            if (currentActivePlayButton) {
+                currentActivePlayButton.textContent = "▶ Play";
+            }
+        }
+
+        // --- Si haces clic en la MISMA canción ---
+        if (currentPlayingUri === uri && isPlaying) {
+            // Entonces PAUSA
+            await fetch(
+                `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`,
+                { method: "PUT", headers: { Authorization: `Bearer ${token}` } }
+            );
+
+            isPlaying = false;
+
+            // Actualizar botón
+            playButton.textContent = "▶ Play";
             return;
         }
 
-        // Iniciar reproducción
+        // --- Aquí iniciamos reproducción ---
         await fetch(
             `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
             {
@@ -452,8 +473,18 @@ async function main() {
         );
 
         console.log("Playing:", uri);
+
+        // Actualizar estado global
+        currentPlayingUri = uri;
         isPlaying = true;
+
+        // Cambiar botón actual
+        playButton.textContent = "⏸ Pause";
+
+        // Guardar botón activo
+        currentActivePlayButton = playButton;
     }
+
 
     async function isSpotifyTokenValid(token) {
         if (!token) return false;
@@ -548,12 +579,14 @@ async function main() {
                         const track = await res.json();
                         if (!track || !track.uri) return;
 
-                        playTrack(track.uri);
+                        // Pasamos el botón a playTrack()
+                        playTrack(track.uri, playBtn);
 
                     } catch (err) {
                         console.error("Error playing track:", err);
                     }
                 });
+
 
                 meta.appendChild(playBtn);
             }
