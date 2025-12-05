@@ -131,6 +131,8 @@ async function main() {
             console.log("Spotify token OK — Loading Web Playback SDK...");
             initSpotifyPlaybackSDK();
         } else {
+            token=null;
+            isPremium = false;
             console.log("Spotify not available — premium or token invalid.");
         }
     })();
