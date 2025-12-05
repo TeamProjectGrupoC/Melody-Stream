@@ -989,8 +989,6 @@ async function shareSongToChat(chatId, track) {
   const chatRef = ref(db, `chats/${chatId}`);
   const timestamp = Date.now();
 
-  console.log("TRACK RECIBIDO:", track);
-
   const message = {
     sender: currentUser.uid,
     timestamp,

@@ -43,10 +43,6 @@ LOGIC WHEN SENDING A MESSAGE:
 6. Messages are displayed in real-time via onValue listener on /chats/{chatId}/messages.
 */
 
-let token = null;
-let isPremium = false;
-let deviceId = null;
-
 async function main() {
         // Firebase configuration
     const firebaseConfig = {
@@ -84,6 +80,37 @@ async function main() {
     // --- Helper: generate chatId ---
     function getChatId(uid1, uid2) {
         return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
+    }
+
+    // Para el reproductor de los chats
+    let playerReady = false;
+    let isPlaying = false;
+    let token = null;
+    let isPremium = false;
+    let deviceId = null;
+
+    initSpotifyPlaybackSDK();
+
+    function initSpotifyPlaybackSDK() {
+        const script = document.createElement("script");
+        script.src = "https://sdk.scdn.co/spotify-player.js";
+        document.body.appendChild(script);
+
+        window.onSpotifyWebPlaybackSDKReady = () => {
+            window.spotifyPlayer = new Spotify.Player({
+                name: "MelodyStream Chat Player",
+                getOAuthToken: (cb) => cb(token),
+                volume: 0.8
+            });
+
+            spotifyPlayer.addListener("ready", ({ device_id }) => {
+                console.log("Device ready:", device_id);
+                deviceId = device_id;
+                playerReady = true;
+            });
+
+            spotifyPlayer.connect();
+        };
     }
 
     // --- Auth listener ---
@@ -376,7 +403,6 @@ async function main() {
             spotifyPlayer.addListener("ready", ({ device_id }) => {
                 console.log("Device ready:", device_id);
                 deviceId = device_id;
-                document.getElementById("playerBar").style.display = "block";
             });
 
             spotifyPlayer.connect();
@@ -384,26 +410,43 @@ async function main() {
     }
 
     async function playTrack(uri) {
-        
-        loadWebPlaybackSDK();
 
-        await fetch(
-        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, 
-        {
-            method: "PUT",
-            headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-            uris: [uri],
-            }),
+        if (!playerReady || !deviceId) {
+            console.warn("Spotify player not ready yet.");
+            return;
         }
-        );
-        document.getElementById("playPauseBtn").textContent = "||";
-        console.log("Playing full track on Premium device.");
 
+        // Alternar Play/Pause
+        if (isPlaying) {
+            await fetch(
+                `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`,
+                {
+                    method: "PUT",
+                    headers: { Authorization: `Bearer ${token}` }
+                }
+            );
+            console.log("Paused");
+            isPlaying = false;
+            return;
+        }
+
+        // Iniciar reproducción
+        await fetch(
+            `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+            {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ uris: [uri] })
+            }
+        );
+
+        console.log("Playing:", uri);
+        isPlaying = true;
     }
+
 
     function buildAttachmentCard(att, senderId) {
 
@@ -455,35 +498,26 @@ async function main() {
             } else {
                 // Hay token y es premium → botón Play que recupera el track de Spotify
                 const playBtn = document.createElement("button");
-                playBtn.textContent = "▶ Play on Spotify";
+                playBtn.textContent = "▶ Play";
                 playBtn.className = "main-button";
                 playBtn.style.marginTop = "10px";
 
                 playBtn.addEventListener("click", async () => {
                     try {
-                        // Recuperar track real de Spotify
                         const res = await fetch(`https://api.spotify.com/v1/tracks/${att.id}`, {
-                            headers: { Authorization: `Bearer ${token}` },
+                            headers: { Authorization: `Bearer ${token}` }
                         });
-                        const track_uri = await res.json();
+                        const track = await res.json();
 
-                        if (!track_uri) {
-                            console.warn("Spotify track not found or missing uri", spTrack);
-                            alert("Could not find this track on Spotify.");
+                        if (!track || !track.uri) {
+                            console.warn("Spotify track missing uri", track);
                             return;
                         }
 
-                        // Reproducimos
-                        playTrack(track_uri.uri);
+                        playTrack(track.uri);
 
                     } catch (err) {
-                        console.error("Error playing track from chat:", err);
-                        const msg = document.createElement("p");
-                        msg.textContent = "NO PREVIEW AVAILABLE";
-                        msg.style.marginTop = "8px";
-                        msg.style.fontStyle = "italic";
-                        msg.style.color = "#aaa";
-                        meta.appendChild(msg);
+                        console.error("Error playing song:", err);
                     }
                 });
 
