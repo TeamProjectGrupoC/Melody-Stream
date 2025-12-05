@@ -504,11 +504,14 @@ async function main() {
 
         // Si no hay token o no es premium → NO PREVIEW AVAILABLE (sin avisos)
         if (isSong) {
-            // Si NO hay token o el token es inválido → Botón para volver a loguear
-            if (!token || !isPremium || !(await isSpotifyTokenValid(token))) {
 
+            // Validate token
+            const tokenValid = token && await isSpotifyTokenValid(token);
+
+            // No token → show "Connect Spotify" button
+            if (!tokenValid) {
                 const reconnectBtn = document.createElement("button");
-                reconnectBtn.textContent = "Log in Spotify";
+                reconnectBtn.textContent = "Connect Spotify";
                 reconnectBtn.className = "main-button";
                 reconnectBtn.style.marginTop = "10px";
 
@@ -519,7 +522,18 @@ async function main() {
                 meta.appendChild(reconnectBtn);
             }
 
-            // Si el token es válido → botón Play normal
+            // Token is valid but user is NOT premium → show info message
+            else if (!isPremium) {
+                const info = document.createElement("p");
+                info.textContent = "Playback not available";
+                info.style.marginTop = "8px";
+                info.style.fontStyle = "italic";
+                info.style.color = "#aaa";
+
+                meta.appendChild(info);
+            }
+
+            // Token valid AND user is premium → show Play button
             else {
                 const playBtn = document.createElement("button");
                 playBtn.textContent = "▶ Play";
@@ -531,19 +545,21 @@ async function main() {
                         const res = await fetch(`https://api.spotify.com/v1/tracks/${att.id}`, {
                             headers: { Authorization: `Bearer ${token}` }
                         });
-                        const track = await res.json();
 
+                        const track = await res.json();
                         if (!track || !track.uri) return;
 
                         playTrack(track.uri);
+
                     } catch (err) {
-                        console.error("Error playing song:", err);
+                        console.error("Error playing track:", err);
                     }
                 });
 
                 meta.appendChild(playBtn);
             }
         }
+
 
 
 
