@@ -479,7 +479,7 @@ async function main() {
         isPlaying = true;
 
         // Cambiar botón actual
-        playButton.textContent = "⏸ Pause";
+        playButton.textContent = "⏹ Stop";
 
         // Guardar botón activo
         currentActivePlayButton = playButton;
