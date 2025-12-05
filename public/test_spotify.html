@@ -52,12 +52,21 @@
       <h1>Search for a Song</h1>
       <input type="text" id="searchInput" placeholder="Song name" />
       <button id="searchBtn">Search</button>
-      <div id="userStatus" style="padding: 10px; margin-top: 15px; border-radius: 5px; font-weight: bold;">
-        Cargando estado...
+      <div id="spotifyStatusContainer" 
+          style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px;">
+
+          <div id="userStatus" 
+              style="padding: 10px; border-radius: 5px; font-weight: bold; flex: 1;">
+              Cargando estado...
+          </div>
+
+          <button id="logoutSpotifyBtn" 
+              style="margin-left: 15px; padding: 10px 20px; background: #c0392b; color: white; border: none; border-radius: 6px; cursor: pointer;">
+              Logout Spotify
+          </button>
+
       </div>
-      <button id="logoutSpotifyBtn" style="margin-top: 15px; padding: 10px 20px; background: #c0392b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">
-          Cerrar sesión de Spotify
-      </button>
+
       <div id="trackInfo"></div>
     </main>
 
