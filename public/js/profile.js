@@ -1000,7 +1000,7 @@ async function shareSongToChat(chatId, track) {
       author: Array.isArray(track.artist) ? track.artist.join(", ") : track.artist || "Unknown Artist",
       ...(track.previewUrl && { audioURL: track.previewUrl }) 
     },
-    text: `Shared song: ${track.title}`
+    text: `Shared song: ${track.id}`
   };
   
   const msgKey = push(messagesRef).key;
