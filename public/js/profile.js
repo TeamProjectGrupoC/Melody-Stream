@@ -904,6 +904,7 @@ function renderSavedSongs(songIds, favorites) {
 
         //SHARE
         div.querySelector(".shareSongBtn").addEventListener("click", () => {
+          data.id = songId;
           openShareSongModal(data);
         });
 
@@ -1000,7 +1001,7 @@ async function shareSongToChat(chatId, track) {
       author: Array.isArray(track.artist) ? track.artist.join(", ") : track.artist || "Unknown Artist",
       ...(track.previewUrl && { audioURL: track.previewUrl }) 
     },
-    text: `Shared song: ${track.title} + id: ${track.id}`
+    text: `Shared song: ${track.title}`
   };
   
   const msgKey = push(messagesRef).key;
