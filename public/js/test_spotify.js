@@ -460,6 +460,28 @@ setInterval(() => {
 
 
 /***********************
+ *  LOG OUT BTN
+ ***********************/
+const logoutBtn = document.getElementById("logoutSpotifyBtn");
+if (logoutBtn) {
+  logoutBtn.addEventListener("click", () => {
+    // Borrar token y flags
+    localStorage.removeItem("spotify_access_token");
+    localStorage.removeItem("spotify_is_premium");
+
+    // Opcional: limpiar cualquier info más
+    localStorage.removeItem("spotify_refresh_token");
+    localStorage.removeItem("spotify_token_expiration");
+
+    alert("You have logged out of Spotify.");
+
+    // Redirigir a login de Spotify
+    window.location.href = "test_register_spotify.html";
+  });
+}
+
+
+/***********************
  *  EVENTS
  ***********************/
 document.getElementById("searchBtn").addEventListener("click", searchTrack);
