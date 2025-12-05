@@ -39,7 +39,7 @@ async function updateSpotifyButton() {
   if (!spotifyBtn) return;
 
   if (savedToken) {
-    // Validar token
+    // Validate token
     const res = await fetch("https://api.spotify.com/v1/me", {
       headers: { Authorization: `Bearer ${savedToken}` },
     });
@@ -56,13 +56,6 @@ async function updateSpotifyButton() {
       localStorage.removeItem("spotify_access_token");
     }
   }
-
-  // Sin token → texto normal
-  spotifyBtn.textContent = "Login with Spotify";
-  spotifyBtn.disabled = true; 
-  spotifyBtn.style.opacity = "0.5";
-  spotifyBtn.style.cursor = "not-allowed";
-  if (msgDiv) msgDiv.textContent = "You must be logged in to connect your Spotify account.";
 }
 
 
