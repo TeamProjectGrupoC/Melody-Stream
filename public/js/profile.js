@@ -517,31 +517,6 @@ if (goToChatBtn) {
   });
 }
 
-/*const logOutBtn = document.getElementById('logOutBtn');
-if (logOutBtn) {
-  logOutBtn.addEventListener('click', async () => {
-    const msgElemento = document.getElementById('msg');
-    const fotoElemento = document.getElementById('fotoPerfilUsuario');
-
-    try {
-      await signOut(auth);
-
-      if (msgElemento) msgElemento.textContent = "You have successfully logged out.";
-
-      if (fotoElemento) {
-        fotoElemento.src = "images/logos/silueta.png";
-      }
-
-      const userDataDiv = document.getElementById('userData');
-      if (userDataDiv) userDataDiv.style.display = "none";
-
-      window.location.href = 'login.html';
-    } catch (error) {
-      console.error("Log out error:", error);
-      if (msgElemento) msgElemento.textContent = "Error logging out.";
-    }
-  });
-}*/
 
 // Evento para abrir modal al hacer click en botón .view-folder (delegación)
 document.addEventListener('click', (e) => {
@@ -690,7 +665,7 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
       // Botón añadir a favoritos
       card.querySelector(".addFavBtn").addEventListener("click", () => {
         saveFavouriteArtist(currentUser.uid, artist);
-        alert(`${artist.name} added to favourites`);
+        //alert(`${artist.name} added to favourites`);
       });
 
       resultContainer.appendChild(card);
