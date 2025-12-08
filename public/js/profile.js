@@ -665,7 +665,6 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
       // Botón añadir a favoritos
       card.querySelector(".addFavBtn").addEventListener("click", () => {
         saveFavouriteArtist(currentUser.uid, artist);
-        //alert(`${artist.name} added to favourites`);
       });
 
       resultContainer.appendChild(card);
@@ -921,7 +920,6 @@ document.getElementById("btnSearchSong").addEventListener("click", async () => {
 
       card.querySelector(".addSongBtn").addEventListener("click", () => {
         saveFavouriteSong(currentUser.uid, song);
-        alert(`${song.name} added to favourites`);
       });
 
       resultContainer.appendChild(card);
