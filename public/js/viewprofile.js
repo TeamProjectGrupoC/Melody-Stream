@@ -18,6 +18,123 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
+// --- SPOTIFY PLAYER VARIABLES (Same logic as chats.js/profile.js) ---
+let playerReady = false;
+let isPlaying = false;
+let token = localStorage.getItem("spotify_access_token");
+let isPremium = localStorage.getItem("spotify_is_premium") === "1";
+let deviceId = null;
+let currentPlayingUri = null;
+let currentActivePlayButton = null;
+
+// 1. Validate Spotify Token (Endpoint 2)
+async function isSpotifyTokenValid(token) {
+    if (!token) return false;
+    try {
+        const res = await fetch("https://api.spotify.com/v1/me", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        return res.status === 200;
+    } catch (e) {
+        console.warn("Token validation failed", e);
+        return false;
+    }
+}
+
+// 2. Initialize Spotify Web Playback SDK
+function initSpotifyPlaybackSDK() {
+    if (document.getElementById('spotify-player-script')) return;
+
+    const script = document.createElement("script");
+    script.id = "spotify-player-script";
+    script.src = "https://sdk.scdn.co/spotify-player.js";
+    script.async = true; 
+    document.body.appendChild(script);
+
+    window.onSpotifyWebPlaybackSDKReady = () => {
+        window.spotifyPlayer = new Spotify.Player({
+            name: "MelodyStream ViewProfile Player",
+            getOAuthToken: (cb) => cb(token),
+            volume: 0.8
+        });
+
+        window.spotifyPlayer.addListener("ready", ({ device_id }) => {
+            console.log("Device ready:", device_id);
+            deviceId = device_id;
+            playerReady = true;
+        });
+
+        window.spotifyPlayer.addListener("not_ready", ({ device_id }) => {
+            console.log("Device ID has gone offline", device_id);
+            playerReady = false;
+        });
+
+        window.spotifyPlayer.connect();
+    };
+}
+
+// 3. Auto-start SDK
+(async () => {
+    if (token && isPremium && await isSpotifyTokenValid(token)) {
+        console.log("Spotify token OK — Loading Web Playback SDK...");
+        initSpotifyPlaybackSDK();
+    } else {
+        console.log("Spotify not available — premium or token invalid.");
+    }
+})();
+
+// 4. Main Function: Play Track (Endpoints 3 & 4)
+async function playTrack(uri, playButton) {
+    if (!playerReady || !deviceId) {
+        console.warn("Spotify player not ready yet.");
+        alert("Player not ready. Please wait a moment.");
+        return;
+    }
+
+    // A) If clicking on a DIFFERENT song -> Pause previous (Endpoint 3)
+    if (currentPlayingUri && currentPlayingUri !== uri) {
+        await fetch(
+            `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`, 
+            { method: "PUT", headers: { Authorization: `Bearer ${token}` } }
+        );
+        isPlaying = false;
+        
+        if (currentActivePlayButton) {
+            currentActivePlayButton.textContent = "▶ Play";
+        }
+    }
+
+    // B) If clicking on the SAME song while playing -> Pause (Endpoint 3)
+    if (currentPlayingUri === uri && isPlaying) {
+        await fetch(
+            `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`, 
+            { method: "PUT", headers: { Authorization: `Bearer ${token}` } }
+        );
+        isPlaying = false;
+        playButton.textContent = "▶ Play";
+        return;
+    }
+
+    // C) Start playback (Endpoint 4)
+    await fetch(
+        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, 
+        {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ uris: [uri] })
+        }
+    );
+
+    console.log("Playing:", uri);
+    currentPlayingUri = uri;
+    isPlaying = true;
+    playButton.textContent = "⏹ Stop";
+    currentActivePlayButton = playButton;
+}
+
 // --- Get profile UID from URL ---
 const params = new URLSearchParams(window.location.search);
 const profileUID = params.get("uid");
@@ -83,7 +200,7 @@ function loadProfile() {
     }
 
     msg.textContent = ``;
-    nameBig.textContent = data.username || "—";
+    nameBig.textContent = data.username || data.name || data.email || "Unknown User";
     img.src = data.urlFotoPerfil || "images/logos/silueta.png";
 
     loadFollowers(); 
@@ -236,11 +353,14 @@ followBtn.addEventListener("click", async () => {
 });
 
 // ----------------------------------------------------
-//  Load favorite songs
+//  Load favorite songs (UPDATED WITH SPOTIFY PLAYER)
 // ----------------------------------------------------
 async function loadFavoriteSongs(uid) {
   const container = document.getElementById("viewUserSongs");
   container.innerHTML = "<p>Loading favorite songs...</p>";
+
+  // Check token validity once
+  const tokenValid = token && await isSpotifyTokenValid(token);
 
   try {
     const favRef = ref(db, `users/${uid}/favoritos`);
@@ -252,7 +372,7 @@ async function loadFavoriteSongs(uid) {
     }
 
     const favorites = favSnap.val();
-    let html = "";
+    container.innerHTML = ""; // Clear loading message
 
     for (const songId in favorites) {
       const songRef = ref(db, `canciones/${songId}`);
@@ -260,18 +380,62 @@ async function loadFavoriteSongs(uid) {
       if (!songSnap.exists()) continue;
 
       const s = songSnap.val();
+      
+      // Construct URI
+      const songUri = s.uri || `spotify:track:${s.id || songId}`;
 
-      html += `
-        <div class="card-item">
-          ${s.albumImageUrl ? `<img src="${s.albumImageUrl}" alt="Cover">` : ""}
-          <div class="card-item-title">${s.title || "Untitled"}</div>
-          <p>${s.artist || ""}</p>
-          ${s.previewUrl ? `<audio controls src="${s.previewUrl}"></audio>` : "<p>No preview available</p>"}
-        </div>
+      // Create Element
+      const div = document.createElement("div");
+      div.className = "card-item";
+
+      div.innerHTML = `
+        ${s.albumImageUrl ? `<img src="${s.albumImageUrl}" alt="Cover">` : ""}
+        <div class="card-item-title">${s.title || "Untitled"}</div>
+        <p>${s.artist || ""}</p>
+        <div class="player-controls-area"></div>
       `;
+
+      // --- PLAYER BUTTON LOGIC ---
+      const controlsArea = div.querySelector(".player-controls-area");
+
+      if (!tokenValid) {
+          const reconnectBtn = document.createElement("button");
+          reconnectBtn.textContent = "Connect Spotify";
+          reconnectBtn.className = "main-button"; 
+          reconnectBtn.style.fontSize = "10px";
+          reconnectBtn.style.marginTop = "5px";
+          reconnectBtn.addEventListener("click", () => {
+              window.location.href = "test_register_spotify.html"; 
+          });
+          controlsArea.appendChild(reconnectBtn);
+      } 
+      else if (!isPremium) {
+          const info = document.createElement("p");
+          info.textContent = "Premium only";
+          info.style.fontStyle = "italic";
+          info.style.fontSize = "10px";
+          info.style.color = "#888";
+          controlsArea.appendChild(info);
+      } 
+      else {
+          const playBtn = document.createElement("button");
+          playBtn.textContent = "▶ Play";
+          playBtn.className = "main-button"; 
+          playBtn.style.marginTop = "5px";
+          playBtn.style.fontSize = "12px";
+          
+          playBtn.addEventListener("click", () => {
+              playTrack(songUri, playBtn);
+          });
+          controlsArea.appendChild(playBtn);
+      }
+
+      container.appendChild(div);
     }
 
-    container.innerHTML = html || "<p class='empty-msg'>No favorite songs found.</p>";
+    if (container.innerHTML === "") {
+        container.innerHTML = "<p class='empty-msg'>No favorite songs found.</p>";
+    }
 
   } catch (err) {
     console.error("Error loading favorite songs:", err);
@@ -282,15 +446,11 @@ async function loadFavoriteSongs(uid) {
 // ----------------------------------------------------
 //  Load favorite artists
 // ----------------------------------------------------
-// ----------------------------------------------------
-//  Load favorite artists
-// ----------------------------------------------------
 async function loadFavoriteArtists(uid) {
   const container = document.getElementById("viewUserArtists");
   container.innerHTML = "<p>Loading favorite artists...</p>";
 
   try {
-    // 1. Get the user's favorite list from the 'users' node
     const favRef = ref(db, `users/${uid}/favourite_artists`);
     const favSnap = await get(favRef);
 
@@ -302,17 +462,14 @@ async function loadFavoriteArtists(uid) {
     const artistsObj = favSnap.val();
     let html = "";
 
-    // 2. Iterate through the artist IDs
     for (const artistId in artistsObj) {
-            // We do not read data directly from artistsObj[artistId] because it might only contain 'true'.
-      // We use the ID to fetch the real info from the global 'artistas' node.
+      // Use ID to fetch from global artists node
       const artistRef = ref(db, `artistas/${artistId}`);
       const artistSnap = await get(artistRef);
 
       if (artistSnap.exists()) {
         const a = artistSnap.val();
 
-        // Now 'a' contains the full info (name, image, followers...)
         html += `
           <div class="card-item">
             ${a.image ? `<img src="${a.image}" alt="Artist image">` : '<img src="images/logos/silueta.png" alt="Artist image">'}
@@ -324,7 +481,6 @@ async function loadFavoriteArtists(uid) {
       }
     }
 
-    // If no HTML was generated after searching (maybe artists were deleted from global DB but remained in favorites)
     if (html === "") {
         container.innerHTML = "<p class='empty-msg'>No artist details found.</p>";
     } else {

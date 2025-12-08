@@ -29,8 +29,74 @@ const db = getDatabase(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
 let currentUser = null; // Guardaremos el usuario aquí para que la función de subida lo vea
+// --- SPOTIFY PLAYER VARIABLES (Same logic as chats.js) ---
+let playerReady = false;
+let isPlaying = false;
+let token = localStorage.getItem("spotify_access_token");
+let isPremium = localStorage.getItem("spotify_is_premium") === "1";
+let deviceId = null;
+let currentPlayingUri = null;
+let currentActivePlayButton = null;
 
-// --- FUNCIÓN DE CARGA DE DATOS
+// 1. Validate Spotify Token (Using endpoint 2)
+async function isSpotifyTokenValid(token) {
+    if (!token) return false;
+    try {
+        const res = await fetch("https://api.spotify.com/v1/me", {
+            headers: { "Authorization": "Bearer " + token }
+        });
+        return res.status === 200;
+    } catch (e) {
+        console.warn("Token validation failed", e);
+        return false;
+    }
+}
+
+// 2. Initialize Spotify Web Playback SDK
+function initSpotifyPlaybackSDK() {
+    // Avoid loading script twice if it exists
+    if (document.getElementById('spotify-player-script')) return;
+
+    const script = document.createElement("script");
+    script.id = "spotify-player-script";
+    script.src = "https://sdk.scdn.co/spotify-player.js";
+    document.body.appendChild(script);
+
+    window.onSpotifyWebPlaybackSDKReady = () => {
+        window.spotifyPlayer = new Spotify.Player({
+            name: "MelodyStream Profile Player",
+            getOAuthToken: (cb) => cb(token),
+            volume: 0.8
+        });
+
+        // Listen for the 'ready' event to get the Device ID
+        window.spotifyPlayer.addListener("ready", ({ device_id }) => {
+            console.log("Device ready:", device_id);
+            deviceId = device_id;
+            playerReady = true;
+        });
+
+        window.spotifyPlayer.addListener("not_ready", ({ device_id }) => {
+            console.log("Device ID has gone offline", device_id);
+            playerReady = false;
+        });
+
+        window.spotifyPlayer.connect();
+    };
+}
+
+// 3. Auto-start SDK if token and premium status are valid
+(async () => {
+    if (token && isPremium && await isSpotifyTokenValid(token)) {
+        console.log("Spotify token OK — Loading Web Playback SDK...");
+        initSpotifyPlaybackSDK();
+    } else {
+        console.log("Spotify not available — premium or token invalid.");
+    }
+})();
+
+
+
 function cargarDatosDePerfil() {
   const imagenElemento = document.getElementById('fotoPerfilUsuario');
   const msgElemento = document.getElementById('msg');
@@ -40,8 +106,9 @@ function cargarDatosDePerfil() {
     return;
   }
 
+
   onAuthStateChanged(auth, async (user) => {
-    currentUser = user; // Guardamos el usuario actual
+    currentUser = user; // set global user for upload function
 
     const msgElemento = document.getElementById('msg');
     const imagenElemento = document.getElementById('fotoPerfilUsuario');
@@ -57,7 +124,7 @@ function cargarDatosDePerfil() {
         const userData = snapshot.val();
 
         if (userData) {
-          // Mostrar datos de perfil
+          // profile info
           userDataDiv.style.display = 'block';
           userDataDiv.innerHTML = `
             <h2 class="profileInformation">Profile Information</h2>
@@ -66,7 +133,7 @@ function cargarDatosDePerfil() {
             <p><strong>Email:</strong> ${user.email}</p>
           `;
 
-          // Mostrar foto de perfil si existe
+          // render profile picture
           if (userData.urlFotoPerfil) {
             imagenElemento.src = userData.urlFotoPerfil;
             const headerPic = document.getElementById('headerUserPic');
@@ -81,7 +148,7 @@ function cargarDatosDePerfil() {
       document.getElementById("favSongsSection").style.display = "block";
 
 
-      // Cargar y mostrar los podcasts subidos por este usuario
+      // Load and display the podcasts uploaded by this user
       loadUserPodcasts(user.uid);
       loadUserFolders(user.uid);
       loadFavouriteArtists(user.uid);
@@ -96,7 +163,7 @@ function cargarDatosDePerfil() {
       if (headerPic) headerPic.src = "images/logos/silueta.png";
       userDataDiv.style.display = 'none';
 
-      // Limpiar lista de podcasts al cerrar sesión
+      // Clear podcast list on logout
       const existingContainer = document.getElementById('userPodcasts');
       if (existingContainer) existingContainer.innerHTML = '';
 
@@ -170,18 +237,18 @@ async function loadUserPodcasts(uid) {
         const item = document.createElement('div');
         item.className = 'podcast-card';
 
-        // Imagen
+        // Image
         const img = document.createElement('img');
         img.src = p.iconURL || 'images/logos/silueta.png';
         img.alt = (p.nombre || 'podcast') + ' icon';
         item.appendChild(img);
 
-        // Título
+        // Títle
         const title = document.createElement('h4');
         title.textContent = p.nombre || '(no title)';
         item.appendChild(title);
 
-        // Descripción
+        // Description
         if (p.descripcion) {
           const desc = document.createElement('p');
           desc.textContent = p.descripcion;
@@ -199,7 +266,7 @@ async function loadUserPodcasts(uid) {
         const controlWrapper = document.createElement('div');
         controlWrapper.className = 'folder-selection-container';
 
-        // Select de carpetas
+        // Selectfolders
         const folderLabel = document.createElement('label');
         folderLabel.textContent = 'Folder:';
         folderLabel.htmlFor = `folder-select-${pid}`;
@@ -223,7 +290,7 @@ async function loadUserPodcasts(uid) {
         controlWrapper.appendChild(folderLabel);
         controlWrapper.appendChild(select);
 
-        // Botón "Add to folder"
+        // button "Add to folder"
         const addBtn = document.createElement('button');
         addBtn.textContent = 'Add to folder';
         addBtn.classList.add('main-button', 'add-to-folder-btn');
@@ -855,6 +922,54 @@ function loadFavouriteSongs(userId) {
   });
 }
 
+async function playTrack(uri, playButton) {
+
+    if (!playerReady || !deviceId) {
+        console.warn("Spotify player not ready.");
+        return;
+    }
+
+    // Otra canción → parar la anterior
+    if (currentPlayingUri && currentPlayingUri !== uri) {
+        await fetch(
+            `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`,
+            { method: "PUT", headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        if (currentActivePlayButton) {
+            currentActivePlayButton.textContent = "▶ Play";
+        }
+    }
+
+    // Misma canción → pausar
+    if (currentPlayingUri === uri && currentPlayingUri && playButton.textContent === "⏹ Stop") {
+        await fetch(
+            `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`,
+            { method: "PUT", headers: { Authorization: `Bearer ${token}` } }
+        );
+
+        playButton.textContent = "▶ Play";
+        currentPlayingUri = null;
+        return;
+    }
+
+    // Reproducir
+    await fetch(
+        `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+        {
+            method: "PUT",
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ uris: [uri] })
+        }
+    );
+
+    currentPlayingUri = uri;
+    playButton.textContent = "⏹ Stop";
+    currentActivePlayButton = playButton;
+}
 async function removeFavSongs(songId){
   const db = getDatabase();
 
@@ -864,54 +979,107 @@ async function removeFavSongs(songId){
   console.log(`Song with id ${songId} removed from favorites`);
 }
 
-function renderSavedSongs(songIds, favorites) {
-  const container = document.getElementById("savedSongs");
-  container.innerHTML = "";
+// --- RENDER SAVED SONGS (Logic matching Chats) ---
+async function renderSavedSongs(songIds, favorites) {
+    const container = document.getElementById("savedSongs");
+    container.innerHTML = "";
+    
+    // Check token validity once when loading the list
+    const tokenValid = token && await isSpotifyTokenValid(token);
+    const db = getDatabase();
 
-  const db = getDatabase();
+    songIds.forEach(songId => {
+        const songRef = ref(db, `canciones/${songId}`);
 
-  songIds.forEach(songId => {
-    const songRef = ref(db, `canciones/${songId}`);
+        onValue(songRef, snapshot => {
+            const data = snapshot.val();
 
-    onValue(songRef, snapshot => {
-      const data = snapshot.val();
+            if (data) {
+                const div = document.createElement("div");
+                div.classList.add("artistCard");
 
-      if (data) {
-        const div = document.createElement("div");
-        div.classList.add("artistCard");
+                let artistNames = "Unknown Artist";
+                if (Array.isArray(data.artist)) {
+                    artistNames = data.artist.join(", ");
+                } else if (typeof data.artist === 'string') {
+                    artistNames = data.artist;
+                }
+                
+                // Construct the URI if not saved (format: spotify:track:ID)
+                // This is crucial for the player to work
+                const songUri = data.uri || `spotify:track:${data.id || songId}`;
 
-        let artistNames = "Unknown Artist";
+                // Base HTML Structure
+                div.innerHTML = `
+                  <img src="${data.albumImageUrl || 'images/logos/silueta.png'}" style="width:80px; border-radius:10px;">
+                  <p><strong>${data.title}</strong></p>
+                  <p>${artistNames}</p>
+                  
+                  <div class="player-controls-area"></div> 
+                  
+                  <div class="action-buttons" style="margin-top:5px;">
+                      <button class="shareSongBtn">Share</button>
+                      <button class="removeSongBtn">Remove</button>
+                  </div>
+                `;
 
-        if (Array.isArray(data.artist)) {
-          artistNames = data.artist.join(", ");
-        } else if (typeof data.artist === 'string') {
-          artistNames = data.artist;  
-        }
-        div.innerHTML = `
-          <img src="${data.albumImageUrl || 'images/logos/silueta.png'}" style="width:80px; border-radius:10px;">
-          <p><strong>${data.title}</strong></p>
-          <p>${artistNames}</p>
-          ${data.previewUrl ? `<audio controls src="${data.previewUrl}" style="width:100%"></audio>` : "<p>No preview available</p>"}
+                // --- PLAYER LOGIC (Dynamic Buttons) ---
+                const controlsArea = div.querySelector(".player-controls-area");
 
-          <button class="shareSongBtn">Share</button>
-          <button class="removeSongBtn">Remove</button>
-        `;
+                // 1. No valid token -> Show Connect button
+                if (!tokenValid) {
+                    const reconnectBtn = document.createElement("button");
+                    reconnectBtn.textContent = "Connect Spotify";
+                    reconnectBtn.className = "main-button"; // Make sure you have CSS for this class
+                    reconnectBtn.style.fontSize = "12px";
+                    reconnectBtn.style.marginTop = "5px";
+                    reconnectBtn.addEventListener("click", () => {
+                        window.location.href = "test_register_spotify.html"; 
+                    });
+                    controlsArea.appendChild(reconnectBtn);
+                } 
+                // 2. Valid token but NOT Premium -> Show info message
+                else if (!isPremium) {
+                    const info = document.createElement("p");
+                    info.textContent = "Playback not available (Premium only)";
+                    info.style.fontStyle = "italic";
+                    info.style.fontSize = "11px";
+                    info.style.color = "#888";
+                    controlsArea.appendChild(info);
+                } 
+                // 3. Premium OK -> Show PLAY button
+                else {
+                    const playBtn = document.createElement("button");
+                    playBtn.textContent = "▶ Play";
+                    playBtn.className = "main-button"; 
+                    playBtn.style.marginTop = "5px";
+                    
+                    // Attach the click event to the playTrack function
+                    playBtn.addEventListener("click", () => {
+                        playTrack(songUri, playBtn);
+                    });
+                    controlsArea.appendChild(playBtn);
+                }
 
-        //REMOVE
-        div.querySelector(".removeSongBtn").addEventListener("click", async () => {
-          removeFavSongs(songId);
+                // --- ACTION BUTTONS EVENTS ---
+                
+                // REMOVE BUTTON
+                div.querySelector(".removeSongBtn").addEventListener("click", async () => {
+                    removeFavSongs(songId);
+                });
+
+                // SHARE BUTTON
+                div.querySelector(".shareSongBtn").addEventListener("click", () => {
+                    // Update data object with the correct URI for the modal
+                    data.id = songId;
+                    data.uri = songUri; 
+                    openShareSongModal(data);
+                });
+
+                container.appendChild(div);
+            }
         });
-
-        //SHARE
-        div.querySelector(".shareSongBtn").addEventListener("click", () => {
-          data.id = songId;
-          openShareSongModal(data);
-        });
-
-        container.appendChild(div);
-      }
     });
-  });
 }
 
 document.getElementById("btnSearchSong").addEventListener("click", async () => {
