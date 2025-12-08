@@ -1,5 +1,7 @@
 
-/*MAIN LAYOUT AND TITLES*/
+/*-----------------------------*/
+/* MAIN LAYOUT AND TITLES
+/*-----------------------------*/
 main.home-layout {
     display: flex;
     flex-direction: column;
@@ -22,7 +24,9 @@ main h1 {
     margin-bottom: 2rem;
 }
 
-/*MODULE STYLE*/
+/*------------------------------*/
+/*MODULE STYLE
+/*------------------------------*/
 .home-module {
     width: 100%;
     max-width: 1000px; 
@@ -35,8 +39,8 @@ main h1 {
     border: 1px solid var(--color-azul2, #3e9ade); 
     
     box-shadow: 
-        0 15px 40px rgba(0, 0, 0, 0.6), /* Sombra de profundidad */
-        0 0 30px rgba(62, 154, 222, 0.7); /* Brillo azul intenso */
+        0 15px 40px rgba(0, 0, 0, 0.6), 
+        0 0 30px rgba(62, 154, 222, 0.7);
 }
 
 .home-module h2 {
@@ -47,8 +51,10 @@ main h1 {
     text-shadow: 0 0 10px rgba(0, 123, 255, 0.7);
 }
 
-/*.song-card*/
 
+/*------------------------------*/
+/* SONG CARD STYLES
+/*------------------------------*/
 .content-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -100,36 +106,35 @@ main h1 {
 }
 
 .song-card .play-button {
-    /* Centrado */
-    margin-top: auto; /* Empuja el botón hacia abajo si el contenido superior varía de altura */
+    margin-top: auto; 
     
-    /* Estilo (Negrita y Redondeado) */
-    background-color: var(--color-azul2, #3e9ade); /* Color principal azul */
+    background-color: var(--color-azul2, #3e9ade);
     color: white;
     border: none;
     
-    /* Forma y Tamaño */
     padding: 10px 20px;
     font-size: 1rem;
-    font-weight: 700; /* Negrita */
+    font-weight: 700; 
     text-transform: uppercase;
-    border-radius: 20px; /* Bordes redondeados */
+    border-radius: 20px; 
     cursor: pointer;
     
-    /* Efectos */
     transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
 }
 
 .song-card .play-button:hover {
-    background-color: #5bb2ec; /* Tono más claro al pasar el ratón */
-    transform: translateY(-2px); /* Ligero efecto de levantamiento */
+    background-color: #5bb2ec; 
+    transform: translateY(-2px); 
     box-shadow: 
         0 6px 15px rgba(0, 0, 0, 0.6), 
         0 0 10px rgba(62, 154, 222, 0.8);
 }
 
-/*.ARTIST-CHIP */
+
+/*------------------------------*/
+/* ARTIST CHIP STYLES
+/*------------------------------*/
 .artist-chip {
     display: flex; 
     align-items: center; 
@@ -137,7 +142,6 @@ main h1 {
     background-color: rgba(62, 154, 222, 0.2); 
     border-radius: 50px;
     
-    /* Mantenemos un padding generoso para el chip */
     padding: 10px 20px 10px 10px; 
     cursor: pointer;
     
@@ -150,9 +154,6 @@ main h1 {
     height: 60px;
     object-fit: cover; 
     border-radius: 50%; 
-    
-    /* El margen derecho debe estar en la imagen, NO en el texto, 
-       para dejar espacio para el centrado. */
     margin-right: 12px; 
     
     border: 2px solid white;
@@ -165,13 +166,8 @@ main h1 {
     font-size: 1.25rem; 
     white-space: nowrap; 
     
-    /* 1. Ocupa todo el espacio horizontal restante en el chip */
     flex-grow: 1; 
-    
-    /* 2. Alinea el texto en el centro de ese espacio. */
     text-align: center; 
-    
-    /* 3. Asegurarnos de que no haya padding o margen interno que lo desplace */
     padding-right: 0; 
     margin-right: 0; 
 }
@@ -186,12 +182,14 @@ main h1 {
     display: flex;
     flex-wrap: wrap; 
     gap: 15px; 
-    justify-content: center; /* Centra los chips horizontalmente */
+    justify-content: center;
     width: 100%;
     padding-top: 10px;
 }
 
-/*PLAYER*/
+/*------------------------------*/
+/* PLAYER BAR STYLES
+/*------------------------------*/
 #playerBarContainer {
     position: fixed;
     bottom: 0;
@@ -215,13 +213,40 @@ main h1 {
     display: flex;
     align-items: center;
     width: 100%;
-    max-width: 1200px; /* Limita el ancho del contenido interno */
+    max-width: 1200px; 
     margin: 0;
-    /* Distribución de elementos: Play | Info | (Progreso) */
+   
     justify-content: flex-start; 
 }
 
-/* --- Botón Play/Pause --- */
+.player-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    margin-left: 20px;
+}
+
+#currentTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-blanco, white); 
+    margin: 0;
+}
+
+#currentArtist {
+    font-size: 0.9rem;
+    color: #a0a0a0;
+    font-weight: 400;
+    margin: 0;
+}
+
+#audioElementWrapper {
+    display: none; 
+}
+
+/*------------------------------*/
+/* BOTÓN PLAY PAUSE
+/*------------------------------*/
 #playPauseButton {
 
     border: none;
@@ -266,42 +291,17 @@ main h1 {
 }
 
 
-.player-info {
-    display: flex;
-    flex-direction: column;
-    text-align: left;
-    margin-left: 20px;
-}
-
-#currentTitle {
-    font-size: 1.1rem;
-    font-weight: 700;
-    color: var(--color-blanco, white); 
-    margin: 0;
-}
-
-#currentArtist {
-    font-size: 0.9rem;
-    color: #a0a0a0;
-    font-weight: 400;
-    margin: 0;
-}
-
-#audioElementWrapper {
-    display: none; 
-}
-
 /* ======================================= */
-/* SECCIÓN APUNTARSE AL LOG IN
+/* REGISTER SECTION STYLES
 /* ======================================= */
 
 #registerCtaModule {
-    background-color: rgba(62, 154, 222, 0.05); /* Fondo azul muy sutil */
+    background-color: rgba(62, 154, 222, 0.05);
     border: 1px solid var(--color-azul2, #3e9ade); 
     
     box-shadow: 
-        0 15px 40px rgba(0, 0, 0, 0.6), /* Sombra de profundidad */
-        0 0 30px rgba(62, 154, 222, 0.7); /* Brillo azul intenso */
+        0 15px 40px rgba(0, 0, 0, 0.6), 
+        0 0 30px rgba(62, 154, 222, 0.7); 
 }
 
 #registerCtaModule h2 {
@@ -328,26 +328,26 @@ main h1 {
     cursor: pointer;
     transition: all 0.3s ease;
     
-    /* Colores y Brillo Intensificado */
-    background-color: var(--color-azul2, #3e9ade); /* Azul principal */
+    background-color: var(--color-azul2, #3e9ade); 
     color: white;
     border: 2px solid var(--color-azul2, #3e9ade);
     box-shadow: 
-        0 4px 15px rgba(62, 154, 222, 0.6), /* Sombra que levanta el botón */
-        0 0 20px rgba(62, 154, 222, 0.4); /* Fuerte brillo alrededor */
+        0 4px 15px rgba(62, 154, 222, 0.6), 
+        0 0 20px rgba(62, 154, 222, 0.4); 
 }
 
 #registerCtaButton:hover {
-    background-color: #5bb2ec; /* Tono más claro al pasar el ratón */
-    transform: scale(1.03); /* Ligero crecimiento */
-    /* Efecto de brillo amplificado al pasar el ratón */
+    background-color: #5bb2ec;
+    transform: scale(1.03); 
     box-shadow: 
         0 6px 20px rgba(62, 154, 222, 0.8),
         0 0 30px rgba(62, 154, 222, 0.9);
 }
 
 
-/*BACKDROP*/
+/*------------------------------*/
+/* BACKDROP (DESCRIPTION ARTISTS)
+/*------------------------------*/
 .modal-backdrop {
     position: fixed;
     top: 0;
@@ -358,9 +358,9 @@ main h1 {
     background-color: rgba(0, 0, 0, 0.7); 
     
     backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px); /* Soporte Webkit */
+    -webkit-backdrop-filter: blur(5px); 
     
-    z-index: 1000; /* Asegura que esté encima de todo */
+    z-index: 1000;
     
     opacity: 0;
     visibility: hidden;

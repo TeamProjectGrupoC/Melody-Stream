@@ -2,7 +2,6 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-     
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
      
     <meta
@@ -24,12 +23,17 @@
      
     <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg" />
   </head>
+
   <body>
+    <!--HEADER SECTION-->
     <header id="headerPrincipal">
       <figure>
-              <img src="images/logos/logo.png" alt="Webpage logo" /> 
+        <!--Logo-->
+        <img src="images/logos/logo.png" alt="Webpage logo" /> 
       </figure>
       <p id="menuToggle"><a href="#" class="hamburguesa"> ☰ </a></p>
+
+      <!--Navigation Menu-->
       <nav id="NavPrincipal">
         <ul>
           <li><a href="index.html">HOME</a></li>
@@ -39,6 +43,8 @@
           <li><a id="loginProfileLink" href="login.html">LOG IN</a></li>
         </ul>
       </nav>
+
+      <!--User Profile Picture-->
       <div id="headerProfileIm">
         <a href="profile.html">
           <img
@@ -50,9 +56,11 @@
       </div>
     </header>
 
+    <!-- MAIN CONTENT SECTION -->
     <main class="home-layout">
       <h1>WELCOME TO MELODY STREAM</h1>
 
+      <!-- Registration Call-To-Action -->
       <section id="registerCtaModule" class="home-module">
         <h2>Ready to start?</h2>
         <p>Join Melody Stream to listen to your favorite music, upload podcasts, and connect with artists and friends.</p>
@@ -60,13 +68,15 @@
         <a href="register.html" id="registerCtaButton" class="main-button">
             REGISTER NOW - IT'S FREE!
         </a>
-    </section>
+      </section>
 
+      <!--TRENDING SONGS SECTION -->
       <section class="home-module module-songs">
         <h2>Trending Songs</h2>
 
         <div id="trendingSongsList" class="content-grid">
 
+          <!--Song Card 1-->
           <div class="song-card" data-song-id="song_1">
             <img src="images/Polaca.png" alt="Song Cover 1" />            
             <h4>Mniej niz zero</h4>
@@ -74,6 +84,7 @@
             <button class="play-button main-button">Play</button>            
           </div>
 
+          <!--Song Card 2-->
           <div class="song-card" data-song-id="song_2">
             <img src="images/AveMaria.png" alt="Song Cover 2" />            
             <h4>Ave María</h4>
@@ -81,6 +92,7 @@
             <button class="play-button main-button">Play</button>            
           </div>
 
+          <!--Song Card 3-->
           <div class="song-card" data-song-id="song_3">
             <img src="images/Firedance.png" alt="Song Cover 3" />            
             <h4>Firedance</h4>
@@ -88,6 +100,7 @@
             <button class="play-button main-button">Play</button>            
           </div>
 
+          <!--Song Card 4-->
           <div class="song-card" data-song-id="song_4">
             <img src="images/September.png" alt="Song Cover 4" />            
             <h4>September</h4>
@@ -96,33 +109,38 @@
           </div>
         </div>
         
+        <!--Audio Player Bar-->
         <div id="playerBarContainer">
             <div id="audioElementWrapper" style="display:none;"></div> 
 
             <div id="customPlayerControls">
-                <button id="playPauseButton" class="player-icon paused" title="Play/Pause"></button>
-                <div id="songInfo" class="player-info">
-                    <span id="currentTitle">Select a song</span>
-                    <span id="currentArtist"></span>
-                </div>
-                </div>
+              <button id="playPauseButton" class="player-icon paused" title="Play/Pause"></button>
+              <div id="songInfo" class="player-info">
+                <span id="currentTitle">Select a song</span>
+                <span id="currentArtist"></span>
+              </div>
+            </div>
         </div>
       </section>
 
+      <!-- FEATURED ARTIST SECTION-->
       <section class="home-module module-artists">
         <h2>Featured Artists</h2>
 
         <div id="featuredArtistsList" class="content-grid artist-chips-wrapper">
+          <!--Artist Chip 1-->
           <div class="artist-chip">
             <img src="images/Rosalia.avif" alt="Artist Pic A" />            
             <span class="artist-name-text">Rosalía</span>
           </div>
 
+          <!--Artist Chip 2-->
           <div class="artist-chip">
             <img src="images/edsheeran.webp" alt="Artist Pic B" />            
             <span class="artist-name-text">Ed Sheeran</span>
           </div>
 
+          <!--Artist Chip 3-->
           <div class="artist-chip">
             <img src="images/theRapants.webp" alt="Artist Pic C" />            
             <span class="artist-name-text">The Rapants</span> 
@@ -130,6 +148,7 @@
         </div>
       </section>
 
+      <!--Artist Description Modal-->
       <div id="artistModalBackdrop" class="modal-backdrop">
         <div id="artistModalContent" class="artist-description-modal">
             <h3 id="modalArtistName">Nombre del Artista</h3>
@@ -139,9 +158,12 @@
       </div>
     </main>
 
+    <!--FOOTER SECTION-->
     <footer id="footerPrincipal">
       <h2 id="footer-title">MELODY STREAM</h2>
     </footer>
+
+    <!--JS FILES-->
     <script type="module" src="js/header.js"></script>
     <script type="module" src="js/home.js"></script>
 

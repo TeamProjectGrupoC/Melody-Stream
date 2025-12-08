@@ -1,13 +1,11 @@
+
+//------ IMPORTING MODULES ------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-
-// Módulos de Realtime Database (RTDB)
 import { getDatabase, ref as databaseRef, onValue, set } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
-
-// Módulos de Firebase Storage (Solo una vez)
 import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
-// --- FIREBASE CONFIGURATION ---
+//----- FIREBASE CONFIGURATION ---
 const firebaseConfig = {
     apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
     authDomain: "melodystream123.firebaseapp.com",
@@ -19,7 +17,7 @@ const firebaseConfig = {
     measurementId: "G-J97KEDLYMB"
 };
 
-// --- INITIALIZATION ---
+//------ INITIALIZATION ---
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
@@ -27,6 +25,10 @@ const storage = getStorage(app);
 
 let currentAudioPlayer = null;
 
+
+//----- SAMPLE DATA -----------
+
+//Data for trending songs
 const trendingSongsData = {
     "song_1": {
         "titulo": "Mniej niz zero",
@@ -50,29 +52,31 @@ const trendingSongsData = {
     }
 };
 
+//Data for featured artist with descriptions
 const featuredArtistsData = {
     "Rosalía": "Rosalía is a two-time GRAMMY® and 13-time Latin GRAMMY® Award-winning artist & producer redefining global pop with fearless musical fusion and singular visual language. Her breakthrough El Mal Querer reimagined flamenco for a new era & earned her a GRAMMY plus eight Latin GRAMMYs including Album of the Year, making her the first Spanish-language artist nominated for Best New Artist at the GRAMMYs. In 2022, she released MOTOMAMI, which she wrote, performed, recorded, & produced; it debuted at #1 on Spotify’s Global Album Chart, scored the highest Metacritic rating of the year & powered her sold-out MOTOMAMI WORLD TOUR.",
     "Ed Sheeran": "Ed Sheeran borrows from any style that crosses his path, molding genres to fit a musical character all his own that's charming, personable, and popular on a global scale. Elements of folk, hip-hop, pop, dance, soul, and rock can be heard in his big hits The A Team, Sing, Thinking Out Loud and Shape of You -- which gives him a broad appeal among different demographics. It also helped elevate him to international acclaim not long after the release of his 2011 debut LP, +, and took 2014's x and 2017's ÷ to the top of both the U.K. albums chart and the Billboard 200. Sheeran maintained his stardom with savvy collaborations -- his 2019 album No. 6 Collaborations Project featured an eclectic roster including Khalid, Camila Cabello, Cardi B, Justin Bieber, Chris Stapleton, and Bruno Mars -- and by continuing to write candidly about his life: his 2021 album = was filled with songs about being a new father. Sheeran's musical explorations continued on -, a 2023 album that featured several tracks co-written and co-produced by Aaron Dessner of the National, and its swiftly released companion, Autumn Variations, both of which reached the Top Five in the U.K. and on the Billboard 200.",
     "The Rapants": "The Rapants is a Galician indie and garage rock band from Muros, formed in 2018, known for their explosive live energy and their festive style that blends pop, garage, disco, and rock, with lyrics in Galician and Spanish about everyday life and good vibes, capturing the essence of youth and partying. They are famous for their laid-back attitude, their connection with the audience, and their ability to make everyone dance, standing out at festivals and venues across the Iberian Peninsula"
 };
 
-
+//-------- HEADER LINKS UPDATE BASED ON AUTHENTICATION STATE ------
+//Update header links base on whether the user is logged in or not
 function updateHeaderLinks(user) {
     const loginProfileLink = document.getElementById('loginProfileLink');
     const headerUserPic = document.getElementById('headerUserPic');
     
     if (user) {
-        // Usuario logueado
+        //User logged in, update de profile link and picture
         if (loginProfileLink) {
             loginProfileLink.textContent = 'PROFILE';
             loginProfileLink.href = 'profile.html';
         }
-        // Asumiendo que guardas la URL de la foto de perfil en localStorage o tienes una forma de obtenerla
         const profilePicUrl = localStorage.getItem('headerProfilePic') || 'images/logos/silueta.png';
         if (headerUserPic) headerUserPic.src = profilePicUrl;
 
-    } else {
-        // Usuario no logueado
+    } 
+    else {
+        //If user is not logged in
         if (loginProfileLink) {
             loginProfileLink.textContent = 'LOG IN';
             loginProfileLink.href = 'login.html';
@@ -81,24 +85,33 @@ function updateHeaderLinks(user) {
     }
 }
 
+//------- INITIALIZE APP ---------
 
 function startApp() {
+    //Check authentication
     onAuthStateChanged(auth, (user) => {
         updateHeaderLinks(user);
     });
 
-    initializeHomeInteractions();
+    initializeHomeInteractions(); //initializing interactions
 }
 
+//------ WAIT FOR THE DOM TO BE FULLY LOADED BEFORE STARTING THE APP ------
 document.addEventListener('DOMContentLoaded', startApp);
 
+
+//-------------------------------------------------//
+
+//----- PLAY AUDIO FROM FIREBASE STORAGE-------
 async function loadPlayFirebaseAudio(audioFilePath, title, artist){
 
+    //Get references to the HTML elements
     const audioWrapper = document.getElementById('audioElementWrapper');
     const playPauseButton = document.getElementById('playPauseButton');
     const currentTitleSpan = document.getElementById('currentTitle');
     const currentArtistSpan = document.getElementById('currentArtist');  
 
+    //Stop and reset the previus audio player if there is one playing
     if (currentAudioPlayer) {
         currentAudioPlayer.pause();
         currentAudioPlayer.currentTime = 0;
@@ -106,9 +119,10 @@ async function loadPlayFirebaseAudio(audioFilePath, title, artist){
     audioWrapper.innerHTML = '';
     
     try{
-        const fileRef = storageRef(storage, audioFilePath);
-        const audioUrl = await getDownloadURL(fileRef);
+        const fileRef = storageRef(storage, audioFilePath); //Get reference to the audio file stored in Firebase
+        const audioUrl = await getDownloadURL(fileRef); //Fetch download URL of the audio
 
+        //Create new audio element 
         audioWrapper.innerHTML = `
             <audio id="audioPlayerSource">
                 <source src="${audioUrl}" type="audio/mpeg">
@@ -116,14 +130,12 @@ async function loadPlayFirebaseAudio(audioFilePath, title, artist){
         `;
 
         currentAudioPlayer = document.getElementById('audioPlayerSource');
+
+        //Update the song title and artist name
         currentTitleSpan.textContent = title;
         currentArtistSpan.textContent = artist;
 
-        currentAudioPlayer.play().catch(e => {
-            console.log(`Reproducción bloqueada para ${title}. Esperando la interacción del usuario.`);
-        });
-
-        playPauseButton.textContent = currentAudioPlayer.paused ? '▶️' : '⏸️';
+        //Toggle the "paused" class on the play/pause button depending on whether the audio is paused
         playPauseButton.classList.toggle('paused', currentAudioPlayer.paused);
 
     }
@@ -133,21 +145,27 @@ async function loadPlayFirebaseAudio(audioFilePath, title, artist){
     };
 }
 
+//------------------------------------------
+//---------- INITIALIZE HOME ITERACTIONS--------
+
 function initializeHomeInteractions() {
-    /*TRENDING SONGS*/
+    //Set up play buttons for trending songs
     const playButtons = document.querySelectorAll('.module-songs .play-button');
     
+    //Initialize player controls
     setupPlayerControls();
 
     playButtons.forEach(button => {
         const songCard = button.closest('.song-card');
         
+        //Retrieve the song ID from the 'data-song-id' attribute of the song card
         const songId = songCard ? songCard.dataset.songId : null; 
         
         if (songId) {
             button.addEventListener('click', () => {
-                const song = trendingSongsData[songId];
+                const song = trendingSongsData[songId];  //Retrieve the song data
 
+                //If the song exists and has a valid audio file, try to play it
                 if (song && song.audioFile) {
                     loadPlayFirebaseAudio(song.audioFile, song.titulo, song.artista);
                 } 
@@ -158,9 +176,13 @@ function initializeHomeInteractions() {
         }
     });
 
+    //Initialize artist descriptions modal
     ArtistDescription();
 }
 
+
+
+// --------- SETUP PLAYER CONTROLS ---------
 function setupPlayerControls(){
     const playPauseButton = document.getElementById('playPauseButton');
 
@@ -171,53 +193,64 @@ function setupPlayerControls(){
             return;
         }
 
+        //if the audio player is paused, play the audio and update the button state
         if(currentAudioPlayer.paused){
-            currentAudioPlayer.play();
-            playPauseButton.classList.remove('paused');
+            currentAudioPlayer.play(); //play audio
+            playPauseButton.classList.remove('paused'); //remove 'paused' class
         }
         else{
-            currentAudioPlayer.pause();
-            playPauseButton.classList.add('paused');
+            //If the audio is playing, pause it and update the button state
+            currentAudioPlayer.pause(); //pause audio
+            playPauseButton.classList.add('paused'); //add 'paused' class
         }
     }
     )
 }
 
+//------------- ARTIST DESCRIPTION MODAL ------------
 function ArtistDescription(){
     const artistChips = document.querySelectorAll('.artist-chip');
+
     const modalBackdrop = document.getElementById('artistModalBackdrop');
     const modalArtistName = document.getElementById('modalArtistName');
     const modalArtistDescription = document.getElementById('modalArtistDescription');
     const closeModalButton = document.getElementById('closeModalButton');
 
+    //Open the modal and display the artist information
     function openModal(artistName) {
         modalArtistName.textContent = artistName;
-        modalArtistDescription.textContent = featuredArtistsData[artistName] || "No hay descripción disponible.";
-        modalBackdrop.classList.add('active');
+        //Look for the artist description
+        modalArtistDescription.textContent = featuredArtistsData[artistName] || "No description avaliable.";
+        modalBackdrop.classList.add('active'); //Make de modal backdrop visible
     }
 
     function closeModal() {
+        //Remove active class from de modal
         modalBackdrop.classList.remove('active');
     }
 
     artistChips.forEach(chip => {
         chip.addEventListener('click', (event) => {
             const artistNameElement = chip.querySelector('.artist-name-text');
+            
             if (artistNameElement) {
-                const artistName = artistNameElement.textContent.trim();
-                openModal(artistName);
+                const artistName = artistNameElement.textContent.trim(); //Get artist name
+                openModal(artistName); //open the modal with the artist`s name and description
             }
         });
     });
 
+    //Event listener to the close modal button
     closeModalButton.addEventListener('click', closeModal);
 
+    //Event listener to the modal backdrop so that clickin on it will also close modal
     modalBackdrop.addEventListener('click', (event) => {
         if (event.target === modalBackdrop) {
             closeModal();
         }
     });
     
+    //Event listener to close the modal when Escape key is pressed
     document.addEventListener('keydown', (event) => {
         if (event.key === 'Escape' && modalBackdrop.classList.contains('active')) {
             closeModal();
