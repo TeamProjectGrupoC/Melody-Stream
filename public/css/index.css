@@ -1,0 +1,409 @@
+
+/*MAIN LAYOUT AND TITLES*/
+main.home-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    max-width: 1200px; 
+    width: 95%;
+    margin: 0 auto; 
+    padding: 3rem 1rem;
+    gap: 3rem; 
+}
+
+main h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--color-azul2, #3e9ade); 
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: 0 0 10px rgba(62, 154, 222, 0.4);
+    margin-bottom: 2rem;
+}
+
+/*MODULE STYLE*/
+.home-module {
+    width: 100%;
+    max-width: 1000px; 
+    margin: 0 auto;
+    padding: 2rem;
+    border-radius: 16px;
+    text-align: center;
+
+    background-color: rgba(255, 255, 255, 0.05); 
+    border: 1px solid var(--color-azul2, #3e9ade); 
+    
+    box-shadow: 
+        0 15px 40px rgba(0, 0, 0, 0.6), /* Sombra de profundidad */
+        0 0 30px rgba(62, 154, 222, 0.7); /* Brillo azul intenso */
+}
+
+.home-module h2 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-azul1, #007bff); 
+    margin-bottom: 1.5rem;
+    text-shadow: 0 0 10px rgba(0, 123, 255, 0.7);
+}
+
+/*.song-card*/
+
+.content-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+}
+
+.song-card {
+    background-color: rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 15px;
+    text-align: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.song-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 
+        0 10px 20px rgba(0, 0, 0, 0.6), 
+        0 0 20px rgba(62, 154, 222, 0.7); 
+}
+
+.song-card img {
+    width: 100%;
+    aspect-ratio: 1 / 1; 
+    object-fit: cover;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    border: 2px solid var(--color-azul2, #3e9ade); 
+}
+
+.song-card h4 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--color-blanco, white);
+    margin: 0 0 3px 0;
+}
+
+.song-card .artist-name {
+    font-size: 0.9rem;
+    color: #c0c0c0;
+    margin: 0 0 10px 0;
+}
+
+.song-card .play-button {
+    /* Centrado */
+    margin-top: auto; /* Empuja el botón hacia abajo si el contenido superior varía de altura */
+    
+    /* Estilo (Negrita y Redondeado) */
+    background-color: var(--color-azul2, #3e9ade); /* Color principal azul */
+    color: white;
+    border: none;
+    
+    /* Forma y Tamaño */
+    padding: 10px 20px;
+    font-size: 1rem;
+    font-weight: 700; /* Negrita */
+    text-transform: uppercase;
+    border-radius: 20px; /* Bordes redondeados */
+    cursor: pointer;
+    
+    /* Efectos */
+    transition: background-color 0.3s ease, transform 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.song-card .play-button:hover {
+    background-color: #5bb2ec; /* Tono más claro al pasar el ratón */
+    transform: translateY(-2px); /* Ligero efecto de levantamiento */
+    box-shadow: 
+        0 6px 15px rgba(0, 0, 0, 0.6), 
+        0 0 10px rgba(62, 154, 222, 0.8);
+}
+
+/*.ARTIST-CHIP */
+.artist-chip {
+    display: flex; 
+    align-items: center; 
+    
+    background-color: rgba(62, 154, 222, 0.2); 
+    border-radius: 50px;
+    
+    /* Mantenemos un padding generoso para el chip */
+    padding: 10px 20px 10px 10px; 
+    cursor: pointer;
+    
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
+}
+
+.artist-chip img {
+    width: 60px; 
+    height: 60px;
+    object-fit: cover; 
+    border-radius: 50%; 
+    
+    /* El margen derecho debe estar en la imagen, NO en el texto, 
+       para dejar espacio para el centrado. */
+    margin-right: 12px; 
+    
+    border: 2px solid white;
+    flex-shrink: 0;
+}
+
+.artist-chip .artist-name-text {
+    color: white;
+    font-weight: 600;
+    font-size: 1.25rem; 
+    white-space: nowrap; 
+    
+    /* 1. Ocupa todo el espacio horizontal restante en el chip */
+    flex-grow: 1; 
+    
+    /* 2. Alinea el texto en el centro de ese espacio. */
+    text-align: center; 
+    
+    /* 3. Asegurarnos de que no haya padding o margen interno que lo desplace */
+    padding-right: 0; 
+    margin-right: 0; 
+}
+
+.artist-chip:hover {
+    background-color: rgba(62, 154, 222, 0.4);
+    box-shadow: 0 0 15px rgba(62, 154, 222, 0.8);
+}
+
+
+.artist-chips-wrapper {
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 15px; 
+    justify-content: center; /* Centra los chips horizontalmente */
+    width: 100%;
+    padding-top: 10px;
+}
+
+/*PLAYER*/
+#playerBarContainer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    
+    background-color: #1a1a1a; 
+    box-shadow: 
+        0 -3px 20px rgba(0, 0, 0, 0.6), 
+        0 0 10px rgba(62, 154, 222, 0.4); 
+    
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 1rem;
+    z-index: 1000; 
+}
+
+#customPlayerControls {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px; /* Limita el ancho del contenido interno */
+    margin: 0;
+    /* Distribución de elementos: Play | Info | (Progreso) */
+    justify-content: flex-start; 
+}
+
+/* --- Botón Play/Pause --- */
+#playPauseButton {
+
+    border: none;
+    border-radius: 50%; 
+    width: 45px;
+    height: 45px;
+
+    background-color: var(--color-azul2, #3e9ade); 
+    color: var(--color-blanco, white);
+
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5); 
+
+    background-size: 50%; 
+    background-repeat: no-repeat;
+    background-position: center center;    
+    
+    text-indent: -999999px;
+    overflow: hidden;
+    
+}
+
+#playPauseButton.paused {
+    background-image: url('../images/icons/play.png'); 
+    background-position: 55% center;
+}
+
+#playPauseButton:not(.paused) {
+    background-image: url('../images/icons/pausa.png');
+    background-position: center center;
+}
+
+#playPauseButton:hover {
+    background-color: #5bb2ec;
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(62, 154, 222, 0.7);
+}
+
+
+.player-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    margin-left: 20px;
+}
+
+#currentTitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--color-blanco, white); 
+    margin: 0;
+}
+
+#currentArtist {
+    font-size: 0.9rem;
+    color: #a0a0a0;
+    font-weight: 400;
+    margin: 0;
+}
+
+#audioElementWrapper {
+    display: none; 
+}
+
+/* ======================================= */
+/* SECCIÓN APUNTARSE AL LOG IN
+/* ======================================= */
+
+#registerCtaModule {
+    background-color: rgba(62, 154, 222, 0.05); /* Fondo azul muy sutil */
+    border: 1px solid var(--color-azul2, #3e9ade); 
+    
+    box-shadow: 
+        0 15px 40px rgba(0, 0, 0, 0.6), /* Sombra de profundidad */
+        0 0 30px rgba(62, 154, 222, 0.7); /* Brillo azul intenso */
+}
+
+#registerCtaModule h2 {
+    font-size: 2.5rem;
+    color: var(--color-azul2, #3e9ade); 
+    text-shadow: 0 0 8px rgba(62, 154, 222, 0.8);
+    margin-bottom: 1rem;
+}
+
+#registerCtaModule p {
+    font-size: 1.1rem;
+    color: #c0c0c0;
+    margin-bottom: 1.5rem;
+}
+
+#registerCtaButton {
+    display: inline-block;
+    padding: 15px 30px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    
+    /* Colores y Brillo Intensificado */
+    background-color: var(--color-azul2, #3e9ade); /* Azul principal */
+    color: white;
+    border: 2px solid var(--color-azul2, #3e9ade);
+    box-shadow: 
+        0 4px 15px rgba(62, 154, 222, 0.6), /* Sombra que levanta el botón */
+        0 0 20px rgba(62, 154, 222, 0.4); /* Fuerte brillo alrededor */
+}
+
+#registerCtaButton:hover {
+    background-color: #5bb2ec; /* Tono más claro al pasar el ratón */
+    transform: scale(1.03); /* Ligero crecimiento */
+    /* Efecto de brillo amplificado al pasar el ratón */
+    box-shadow: 
+        0 6px 20px rgba(62, 154, 222, 0.8),
+        0 0 30px rgba(62, 154, 222, 0.9);
+}
+
+
+/*BACKDROP*/
+.modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    
+    background-color: rgba(0, 0, 0, 0.7); 
+    
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px); /* Soporte Webkit */
+    
+    z-index: 1000; /* Asegura que esté encima de todo */
+    
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s;
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-backdrop.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.artist-description-modal {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+    
+    width: 450px; 
+    max-width: 90%;
+    
+    transform: translateY(-50px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.modal-backdrop.active .artist-description-modal {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+#closeModalButton {
+    margin-top: 20px;
+    width: 100%;
+}
+
+#modalArtistName {
+    font-size: 1.8em;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
