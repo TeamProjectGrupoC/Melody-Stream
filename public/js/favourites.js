@@ -11,6 +11,10 @@ export async function saveFavouriteSong(userId, track) {
   await set(favSongRef, true);
 
   const songSnapshot = await get(songRef);
+  if(songSnapshot.exists){
+    alert("This song is already in your favourites.");
+    return;
+  }
   if (!songSnapshot.exists()) {
 
       const songData = {

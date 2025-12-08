@@ -584,31 +584,6 @@ if (goToChatBtn) {
   });
 }
 
-/*const logOutBtn = document.getElementById('logOutBtn');
-if (logOutBtn) {
-  logOutBtn.addEventListener('click', async () => {
-    const msgElemento = document.getElementById('msg');
-    const fotoElemento = document.getElementById('fotoPerfilUsuario');
-
-    try {
-      await signOut(auth);
-
-      if (msgElemento) msgElemento.textContent = "You have successfully logged out.";
-
-      if (fotoElemento) {
-        fotoElemento.src = "images/logos/silueta.png";
-      }
-
-      const userDataDiv = document.getElementById('userData');
-      if (userDataDiv) userDataDiv.style.display = "none";
-
-      window.location.href = 'login.html';
-    } catch (error) {
-      console.error("Log out error:", error);
-      if (msgElemento) msgElemento.textContent = "Error logging out.";
-    }
-  });
-}*/
 
 // Evento para abrir modal al hacer click en botón .view-folder (delegación)
 document.addEventListener('click', (e) => {
@@ -757,7 +732,6 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
       // Botón añadir a favoritos
       card.querySelector(".addFavBtn").addEventListener("click", () => {
         saveFavouriteArtist(currentUser.uid, artist);
-        alert(`${artist.name} added to favourites`);
       });
 
       resultContainer.appendChild(card);
@@ -1114,7 +1088,6 @@ document.getElementById("btnSearchSong").addEventListener("click", async () => {
 
       card.querySelector(".addSongBtn").addEventListener("click", () => {
         saveFavouriteSong(currentUser.uid, song);
-        alert(`${song.name} added to favourites`);
       });
 
       resultContainer.appendChild(card);
@@ -1217,6 +1190,132 @@ document.getElementById("shareSongConfirm").addEventListener("click", async () =
 // Crea un objeto global compartido entre módulos
 if (!globalThis.MelodyStreamAPI) {
     globalThis.MelodyStreamAPI = {};
+}
+
+// Nueva función para abrir el modal de carpeta (puedes llamarla desde cualquier parte)
+async function openFolderModal(folderId, folderName = '') {
+  // asegúrate de que existe #folder-modal y #folder-podcast-list en el DOM
+  let modal = document.getElementById('folder-modal');
+  if (!modal) {
+    modal = document.createElement('div');
+    modal.id = 'folder-modal';
+    document.body.appendChild(modal);
+  }
+
+  // estructura mínima dentro del modal
+  modal.innerHTML = `
+    <div class="folder-modal-inner" style="max-width:1100px;width:95%;padding:20px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <h2 id="folder-modal-title">${folderName || 'Carpeta'}</h2>
+        <button id="folder-modal-close" class="btn">Close</button>
+      </div>
+      <div id="folder-podcast-list" style="margin-top:16px;display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:1rem;"></div>
+    </div>
+  `;
+  modal.style.position = 'fixed';
+  modal.style.inset = '0';
+  modal.style.display = 'flex';
+  modal.style.alignItems = 'center';
+  modal.style.justifyContent = 'center';
+  modal.style.background = 'rgba(0,0,0,0.6)';
+  document.getElementById('folder-modal-close')?.addEventListener('click', () => { modal.style.display = 'none'; });
+
+  const listEl = document.getElementById('folder-podcast-list');
+  if (!listEl) return;
+  listEl.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--color-blanco)">Loading...</p>';
+  modal.style.display = 'flex';
+
+  try {
+    // intenta usar allPodcasts en memoria si existe, si no, consulta la DB
+    let all = window.allPodcasts || {};
+    if (!Object.keys(all).length) {
+      const snap = await get(ref(db, 'podcasts'));
+      all = snap.exists() ? snap.val() : {};
+    }
+
+    const items = [];
+    for (const pid in all) {
+      if (!Object.prototype.hasOwnProperty.call(all, pid)) continue;
+      const p = all[pid];
+      if (p.folderId && String(p.folderId) === String(folderId)) {
+        items.push({ id: pid, data: p });
+      }
+    }
+
+    listEl.innerHTML = '';
+    if (items.length === 0) {
+      listEl.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--color-blanco)">No hay podcasts en esta carpeta.</p>';
+      return;
+    }
+
+    // crear tarjetas EXACTAS como en podcast.js
+    for (const it of items) {
+      const p = it.data;
+      const card = document.createElement('div');
+      card.className = 'podcast-card';
+
+      const img = document.createElement('img');
+      img.src = p.iconURL || 'images/logos/silueta.png';
+      img.alt = p.nombre || p.title || 'podcast';
+      card.appendChild(img);
+
+      const titleEl = document.createElement('h4');
+      titleEl.textContent = p.nombre || p.title || '(Sin título)';
+      card.appendChild(titleEl);
+
+      if (p.uploaderName || p.idcreador) {
+        const uploader = document.createElement('div');
+        uploader.className = 'podcast-uploader';
+        let disp = p.uploaderName || p.idcreador;
+        if (p.idcreador && window.usersMap && usersMap[p.idcreador]) {
+          const u = usersMap[p.idcreador];
+          disp = u.username || u.displayName || u.email || p.idcreador;
+        }
+        uploader.textContent = `Uploaded by: ${disp}`;
+        card.appendChild(uploader);
+      }
+
+      if (p.descripcion) {
+        const desc = document.createElement('p');
+        desc.textContent = p.descripcion;
+        card.appendChild(desc);
+      }
+
+      if (p.audioURL) {
+        const audio = document.createElement('audio');
+        audio.controls = true;
+        audio.src = p.audioURL;
+        card.appendChild(audio);
+      }
+
+      // botones: delete (si puede) y share (igual que en podcasts)
+      const canDelete = (typeof isMasterUser === 'function' && isMasterUser()) ||
+                        (currentUser && p.idcreador && String(p.idcreador) === String(currentUser.uid));
+      if (canDelete) {
+        const del = document.createElement('button');
+        del.className = 'btn btn-outline-danger mt-3';
+        del.textContent = 'Delete';
+        del.addEventListener('click', () => {
+          if (!confirm('Confirm delete?')) return;
+          if (typeof deletePodcast === 'function') deletePodcast(it.id, p.audioURL, p.iconURL);
+        });
+        card.appendChild(del);
+      }
+
+      const share = document.createElement('button');
+      share.className = 'btn btn-outline-primary mt-2';
+      share.textContent = 'Share';
+      share.addEventListener('click', () => {
+        if (typeof promptSharePodcast === 'function') promptSharePodcast(it.id, p);
+      });
+      card.appendChild(share);
+
+      listEl.appendChild(card);
+    }
+  } catch (err) {
+    console.error('openFolderModal error:', err);
+    listEl.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--color-blanco)">Error al cargar podcasts.</p>';
+  }
 }
 
 
