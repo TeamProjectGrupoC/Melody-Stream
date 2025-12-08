@@ -282,11 +282,15 @@ async function loadFavoriteSongs(uid) {
 // ----------------------------------------------------
 //  Load favorite artists
 // ----------------------------------------------------
+// ----------------------------------------------------
+//  Load favorite artists
+// ----------------------------------------------------
 async function loadFavoriteArtists(uid) {
   const container = document.getElementById("viewUserArtists");
   container.innerHTML = "<p>Loading favorite artists...</p>";
 
   try {
+    // 1. Get the user's favorite list from the 'users' node
     const favRef = ref(db, `users/${uid}/favourite_artists`);
     const favSnap = await get(favRef);
 
@@ -298,20 +302,34 @@ async function loadFavoriteArtists(uid) {
     const artistsObj = favSnap.val();
     let html = "";
 
+    // 2. Iterate through the artist IDs
     for (const artistId in artistsObj) {
-      const a = artistsObj[artistId];
+            // We do not read data directly from artistsObj[artistId] because it might only contain 'true'.
+      // We use the ID to fetch the real info from the global 'artistas' node.
+      const artistRef = ref(db, `artistas/${artistId}`);
+      const artistSnap = await get(artistRef);
 
-      html += `
-        <div class="card-item">
-          ${a.image ? `<img src="${a.image}" alt="Artist image">` : ""}
-          <div class="card-item-title">${a.name || "Unknown Artist"}</div>
-          <p><strong>Followers:</strong> ${a.followers?.toLocaleString() || 0}</p>
-          <p><strong>Genres:</strong> ${Array.isArray(a.genres) ? a.genres.join(", ") : a.genres || "—"}</p>
-        </div>
-      `;
+      if (artistSnap.exists()) {
+        const a = artistSnap.val();
+
+        // Now 'a' contains the full info (name, image, followers...)
+        html += `
+          <div class="card-item">
+            ${a.image ? `<img src="${a.image}" alt="Artist image">` : '<img src="images/logos/silueta.png" alt="Artist image">'}
+            <div class="card-item-title">${a.name || "Unknown Artist"}</div>
+            <p><strong>Followers:</strong> ${a.followers?.toLocaleString() || 0}</p>
+            <p><strong>Genres:</strong> ${Array.isArray(a.genres) ? a.genres.join(", ") : a.genres || "—"}</p>
+          </div>
+        `;
+      }
     }
 
-    container.innerHTML = html;
+    // If no HTML was generated after searching (maybe artists were deleted from global DB but remained in favorites)
+    if (html === "") {
+        container.innerHTML = "<p class='empty-msg'>No artist details found.</p>";
+    } else {
+        container.innerHTML = html;
+    }
 
   } catch (err) {
     console.error("Error loading favorite artists:", err);
