@@ -152,7 +152,9 @@ function displayFolders(folders) {
     const viewButton = document.createElement("button");
     viewButton.textContent = "View";
     viewButton.className = "btn btn-outline-primary mt-2";
+    // Use the same folder renderer as profile: loadFolderPodcasts
     viewButton.addEventListener("click", () => {
+      // Abrir modal con la función existente
       openFolderModal(folderId, folder.name || "Folder");
     });
 
@@ -186,7 +188,7 @@ function displayFolders(folders) {
 }
 
 // Open modal with podcasts from folder
-function openFolderModal(folderId, folderName) {
+async function openFolderModal(folderId, folderName) {
   const modal = document.getElementById("folder-modal");
   const title = document.getElementById("folder-modal-title");
   const list = document.getElementById("folder-podcast-list");
@@ -207,7 +209,7 @@ function openFolderModal(folderId, folderName) {
   }
 
   list.innerHTML = "";
-  
+
   if (Object.keys(folderPodcasts).length === 0) {
     const emptyMsg = document.createElement("p");
     emptyMsg.className = "modal-empty-message";
@@ -216,43 +218,80 @@ function openFolderModal(folderId, folderName) {
     return;
   }
 
-  // Display podcasts in modal
+  // For each podcast build a .podcast-card (same structure as displayPodcasts)
   for (const pid in folderPodcasts) {
-    const p = folderPodcasts[pid];
+    const podcast = folderPodcasts[pid];
 
-    const item = document.createElement("div");
-    item.className = "modal-podcast-item";
+    const podcastItem = document.createElement("div");
+    podcastItem.classList.add("podcast-card");
 
-    // Thumbnail
-    const thumb = document.createElement("img");
-    thumb.src = p.iconURL || "images/logos/silueta.png";
-    thumb.alt = p.nombre || "podcast";
-    item.appendChild(thumb);
+    // Icon
+    const img = document.createElement("img");
+    img.src = podcast.iconURL || "images/logos/silueta.png";
+    img.alt = podcast.nombre || "podcast";
+    podcastItem.appendChild(img);
 
-    // Info
-    const info = document.createElement("div");
-    info.className = "modal-podcast-info";
+    // Title
+    const titleEl = document.createElement("h3");
+    titleEl.textContent = podcast.nombre || "(No title)";
+    podcastItem.appendChild(titleEl);
 
-    const pTitle = document.createElement("h4");
-    pTitle.textContent = p.nombre || "(No title)";
-    info.appendChild(pTitle);
+    // Uploader
+    let displayName = null;
+    if (podcast.uploaderName) displayName = podcast.uploaderName;
+    else if (podcast.idcreador && usersMap[podcast.idcreador]) {
+      const u = usersMap[podcast.idcreador];
+      displayName = u.username || u.displayName || u.email || podcast.idcreador;
+    } else if (podcast.idcreador) {
+      displayName = podcast.idcreador;
+    }
+    if (displayName) {
+      const uploader = document.createElement("div");
+      uploader.className = "podcast-uploader";
+      uploader.textContent = `Uploaded by: ${displayName}`;
+      podcastItem.appendChild(uploader);
+    }
 
-    if (p.descripcion) {
+    // Description
+    if (podcast.descripcion) {
       const desc = document.createElement("p");
-      desc.textContent = p.descripcion;
-      info.appendChild(desc);
+      desc.textContent = podcast.descripcion;
+      podcastItem.appendChild(desc);
     }
 
     // Audio player
-    if (p.audioURL) {
+    if (podcast.audioURL) {
       const audio = document.createElement("audio");
       audio.controls = true;
-      audio.src = p.audioURL;
-      info.appendChild(audio);
+      audio.src = podcast.audioURL;
+      podcastItem.appendChild(audio);
     }
 
-    item.appendChild(info);
-    list.appendChild(item);
+    // Delete button: show if uploader or master (same logic)
+    const canDelete = isMasterUser() || (currentUser && podcast.idcreador && String(podcast.idcreador) === String(currentUser.uid));
+    if (canDelete) {
+      const deleteButton = document.createElement("button");
+      deleteButton.textContent = "Delete";
+      deleteButton.className = "btn btn-outline-danger mt-3";
+      deleteButton.addEventListener("click", () => {
+        if (!isMasterUser() && (!currentUser || String(podcast.idcreador) !== String(currentUser.uid))) {
+          return alert("You are not allowed to delete this podcast.");
+        }
+        deletePodcast(pid, podcast.audioURL, podcast.iconURL);
+      });
+      podcastItem.appendChild(deleteButton);
+    }
+
+    // Share button (same as main page)
+    const shareButton = document.createElement("button");
+    shareButton.textContent = "Share";
+    shareButton.className = "btn btn-outline-primary mt-2";
+    shareButton.addEventListener("click", () => {
+      promptSharePodcast(pid, podcast);
+    });
+    podcastItem.appendChild(shareButton);
+
+    list.appendChild(podcastItem);
   }
 }
 
