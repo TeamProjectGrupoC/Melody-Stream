@@ -1,100 +1,149 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+     
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+     
+    <meta
+      name="author"
+      content="Carolina Alba García, Celtia Castelo Gajino, Guillermo Arcos Salgado, Ines Vilariño, Mario Seoane, Francisco"
+    />
+     
+    <meta
+      name="description"
+      content="Melody Stream: listen to music; upload your own podcast; and chat and share your favourite songs with your friends"
+    />
+     
+    <meta name="keywords" content="Melody Stream, music, podcast, friends" />
+     
+    <title>Melody Stream</title>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="author"
-    content="Carolina Alba García, Celtia Castelo Gajino, Guillermo Arcos Salgado, Ines Vilariño, Mario Seoane, Francisco" />
-  <meta name="description"
-    content="Melody Stream: listen to music; upload your own podcast; and chat and share your favourite songs with your friends" />
-  <meta name="keywords" content="Melody Stream, music, podcast, friends" />
-  <title>Melody Stream</title>
+    <link rel="stylesheet" href="css/general.css" />
+    <link rel="stylesheet" href="css/index.css" />
+     
+    <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg" />
+  </head>
+  <body>
+    <header id="headerPrincipal">
+      <figure>
+              <img src="images/logos/logo.png" alt="Webpage logo" /> 
+      </figure>
+      <p id="menuToggle"><a href="#" class="hamburguesa"> ☰ </a></p>
+      <nav id="NavPrincipal">
+        <ul>
+          <li><a href="index.html">HOME</a></li>
+          <li><a href="test_register_spotify.html">MUSIC</a></li>
+          <li><a href="podcast.html">PODCAST</a></li>
+          <li><a href="users.html">USERS</a></li>
+          <li><a id="loginProfileLink" href="login.html">LOG IN</a></li>
+        </ul>
+      </nav>
+      <div id="headerProfileIm">
+        <a href="profile.html">
+          <img
+            id="headerUserPic"
+            src="images/logos/silueta.png"
+            alt="User Profile Icon"
+          />
+        </a>
+      </div>
+    </header>
 
-  <link rel="stylesheet" href="css/general.css" />
-  <link rel="icon" type="image/png" href="imagenes/logos/melodystream.svg" />
-</head>
+    <main class="home-layout">
+      <h1>WELCOME TO MELODY STREAM</h1>
 
-<body>
-  <header id="headerPrincipal">
-    <figure>
-      <img src="images/logos/logo.png" alt="Webpage logo" />
-    </figure>
-    <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
-    <nav id="NavPrincipal">
-      <ul>
-        <li><a href="index.html">HOME</a></li>
-        <li><a href="test_register_spotify.html">MUSIC</a></li>
-        <li><a href="podcast.html">PODCAST</a></li>
-         <li><a href="users.html">USERS</a></li>
-        <!-- will change dinamically -->
-        <li><a id="loginProfileLink" href="login.html">LOG IN</a></li>
-      </ul>
-    </nav>
+      <section id="registerCtaModule" class="home-module">
+        <h2>Ready to start?</h2>
+        <p>Join Melody Stream to listen to your favorite music, upload podcasts, and connect with artists and friends.</p>
+        
+        <a href="register.html" id="registerCtaButton" class="main-button">
+            REGISTER NOW - IT'S FREE!
+        </a>
+    </section>
 
-    <div id="headerProfileIm">
-      <a href="profile.html">
-        <img id="headerUserPic" src="images/logos/silueta.png" alt="User Profile Icon" />
-      </a>
-    </div>
+      <section class="home-module module-songs">
+        <h2>Trending Songs</h2>
 
-  </header>
+        <div id="trendingSongsList" class="content-grid">
 
-  <main>
-    <h1>Melody Stream Team C - Test 1</h1>
-    <h2 id="helloUser"></h2>
-  </main>
+          <div class="song-card" data-song-id="song_1">
+            <img src="images/Polaca.png" alt="Song Cover 1" />            
+            <h4>Mniej niz zero</h4>
+            <p class="artist-name">Lady Pank</p>
+            <button class="play-button main-button">Play</button>            
+          </div>
 
-  <footer id="footerPrincipal">
-    <h2 id="footer-title">MELODY STREAM</h2>
-    <div id="footer-follow">
-      <p>FOLLOW US</p>
-      <ul>
-        <!-- Logo 1 (Spotify) -->
-        <li>
-          <figure>
-            <a href="https://www.spotify.com" target="_blank">
-              <img src="images/logos/Spotify.svg" alt="Spotify" />
-            </a>
-          </figure>
-        </li>
-        <!-- Logo 2 (Facebook) -->
-        <li>
-          <figure>
-            <a href="https://www.facebook.com" target="_blank">
-              <img src="images/logos/Facebook.svg" alt="Facebook" />
-            </a>
-          </figure>
-        </li>
-        <!-- Logo 3 (Instagram) -->
-        <li>
-          <figure>
-            <a href="https://www.instagram.com" target="_blank">
-              <img src="images/logos/Instagram.svg" alt="Instagram" />
-            </a>
-          </figure>
-        </li>
-        <!-- Logo 4 (Twitter) -->
-        <li>
-          <figure>
-            <a href="https://www.twitter.com" target="_blank">
-              <img src="images/logos/Twitter.svg" alt="Twitter" />
-            </a>
-          </figure>
-        </li>
-        <!-- Logo 5 (YouTube) -->
-        <li>
-          <figure>
-            <a href="https://www.youtube.com" target="_blank">
-              <img src="images/logos/Youtube.svg" alt="YouTube" />
-            </a>
-          </figure>
-        </li>
-      </ul>
-    </div>
-  </footer>
-  <script type="module" src="js/header.js"></script>
-  <script type="module" src="js/home.js"></script>
-</body>
+          <div class="song-card" data-song-id="song_2">
+            <img src="images/AveMaria.png" alt="Song Cover 2" />            
+            <h4>Ave María</h4>
+            <p class="artist-name">David Bisbal</p>
+            <button class="play-button main-button">Play</button>            
+          </div>
 
+          <div class="song-card" data-song-id="song_3">
+            <img src="images/Firedance.png" alt="Song Cover 3" />            
+            <h4>Firedance</h4>
+            <p class="artist-name">Maria Pages</p>
+            <button class="play-button main-button">Play</button>            
+          </div>
+
+          <div class="song-card" data-song-id="song_4">
+            <img src="images/September.png" alt="Song Cover 4" />            
+            <h4>September</h4>
+            <p class="artist-name">Earth, Wind & Fire</p>
+            <button class="play-button main-button">Play</button>            
+          </div>
+        </div>
+        
+        <div id="playerBarContainer">
+            <div id="audioElementWrapper" style="display:none;"></div> 
+
+            <div id="customPlayerControls">
+                <button id="playPauseButton" class="player-icon paused" title="Play/Pause"></button>
+                <div id="songInfo" class="player-info">
+                    <span id="currentTitle">Select a song</span>
+                    <span id="currentArtist"></span>
+                </div>
+                </div>
+        </div>
+      </section>
+
+      <section class="home-module module-artists">
+        <h2>Featured Artists</h2>
+
+        <div id="featuredArtistsList" class="content-grid artist-chips-wrapper">
+          <div class="artist-chip">
+            <img src="images/Rosalia.avif" alt="Artist Pic A" />            
+            <span class="artist-name-text">Rosalía</span>
+          </div>
+
+          <div class="artist-chip">
+            <img src="images/edsheeran.webp" alt="Artist Pic B" />            
+            <span class="artist-name-text">Ed Sheeran</span>
+          </div>
+
+          <div class="artist-chip">
+            <img src="images/theRapants.webp" alt="Artist Pic C" />            
+            <span class="artist-name-text">The Rapants</span> 
+          </div>
+        </div>
+      </section>
+
+      <div id="artistModalBackdrop" class="modal-backdrop">
+        <div id="artistModalContent" class="artist-description-modal">
+            <h3 id="modalArtistName">Nombre del Artista</h3>
+            <div id="modalArtistDescription">Descripción del artista aquí.</div>
+            <button id="closeModalButton" class="main-button">Cerrar</button>
+        </div>
+      </div>
+    </main>
+
+    <footer id="footerPrincipal">
+      <h2 id="footer-title">MELODY STREAM</h2>
+    </footer>
+    <script type="module" src="js/header.js"></script>
+    <script type="module" src="js/home.js"></script>
+
+  </body>
 </html>
