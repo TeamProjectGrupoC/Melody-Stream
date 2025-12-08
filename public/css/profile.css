@@ -973,13 +973,85 @@ main a:hover {
     width: 100%;
 }
 
-.folder-list {
-     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-top: 10px;
-    justify-content: center;
-    justify-items: center;
-    align-items: center;
-    width: 100%;
+/* === Make folder modal podcast cards look exactly like podcast page === */
+
+/* Reuse podcast card visuals inside profile's folder modal */
+#folder-modal .podcast-card {
+  background-color: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 1rem;
+  transition: all 0.3s ease;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3), 0 0 8px rgba(62,154,222,0.3);
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+
+  color: var(--color-blanco);
+  font-size: 0.95rem;
+
+  max-width: 250px;
+  width: 100%;
+  justify-self: center;
+}
+
+#folder-modal .podcast-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--color-azul2);
+  box-shadow: 0 6px 20px rgba(62,154,222,0.25), 0 0 12px rgba(62,154,222,0.5);
+}
+
+#folder-modal .podcast-card img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 0.8rem;
+  border: 2px solid var(--color-azul2);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Title / description style consistent with podcast page */
+#folder-modal .podcast-card h3,
+#folder-modal .podcast-card h4 {
+  color: var(--color-azul2);
+  font-weight: 700;
+  margin: 0;
+  font-size: 1.1rem;
+  line-height: 1.3;
+}
+
+#folder-modal .podcast-card p {
+  color: var(--color-blanco);
+  opacity: 0.9;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* audio control full width */
+#folder-modal .podcast-card audio {
+  width: 100%;
+  margin-top: 0.5rem;
+  border-radius: 6px;
+  background-color: rgba(255,255,255,0.06);
+}
+
+/* modal grid same layout as podcasts page */
+#folder-modal > div #folder-podcast-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+/* buttons inside cards match podcast page */
+#folder-modal .podcast-card .btn {
+  width: 100%;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 600;
+  margin-top: 0.6rem;
 }
