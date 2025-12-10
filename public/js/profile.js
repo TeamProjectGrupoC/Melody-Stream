@@ -802,11 +802,17 @@ document.getElementById("shareArtistCancel").addEventListener("click", () => {
 });
 
 async function shareArtistToChat(chatId, artist) {
-
   const db = getDatabase();
-  const messagesRef = ref(db, `chats/${chatId}/messages`);
-  const chatRef = ref(db, `chats/${chatId}`);
   const timestamp = Date.now();
+
+  // 1. get UIDS
+  const parts = chatId.split("_");
+  const user1 = parts[0];
+  const user2 = parts[1];
+
+  // 2. prepare message data
+  const messagesRef = ref(db, `chats/${chatId}/messages`);
+  const msgKey = push(messagesRef).key;
 
   const message = {
     sender: currentUser.uid,
@@ -816,36 +822,36 @@ async function shareArtistToChat(chatId, artist) {
       title: artist.name,
       imageURL: artist.image,
       author: "Favourite Artist",
-      audioURL: "" // no hay audio
+      audioURL: "" 
     },
     text: `Shared artist: ${artist.name}`
   };
 
-  const msgKey = push(messagesRef).key;
-  await set(ref(db, `chats/${chatId}/messages/${msgKey}`), message);
-
-  // Actualizar createdAt solo
-  await update(chatRef, { createdAt: timestamp });
-
-
-  // actualizar lista userChats
   const lastMessageObj = {
     sender: currentUser.uid,
     text: `[Artist] ${artist.name}`,
     timestamp
   };
 
-  await update(ref(db, `userChats/${currentUser.uid}/${chatId}`), {
-    lastMessage: lastMessageObj
-  });
+  // 3. prepare updates
+  const updates = {};
+  
+  // Chat data
+  updates[`chats/${chatId}/messages/${msgKey}`] = message;
+  updates[`chats/${chatId}/createdAt`] = timestamp;
+  updates[`chats/${chatId}/users/${user1}`] = true;
+  updates[`chats/${chatId}/users/${user2}`] = true;
 
-  // para el otro usuario
-  const parts = chatId.split("_");
-  const otherUser = parts[0] === currentUser.uid ? parts[1] : parts[0];
+  // Sender UserChat
+  updates[`userChats/${currentUser.uid}/${chatId}/lastMessage`] = lastMessageObj;
+  updates[`userChats/${currentUser.uid}/${chatId}/isRead`] = true;
 
-  await update(ref(db, `userChats/${otherUser}/${chatId}`), {
-    lastMessage: lastMessageObj
-  });
+  // Receiver UserChat (Calculamos quién es el otro)
+  const otherUser = (user1 === currentUser.uid) ? user2 : user1;
+  updates[`userChats/${otherUser}/${chatId}/lastMessage`] = lastMessageObj;
+  updates[`userChats/${otherUser}/${chatId}/isRead`] = false;
+
+  await update(ref(db), updates);
 }
 
 document.getElementById("shareArtistConfirm").addEventListener("click", async () => {
@@ -1126,9 +1132,14 @@ document.getElementById("shareSongCancel").addEventListener("click", () => {
 
 async function shareSongToChat(chatId, track) {
   const db = getDatabase();
-  const messagesRef = ref(db, `chats/${chatId}/messages`);
-  const chatRef = ref(db, `chats/${chatId}`);
   const timestamp = Date.now();
+
+  const parts = chatId.split("_");
+  const user1 = parts[0];
+  const user2 = parts[1];
+
+  const messagesRef = ref(db, `chats/${chatId}/messages`);
+  const msgKey = push(messagesRef).key;
 
   const message = {
     sender: currentUser.uid,
@@ -1143,27 +1154,28 @@ async function shareSongToChat(chatId, track) {
     text: `Shared song: ${track.title}`
   };
   
-  const msgKey = push(messagesRef).key;
-  await set(ref(db, `chats/${chatId}/messages/${msgKey}`), message);
-
-  await update(chatRef, { createdAt: timestamp });
-
   const lastMessageObj = {
     sender: currentUser.uid,
     text: `[Song] ${track.title}`,
     timestamp
   };
 
-  await update(ref(db, `userChats/${currentUser.uid}/${chatId}`), {
-    lastMessage: lastMessageObj
-  });
+  // Prepare updates
+  const updates = {};
 
-  const parts = chatId.split("_");
-  const otherUser = parts[0] === currentUser.uid ? parts[1] : parts[0];
+  updates[`chats/${chatId}/messages/${msgKey}`] = message;
+  updates[`chats/${chatId}/createdAt`] = timestamp;
+  updates[`chats/${chatId}/users/${user1}`] = true;
+  updates[`chats/${chatId}/users/${user2}`] = true;
 
-  await update(ref(db, `userChats/${otherUser}/${chatId}`), {
-    lastMessage: lastMessageObj
-  });
+  updates[`userChats/${currentUser.uid}/${chatId}/lastMessage`] = lastMessageObj;
+  updates[`userChats/${currentUser.uid}/${chatId}/isRead`] = true;
+
+  const otherUser = (user1 === currentUser.uid) ? user2 : user1;
+  updates[`userChats/${otherUser}/${chatId}/lastMessage`] = lastMessageObj;
+  updates[`userChats/${otherUser}/${chatId}/isRead`] = false;
+
+  await update(ref(db), updates);
 }
 
 document.getElementById("shareSongConfirm").addEventListener("click", async () => {

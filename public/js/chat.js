@@ -279,23 +279,30 @@ async function main() {
         onChildAdded(messagesRef, async (childSnap) => {
             const data = childSnap.val();
             const div = document.createElement("div");
+            
+            // 1. Basic initial configuration
             div.className = "message";
-
             if (data.sender === currentUser.uid) {
                 div.classList.add("you");
             } else {
                 div.classList.add("other");
             }
 
+            // 2. Append the div to HTML IMMEDIATELY
+            // This guarantees messages appear in the correct chronological order
+            // even if the content (like a song) takes time to load via await.
+            messagesDiv.appendChild(div);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+            // --- FROM HERE WE FILL THE CONTENT ---
+
             // --- Detect STATUS messages (Accepted/Rejected) ---
-            if (data.text.startsWith("✅") || data.text.startsWith("❌")) {
+            if (data.text && (data.text.startsWith("✅") || data.text.startsWith("❌"))) {
                 div.classList.add("status-message");
                 const p = document.createElement("p");
                 p.textContent = data.text;
                 div.appendChild(p);
-                messagesDiv.appendChild(div);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                return;
+                return; // Already added to DOM, just exit
             }
 
             // --- Detect Follow Request ---
@@ -310,78 +317,101 @@ async function main() {
                 p.textContent = `${usersMap[data.sender]?.username || "A user"} wants to follow you.`;
                 div.appendChild(p);
 
-                const btnContainer = document.createElement("div");
-                btnContainer.className = "request-actions";
+                // --- DYNAMIC CONTAINER ---
+                const actionContainer = document.createElement("div");
+                actionContainer.className = "request-actions";
+                div.appendChild(actionContainer);
 
-                const acceptBtn = document.createElement("button");
-                acceptBtn.textContent = "Accept";
-                acceptBtn.className = "btn-action btn-accept";
+                const requestRef = ref(db, `users/${currentUser.uid}/followRequests/${data.sender}`);
+                const followerRef = ref(db, `users/${currentUser.uid}/followers/${data.sender}`);
 
-                const rejectBtn = document.createElement("button");
-                rejectBtn.textContent = "Reject";
-                rejectBtn.className = "btn-action btn-reject";
+                // Check status in DB
+                Promise.all([get(requestRef), get(followerRef)]).then(([reqSnap, followSnap]) => {
+                    // CASE 1: ALREADY FOLLOWING
+                    if (followSnap.exists()) {
+                        actionContainer.innerHTML = `<p style="color: #4CAF50; font-weight: bold; font-size: 0.9em;">✅ Request accepted</p>`;
+                    } 
+                    // CASE 2: REJECTED OR EXPIRED
+                    else if (!reqSnap.exists()) {
+                        actionContainer.innerHTML = `<p style="color: #F44336; font-weight: bold; font-size: 0.9em;">❌ Request rejected or expired</p>`;
+                    } 
+                    // CASE 3: PENDING
+                    else {
+                        const acceptBtn = document.createElement("button");
+                        acceptBtn.textContent = "Accept";
+                        acceptBtn.className = "btn-action btn-accept";
 
-                btnContainer.appendChild(rejectBtn);
-                btnContainer.appendChild(acceptBtn);
-                div.appendChild(btnContainer);
+                        const rejectBtn = document.createElement("button");
+                        rejectBtn.textContent = "Reject";
+                        rejectBtn.className = "btn-action btn-reject";
 
-                // --- Event Listeners for Buttons ---
-                acceptBtn.addEventListener("click", async () => {
-                    await set(ref(db, `users/${currentUser.uid}/followers/${data.sender}`), true);
-                    await set(ref(db, `users/${currentUser.uid}/followRequests/${data.sender}`), null);
+                        actionContainer.appendChild(rejectBtn);
+                        actionContainer.appendChild(acceptBtn);
 
-                    const chatId = getChatId(currentUser.uid, data.sender);
-                    const msgRef = ref(db, `chats/${chatId}/messages`);
-                    const newMsgKey = push(msgRef).key;
+                        acceptBtn.addEventListener("click", async () => {
+                            // 1. Update DB
+                            await set(ref(db, `users/${currentUser.uid}/followers/${data.sender}`), true);
+                            await set(ref(db, `users/${currentUser.uid}/followRequests/${data.sender}`), null);
+                            
+                            // 2. Send confirmation message
+                            const chatId = getChatId(currentUser.uid, data.sender);
+                            const msgRef = ref(db, `chats/${chatId}/messages`);
+                            const newMsgKey = push(msgRef).key;
+                            
+                            await set(ref(db, `chats/${chatId}/messages/${newMsgKey}`), {
+                                sender: currentUser.uid,
+                                text: "✅ Follow request accepted",
+                                timestamp: Date.now()
+                            });
+                            
+                            // 3. Update UI visually
+                            actionContainer.innerHTML = `<p style="color: #4CAF50; font-weight: bold; font-size: 0.9em;">✅ Request accepted</p>`;
+                        });
 
-                    await set(ref(db, `chats/${chatId}/messages/${newMsgKey}`), {
-                        sender: currentUser.uid,
-                        text: "✅ Follow request accepted",
-                        timestamp: Date.now()
-                    });
+                        rejectBtn.addEventListener("click", async () => {
+                            // 1. Update DB
+                            await set(ref(db, `users/${currentUser.uid}/followRequests/${data.sender}`), null);
+                            
+                            // 2. Send rejection message
+                            const chatId = getChatId(currentUser.uid, data.sender);
+                            const msgRef = ref(db, `chats/${chatId}/messages`);
+                            const newMsgKey = push(msgRef).key;
+                            
+                            await set(ref(db, `chats/${chatId}/messages/${newMsgKey}`), {
+                                sender: currentUser.uid,
+                                text: "❌ Follow request rejected",
+                                timestamp: Date.now()
+                            });
 
-                    div.remove();
+                            // 3. Update UI visually
+                            actionContainer.innerHTML = `<p style="color: #F44336; font-weight: bold; font-size: 0.9em;">❌ Request rejected</p>`;
+                        });
+                    }
                 });
-
-                rejectBtn.addEventListener("click", async () => {
-                    await set(ref(db, `users/${currentUser.uid}/followRequests/${data.sender}`), null);
-
-                    const chatId = getChatId(currentUser.uid, data.sender);
-                    const msgRef = ref(db, `chats/${chatId}/messages`);
-                    const newMsgKey = push(msgRef).key;
-
-                    await set(ref(db, `chats/${chatId}/messages/${newMsgKey}`), {
-                        sender: currentUser.uid,
-                        text: "❌ Follow request rejected",
-                        timestamp: Date.now()
-                    });
-                    div.remove();
-                });
-
-                messagesDiv.appendChild(div);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
-                return;
+                
+                return; // Already in DOM
             }
 
-            // --- Normal message rendering ---
+            // --- Normal Rendering (Text) ---
             if (data.text) {
                 const p = document.createElement("p");
                 p.textContent = data.text;
                 div.appendChild(p);
             }
 
+            // --- Attachment Rendering (Songs) - THIS IS THE SLOW PART ---
             if (data.attachment) {
+                // Here is the await that caused the ordering issue
                 const card = await buildAttachmentCard(data.attachment, data.sender);
 
                 if (card instanceof Node) {
                     div.appendChild(card);
+                    // Scroll again because the div height changed after loading the card
+                    messagesDiv.scrollTop = messagesDiv.scrollHeight;
                 } else {
-                    console.warn("Attachment card no es un nodo:", card);
+                    console.warn("Attachment card is not a node:", card);
                 }
             }
-
-            messagesDiv.appendChild(div);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
         });
     });
 

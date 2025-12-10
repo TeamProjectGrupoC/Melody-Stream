@@ -315,22 +315,39 @@ followBtn.addEventListener("click", async () => {
       followBtn.textContent = "Request Sent";
       followBtn.className = "state-pending";
 
-      // 🔔 Send chat notification
+      //  Send chat notification
       const chatId = currentUserUID < profileUID ? `${currentUserUID}_${profileUID}` : `${profileUID}_${currentUserUID}`;
       const messagesRef = ref(db, `chats/${chatId}/messages`);
-      const timestamp = Date.now();
+      const newMessageKey = push(messagesRef).key;      const timestamp = Date.now();
       const message = {
         sender: currentUserUID,
         text: "📩 Sent a follow request",
         timestamp
       };
 
-      const newMessageKey = push(messagesRef).key;
-      await set(ref(db, `chats/${chatId}/messages/${newMessageKey}`), message);
+      // 1. Add message to chat
+      await update(ref(db, `chats/${chatId}`), {
+          [`messages/${newMessageKey}`]: message,
+          createdAt: timestamp,
+          users: {
+              [currentUserUID]: true,
+              [profileUID]: true
+          }
+      });
       
       const lastMessage = { ...message };
-      await update(ref(db, `userChats/${currentUserUID}/${chatId}`), { lastMessage });
-      await update(ref(db, `userChats/${profileUID}/${chatId}`), { lastMessage });
+
+      // 2. sender-> isRead: true
+      await update(ref(db, `userChats/${currentUserUID}/${chatId}`), { 
+          lastMessage,
+          isRead: true 
+      });
+
+      // 3.receiver -> isRead: false 
+      await update(ref(db, `userChats/${profileUID}/${chatId}`), { 
+          lastMessage,
+          isRead: false 
+      });
     }
 
     else if (followBtn.textContent === "Following") {
