@@ -562,8 +562,46 @@ async function main() {
         }
 
         const isSong = att.audioURL && att.audioURL !== "";
+        const isPodcast = att.type === "podcast" || (att.audioURL && !att.id);
 
-        if (isSong) {
+        // Podcast rendering
+        if (isPodcast) {
+            // Create the play/stop button
+            const playBtn = document.createElement("button");
+            playBtn.textContent = "▶ Play Podcast";
+            playBtn.className = "main-button";
+            playBtn.style.marginTop = "10px";
+            playBtn.style.width = "100%"; // optional: make button full width of the card
+
+            // Create a hidden audio element
+            const audioEl = document.createElement("audio");
+            audioEl.src = att.audioURL;
+            audioEl.preload = "metadata"; // enough to load duration
+            audioEl.style.display = "none"; // hide the default audio controls
+
+            card.appendChild(audioEl); // append to DOM even though it's hidden
+
+            let isPlaying = false;
+
+            // Button click toggles play/pause
+            playBtn.addEventListener("click", () => {
+                if (!isPlaying) {
+                    audioEl.play(); // start playing
+                    playBtn.textContent = "⏹ Stop Podcast"; // update button text
+                    isPlaying = true;
+                } else {
+                    audioEl.pause(); // pause playback
+                    audioEl.currentTime = 0; // reset to start
+                    playBtn.textContent = "▶ Play Podcast"; // revert button text
+                    isPlaying = false;
+                }
+            });
+
+            meta.appendChild(playBtn); // add button to the card metadata
+        }
+
+
+       if (isSong && !isPodcast) {
 
             // Validate token
             const tokenValid = token && await isSpotifyTokenValid(token);
@@ -608,8 +646,6 @@ async function main() {
 
                         const track = await res.json();
                         if (!track || !track.uri) return;
-
-                        // Pasamos el botón a playTrack()
                         playTrack(track.uri, playBtn);
 
                     } catch (err) {
@@ -675,7 +711,7 @@ async function main() {
             }
 
             // Add song to favourites
-            if (isSong) {
+            if (isSong && !isPodcast) {
                 const btnSong = document.createElement("button");
                 btnSong.textContent = "Add to favourite songs";
                 btnSong.className = "main-button";

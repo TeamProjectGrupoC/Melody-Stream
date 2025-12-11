@@ -54,7 +54,6 @@ async function updateSpotifyButton() {
       spotifyBtn.disabled = false;
       spotifyBtn.style.opacity = "1";
       spotifyBtn.style.cursor = "pointer";
-      titleSpotify.textContent = "Login with Spotify";
     }
   }
 }
