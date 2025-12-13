@@ -639,7 +639,7 @@ async function searchArtist(query) {
 
   const fullData = await fullResp.json();
 
-  return fullResp.artists.items;
+  return fullData.artists.items;
 }
 
 async function fetchArtistData(artistIds) {
