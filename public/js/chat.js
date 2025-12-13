@@ -681,12 +681,8 @@ async function main() {
 
                         let foundArtist = null;
 
-                        console.log("ATTACHMENT ID:", att.id);
-                        console.log("CANCIONES DEL SENDER:");
-                        console.log(data);
-
                         for (const key in data) {
-                            if (data[key].id === att.id) {
+                            if (key === att.id) {
                                 foundArtist = data[key];
                                 break;
                             }
@@ -735,7 +731,7 @@ async function main() {
                         let foundSong = null;
 
                         for (const key in data) {
-                            if (data[key].id === att.id) {
+                            if (key === att.id) {
                                 foundKey = key;
                                 foundSong = data[key];
                                 break;
