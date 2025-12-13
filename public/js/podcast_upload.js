@@ -46,6 +46,7 @@ function bindDomElements() {
 }
 
 // Poblar select de carpetas (si existe). Si uid pasado, filtra solo carpetas del usuario (como en profile.js).
+// Excepto cuenta master que ve todas.
 async function populateFolderSelect(uid = null) {
   if (!folderSelect) return;
   folderSelect.innerHTML = '<option value="">-- No folder --</option>';
@@ -53,10 +54,15 @@ async function populateFolderSelect(uid = null) {
     const snap = await get(ref(db, 'folders'));
     if (!snap.exists()) return;
     const folders = snap.val();
+    
+    // Detectar si es master (misma cuenta que tiene header dorado)
+    const isMaster = currentUser && currentUser.email && currentUser.email.toLowerCase() === "teamprojectgrupoc@gmail.com";
+    
     for (const fid in folders) {
       if (!Object.prototype.hasOwnProperty.call(folders, fid)) continue;
       const f = folders[fid];
-      if (uid && f.createdBy && String(f.createdBy) !== String(uid)) continue; // same logic as profile.js
+      // Si NO es master, filtrar solo carpetas del usuario
+      if (!isMaster && uid && f.createdBy && String(f.createdBy) !== String(uid)) continue;
       const opt = document.createElement('option');
       opt.value = fid;
       opt.textContent = f.name || `(folder ${fid})`;
@@ -204,13 +210,10 @@ async function handleUpload() {
 document.addEventListener('DOMContentLoaded', () => {
   bindDomElements();
 
-  // poblar carpetas inicialmente (si ya hay sesion se filtrará en onAuth)
-  populateFolderSelect().catch(e => console.error(e));
-
   // listeners
   onAuthStateChanged(auth, (user) => {
     currentUser = user;
-    // si quieres que solo se muestren carpetas del usuario, pasa user.uid
+    // Poblar carpetas filtradas por usuario (o todas si es master)
     populateFolderSelect(user ? user.uid : null).catch(e => console.error(e));
 
     if (msg && formContainer && loginBtn) {

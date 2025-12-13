@@ -9,7 +9,7 @@ import { getDatabase, ref, onValue, set, get, update, push, remove } from "https
 const databaseRef = ref;
 
 // Módulos de Storage
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
 // --- CONFIGURACIÓN DE FIREBASE ---
 const firebaseConfig = {
@@ -311,6 +311,42 @@ async function loadUserPodcasts(uid) {
           }
         });
 
+        // Botón Delete para el podcast
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.className = 'btn btn-outline-danger mt-3';
+        deleteBtn.addEventListener('click', async () => {
+          if (!confirm(`Are you sure you want to delete "${p.nombre || 'this podcast'}"?`)) return;
+          try {
+            // Borrar archivos de storage si existen
+            if (p.audioURL) {
+              try {
+                const audioRef = storageRef(storage, p.audioURL);
+                await deleteObject(audioRef);
+              } catch (e) {
+                console.warn('Could not delete audio from storage:', e);
+              }
+            }
+            if (p.iconURL) {
+              try {
+                const iconRef = storageRef(storage, p.iconURL);
+                await deleteObject(iconRef);
+              } catch (e) {
+                console.warn('Could not delete icon from storage:', e);
+              }
+            }
+            // Borrar entrada de la base de datos
+            await remove(databaseRef(db, `podcasts/${pid}`));
+            // Recargar la lista
+            await loadUserPodcasts(uid);
+            alert('Podcast deleted successfully');
+          } catch (err) {
+            console.error('Error deleting podcast:', err);
+            alert('Failed to delete podcast: ' + (err.message || err));
+          }
+        });
+        item.appendChild(deleteBtn);
+
         list.appendChild(item);
       }
     }
@@ -405,6 +441,47 @@ async function loadUserFolders(uid) {
         viewBtn.setAttribute('data-folder-name', f.name || '');
 
         item.appendChild(viewBtn);
+
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.className = 'btn btn-outline-danger mt-3';
+        deleteBtn.addEventListener('click', async () => {
+          if (!confirm(`Are you sure you want to delete the folder "${f.name || fid}"?`)) return;
+          try {
+            // Borrar icono de storage si existe
+            if (f.iconURL) {
+              try {
+                const iconRef = storageRef(storage, f.iconURL);
+                await deleteObject(iconRef);
+              } catch (e) {
+                console.warn('Could not delete folder icon from storage:', e);
+              }
+            }
+            // Borrar entrada de la carpeta
+            await remove(databaseRef(db, `folders/${fid}`));
+            
+            // Limpiar folderId de todos los podcasts que estaban en esta carpeta
+            const podsSnap = await get(databaseRef(db, 'podcasts'));
+            if (podsSnap.exists()) {
+              const allPods = podsSnap.val();
+              for (const pid in allPods) {
+                const pod = allPods[pid];
+                if (pod.folderId && String(pod.folderId) === String(fid)) {
+                  await update(databaseRef(db, `podcasts/${pid}`), { folderId: null });
+                }
+              }
+            }
+            
+            // Recargar la lista
+            await loadUserFolders(uid);
+            alert('Folder deleted successfully');
+          } catch (err) {
+            console.error('Error deleting folder:', err);
+            alert('Failed to delete folder: ' + (err.message || err));
+          }
+        });
+        item.appendChild(deleteBtn);
 
         list.appendChild(item);
       }

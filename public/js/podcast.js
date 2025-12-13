@@ -161,8 +161,8 @@ function displayFolders(folders) {
     // Añadir view directamente a la tarjeta (igual que los botones de podcast)
     folderItem.appendChild(viewButton);
 
-    // Delete button — solo si el usuario actual es el creador O es master
-    const canDeleteFolder = isMasterUser() || (currentUser && folder.createdBy && String(folder.createdBy) === String(currentUser.uid));
+    // Delete button — solo para master
+    const canDeleteFolder = isMasterUser();
     if (canDeleteFolder) {
       const deleteButton = document.createElement("button");
       deleteButton.textContent = "Delete";
@@ -267,14 +267,14 @@ async function openFolderModal(folderId, folderName) {
       podcastItem.appendChild(audio);
     }
 
-    // Delete button: show if uploader or master (same logic)
-    const canDelete = isMasterUser() || (currentUser && podcast.idcreador && String(podcast.idcreador) === String(currentUser.uid));
+    // Delete button: show solo si es master
+    const canDelete = isMasterUser();
     if (canDelete) {
       const deleteButton = document.createElement("button");
       deleteButton.textContent = "Delete";
       deleteButton.className = "btn btn-outline-danger mt-3";
       deleteButton.addEventListener("click", () => {
-        if (!isMasterUser() && (!currentUser || String(podcast.idcreador) !== String(currentUser.uid))) {
+        if (!isMasterUser()) {
           return alert("You are not allowed to delete this podcast.");
         }
         deletePodcast(pid, podcast.audioURL, podcast.iconURL);
@@ -380,14 +380,14 @@ function displayPodcasts(podcasts) {
     }
 
     // Delete button: show si uploader o master
-    const canDelete = isMasterUser() || (currentUser && podcast.idcreador && String(podcast.idcreador) === String(currentUser.uid));
+    const canDelete = isMasterUser();
     if (canDelete) {
       const deleteButton = document.createElement("button");
       deleteButton.textContent = "Delete";
       deleteButton.className = "btn btn-outline-danger mt-3";
       deleteButton.addEventListener("click", () => {
         // double-check before delete
-        if (!isMasterUser() && (!currentUser || String(podcast.idcreador) !== String(currentUser.uid))) {
+        if (!isMasterUser()) {
           return alert("You are not allowed to delete this podcast.");
         }
         deletePodcast(podcastId, podcast.audioURL, podcast.iconURL);
