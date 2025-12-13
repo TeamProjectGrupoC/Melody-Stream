@@ -625,9 +625,21 @@ async function searchArtist(query) {
     `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist&limit=6`,
     { headers: { "Authorization": "Bearer " + token } }
   );
-
   const data = await resp.json();
-  return data.artists.items;
+
+  //We ask for full information
+  const items = data?.artists?.items || [];
+  if (items.length === 0) return [];
+
+  const ids = items.map(a => a.id).join(",");
+  const fullResp = await fetch(
+    `https://api.spotify.com/v1/artists?ids=${ids}`,
+    { headers: { "Authorization": "Bearer " + token } }
+  );
+
+  const fullData = await fullResp.json();
+
+  return fullResp.artists.items;
 }
 
 async function fetchArtistData(artistIds) {
