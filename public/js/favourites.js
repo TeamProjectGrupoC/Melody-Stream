@@ -1,4 +1,34 @@
 // favourites.js
+
+/**
+ * ============================================================================
+ * FAVOURITES MANAGER MODULE
+ * ============================================================================
+ * * IMPLEMENTATION OVERVIEW:
+ * This module handles the backend logic for saving user preferences (Songs and Artists)
+ * to the Firebase Realtime Database. It employs the next strategy:
+ * 1. Global Collections: Full metadata is stored in central nodes (`canciones`, `artistas`).
+ * 2. User References: User profiles only store the IDs (keys) of their favorites.
+ * * This approach reduces data duplication
+ * 
+ * * 1. saveFavouriteSong(userId, track) [Async]
+ * - Purpose: adds a track to the user's specific "favoritos" list.
+ * - Duplicate Check: Verifies if the user already has this song to prevent overwrites.
+ * - Global Storage Check: Checks if the song's metadata exists in the global `/canciones` node.
+ * > If missing: Extracts relevant data (Title, Artist, Album, Image) from the 
+ * `track` object and saves it globally.
+ * - Linking: Updates the user's profile by setting the song ID to `true` at 
+ * `users/{userId}/favoritos/{trackId}`.
+ * * * 2. saveFavouriteArtist(userId, artist) [Async]
+ * - Purpose: adds an artist to the user's specific "favourite_artists" list.
+ * - Duplicate Check: Verifies if the artist is already in the user's favorites.
+ * - Global Storage Check: Checks if the artist's metadata exists in the global `/artistas` node.
+ * > If missing: Extracts relevant data (Name, Image, Followers, Genres) from the 
+ * `artist` object and saves it globally.
+ * - Linking: Updates the user's profile by setting the artist ID to `true` at 
+ * `users/{userId}/favourite_artists/{artistId}`.
+ * * ============================================================================
+ */
 import { getDatabase, ref, get, set, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 export async function saveFavouriteSong(userId, track) {

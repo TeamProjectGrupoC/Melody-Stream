@@ -43,6 +43,56 @@ LOGIC WHEN SENDING A MESSAGE:
 6. Messages are displayed in real-time via onValue listener on /chats/{chatId}/messages.
 */
 
+/**
+ * MAIN EXECUTION FLOW & FUNCTION SUMMARY:
+ * * 1. CONFIGURATION & STATE
+ * - Initializes Firebase (App, Database, Auth).
+ * - Selects all necessary DOM elements.
+ * - Declares global state variables (currentUser, selectedUser, Spotify tokens).
+ * * 2. HELPER: getChatId(uid1, uid2)
+ * - Generates a unique, consistent Chat ID by sorting user UIDs lexicographically.
+ * * 3. SPOTIFY INTEGRATION
+ * - isSpotifyTokenValid(token): Verifies if the stored access token is still valid via fetch.
+ * - initSpotifyPlaybackSDK(): Injects the Spotify script, initializes the Player, and connects to the device.
+ * - IIFE (Async): Checks localStorage for token/premium status and triggers SDK initialization if valid.
+ * * 4. AUTHENTICATION LISTENER (onAuthStateChanged)
+ * - Handles user login state.
+ * - On login: Fetches the global list of users (`usersMap`).
+ * - Sets up a real-time listener on `userChats/{uid}` to trigger `renderUserList`.
+ * * 5. UI RENDERER: renderUserList(userChats)
+ * - Filters out the current user.
+ * - Calculates "Read/Unread" status based on the last message sender.
+ * - Sorts users by `lastMessageTimestamp` (newest first).
+ * - Renders the sidebar list, applying visual styles for unread messages.
+ * * 6. EVENT: SELECT USER (userListDiv click)
+ * - Highlights the selected user and marks the chat as "read" in the DB.
+ * - Resets the chat view and attaches a listener (`onChildAdded`) to `chats/{chatId}/messages`.
+ * - MESSAGE RENDERING LOGIC:
+ * - Distinguishes between "You" vs "Other" styles.
+ * - Handles Status Messages (✅/❌).
+ * - Handles "Follow Requests" (Renders Accept/Reject buttons and updates DB).
+ * - Handles Text Messages.
+ * - Handles Attachments (Calls `buildAttachmentCard`).
+ * * 7. DATA NORMALIZATION
+ * - normalizeArtistForFavourites(artistId): Formats artist data from DB for the "Favourites" module.
+ * - normalizeSongForFavourites(songId): Formats song data from DB for the "Favourites" module.
+ * * 8. PLAYBACK CONTROL: playTrack(uri, playButton)
+ * - Controls the Spotify Player state.
+ * - Handles Play/Pause toggling and manages the specific button UI (Play vs Stop).
+ * - Sends PUT requests to the Spotify Web API.
+ * * 9. UI COMPONENT: buildAttachmentCard(att, senderId)
+ * - dynamically creates the DOM for shared content (Songs/Podcasts).
+ * - Renders images, titles, and authors.
+ * - Adds "Play" buttons (HTML5 Audio for podcasts, Spotify SDK for songs).
+ * - Adds "Add to Favourites" buttons (checks sender's favorites, normalizes data, calls `saveFavourite...`).
+ * * 10. CORE LOGIC: sendMessage(fileAttachment)
+ * - Constructs the message object (text, timestamp, optional attachment).
+ * - Updates the central `chats` node (pushes message).
+ * - Updates `userChats` for both participants (sets `lastMessage`, read status).
+ * * 11. SEARCH & NAVIGATION
+ * - Search Listener: Filters the rendered user list by username.
+ * - Chat Header Click: Redirects to the selected user's profile page.
+ */
 
 async function main() {
         // Firebase configuration
@@ -399,9 +449,8 @@ async function main() {
                 div.appendChild(p);
             }
 
-            // --- Attachment Rendering (Songs) - THIS IS THE SLOW PART ---
+            // --- Attachment Rendering (Songs) ---
             if (data.attachment) {
-                // Here is the await that caused the ordering issue
                 const card = await buildAttachmentCard(data.attachment, data.sender);
 
                 if (card instanceof Node) {
@@ -468,10 +517,10 @@ async function main() {
             return;
         }
 
-        // --- Si haces clic en otra canción ---
+        // ---  if you click in another song ---
         if (currentPlayingUri && currentPlayingUri !== uri) {
 
-            // Pausar la reproducción actual
+            // pause currently playing
             await fetch(
                 `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`,
                 { method: "PUT", headers: { Authorization: `Bearer ${token}` } }
@@ -479,15 +528,15 @@ async function main() {
 
             isPlaying = false;
 
-            // Restaurar botón anterior (si existe)
+            // reset previous button
             if (currentActivePlayButton) {
                 currentActivePlayButton.textContent = "▶ Play";
             }
         }
 
-        // --- Si haces clic en la MISMA canción ---
+        // --- click on the same song ---
         if (currentPlayingUri === uri && isPlaying) {
-            // Entonces PAUSA
+            // then pause
             await fetch(
                 `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`,
                 { method: "PUT", headers: { Authorization: `Bearer ${token}` } }
@@ -495,12 +544,12 @@ async function main() {
 
             isPlaying = false;
 
-            // Actualizar botón
+            // update button
             playButton.textContent = "▶ Play";
             return;
         }
 
-        // --- Aquí iniciamos reproducción ---
+        // --- start playing ---
         await fetch(
             `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
             {
@@ -515,14 +564,10 @@ async function main() {
 
         console.log("Playing:", uri);
 
-        // Actualizar estado global
+        //uodate state
         currentPlayingUri = uri;
         isPlaying = true;
-
-        // Cambiar botón actual
         playButton.textContent = "⏹ Stop";
-
-        // Guardar botón activo
         currentActivePlayButton = playButton;
     }
 
@@ -704,7 +749,7 @@ async function main() {
                             return;
                         }
 
-                        // 2. Llamar a favourites.js (misma función que usa profile.js)
+                        // 2.  call favourites.js 
                         const normalized = await normalizeArtistForFavourites(foundArtist);
                         await saveFavouriteArtist(user.uid, normalized);
 

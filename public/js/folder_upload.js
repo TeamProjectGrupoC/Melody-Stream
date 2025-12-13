@@ -1,3 +1,23 @@
+/**
+ * ============================================================================
+ * PODCAST FOLDER CREATION MODULE
+ * ============================================================================
+ * Manages the UI and backend logic for creating new podcast folders.
+ * * FUNCTIONAL BREAKDOWN:
+ * 1. Auth Listener:
+ * - Tracks `currentUser` state.
+ * - Disables the "Save" button and displays warnings if the user is not logged in.
+ *
+ * 2. createFolder(name, iconFile) [Async]:
+ * - Validation: Checks if a folder with the same name already exists in the DB.
+ * - Storage: Uploads the folder icon (if provided) to Firebase Storage and retrieves the URL.
+ * - Database: Pushes the new folder metadata (name, iconURL, creatorID) to `folders/`.
+ *
+ * 3. Event Handlers:
+ * - Cancel: Redirects the user back to `podcast.html`.
+ * - Save: Triggers the creation process, handles UI feedback (messages), and redirects on success.
+ * ============================================================================
+ */
 // Firabase App initialization
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 

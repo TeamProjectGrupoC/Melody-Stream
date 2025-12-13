@@ -1,3 +1,41 @@
+/**
+ * ============================================================================
+ * GLOBAL HEADER & NAVIGATION CONTROLLER
+ * ============================================================================
+ * This script manages the state of the main navigation header across the application.
+ * It handles authentication UI (Login vs Profile/Logout), loads user avatars, 
+ * and provides real-time notifications for incoming chat messages.
+ *
+ * * KEY FEATURES & LOGIC:
+ *
+ * 1. DEFENSIVE DOM MANIPULATION:
+ * - Checks if header elements (Nav, Profile Link, User Pic) exist.
+ * - If missing, it dynamically creates and injects them to prevent errors.
+ *
+ * 2. AUTHENTICATION STATE MANAGEMENT (onAuthStateChanged):
+ * 
+ * - LOGGED OUT:
+ * > Resets header to "Guest" mode (Log In link, default silhouette).
+ * > Removes the "Log Out" button.
+ * - LOGGED IN:
+ * > Updates link to "MY PROFILE".
+ * > Inserts a "LOG OUT" button dynamically.
+ * > Fetches the specific user's profile picture from Realtime DB (`users/{uid}`).
+ * > "Master User" Logic: Applies special Gold styling if the email matches the admin.
+ *
+ * 3. REAL-TIME NOTIFICATIONS (onChildChanged):
+ * - Sets a listener on `userChats/{uid}`.
+ * - When a chat updates, checks if the last message was sent by someone else.
+ * - Triggers `showNewMessagesButton()`:
+ * > Injects a temporary "New Messages!" button into the nav.
+ * > Button auto-removes itself after 10 seconds via setTimeout.
+ *
+ * 4. LOGOUT HANDLING:
+ * - Signs the user out of Firebase.
+ * - Clears local storage tokens (Spotify).
+ * - Redirects the user based on their current page (e.g., restricted pages go to login).
+ * ============================================================================
+ */
 // --- IMPORTS ---
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
@@ -70,7 +108,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+ // --- Create the Logout Button Element ---
   function createLogoutListItem() {
+    // 1. Create DOM elements (List Item & Anchor)
     const li = document.createElement("li");
     li.id = "logoutLi";
     const a = document.createElement("a");
@@ -79,22 +119,28 @@ document.addEventListener("DOMContentLoaded", () => {
     a.textContent = "LOG OUT";
     a.style.cursor = "pointer";
 
+    // 2. Attach Click Listener
     a.addEventListener("click", async (ev) => {
-      ev.preventDefault();
+      ev.preventDefault(); // Stop default link behavior
       try {
+        // 3. Perform Firebase Sign Out
         await signOut(auth);
+        
+        // 4. Clear sensitive data (Spotify Token)
         localStorage.removeItem("spotify_access_token");
         
+        // 5. Smart Redirect Logic: Check current page to decide destination
         if (window.location.pathname.endsWith("test_spotify.html")) {
           window.location.href = "test_register_spotify.html";
         } else if (window.location.pathname.endsWith("profile.html")){
-          window.location.href = "login.html"
+          window.location.href = "login.html" // Protect profile page
         } else if (window.location.pathname.endsWith("chat.html")){
-          window.location.href = "login.html"
+          window.location.href = "login.html" // Protect chat page
         } else {
-          window.location.reload();
+          window.location.reload(); // Just reload for public pages
         }
       } catch (err) {
+        // 6. Error Handling: Force cleanup and reload if sign-out fails
         console.error("Sign out error:", err);
         localStorage.removeItem("spotify_access_token");
         window.location.reload();
@@ -105,12 +151,16 @@ document.addEventListener("DOMContentLoaded", () => {
     return li;
   }
 
+  // --- Insert Logout Button into DOM ---
   function insertLogoutButton() {
     if (!header) return;
-    if (document.getElementById("logoutLi")) return;
+    if (document.getElementById("logoutLi")) return; // Prevent duplicates
+
+    // Find the main navigation list
     const targetNav = header.querySelector("#NavPrincipal") || header.querySelector("nav");
     const ul = targetNav?.querySelector("ul") || targetNav;
     
+    // Strategy 1: Insert it immediately AFTER the Profile link (User UX)
     if (loginProfileLink) {
       const parentLi = loginProfileLink.closest("li");
       if (parentLi && parentLi.parentNode) {
@@ -118,22 +168,30 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
     }
+    // Strategy 2: Fallback (Append to the end of the list)
     if (ul) ul.appendChild(createLogoutListItem());
     else header.appendChild(createLogoutListItem());
   }
 
+  // --- Remove Logout Button (Cleanup) ---
   function removeLogoutButton() {
     const li = document.getElementById("logoutLi");
+    // Remove only if it exists and has a parent
     if (li && li.parentNode) li.parentNode.removeChild(li);
   }
 
+  // --- Remove Duplicate "Log In" Links ---
   function removeExtraLoginLinks() {
     const targetNav = header?.querySelector("#NavPrincipal") || header?.querySelector("nav");
     if (!targetNav) return;
+
+    // Scan all links to remove hardcoded or legacy "Log In" buttons
     const anchors = targetNav.querySelectorAll("a");
     anchors.forEach(a => {
+      // Condition: It says "LOG IN" but is NOT our main controlled link
       if (a !== loginProfileLink && a.textContent && a.textContent.trim().toUpperCase() === "LOG IN") {
         const li = a.closest("li");
+        // Remove the entire LI if possible, otherwise just the anchor
         if (li && li.parentNode) li.parentNode.removeChild(li);
         else a.remove();
       }

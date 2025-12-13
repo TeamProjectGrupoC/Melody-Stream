@@ -1,4 +1,45 @@
+/**
+ * ============================================================================
+ * MELODY STREAM - MAIN CONTROLLER
+ * ============================================================================
+ * * IMPLEMENTATION OVERVIEW:
+ * This script serves as the main entry point for the application's home page. 
+ * It integrates Firebase services (Auth, Realtime Database, Storage) to handle 
+ * user sessions, dynamic UI updates, and media streaming.
 
+ * ============================================================================
+ * * 1. updateHeaderLinks(user)
+ * - Updates the navigation bar based on the authentication state.
+ * - If logged in: Shows "PROFILE" link and fetches the user's avatar from localStorage.
+ * - If logged out: Shows "LOG IN" link and a default silhouette avatar.
+ * * 2. startApp()
+ * - The main initialization function triggered when the DOM is ready.
+ * - Sets up the `onAuthStateChanged` listener to trigger UI updates (`updateHeaderLinks`, `updateRegisterModule`).
+ * - Calls `initializeHomeInteractions` to set up event listeners.
+ * * 3. loadPlayFirebaseAudio(audioFilePath, title, artist) [Async]
+ * - Stops any currently playing audio.
+ * - Fetches the download URL for a specific audio file from Firebase Storage.
+ * - Dynamically creates and injects an HTML `<audio>` element into the DOM.
+ * - Updates the "Now Playing" UI (Title, Artist) and starts playback.
+ * * 4. initializeHomeInteractions()
+ * - Selects all "Play" buttons in the trending songs section.
+ * - Binds click events to specific songs using data attributes (`data-song-id`).
+ * - Links the local `trendingSongsData` object to the Firebase storage logic.
+ * - Initializes the player controls and artist modal logic.
+ * * 5. setupPlayerControls()
+ * - Manages the global Play/Pause button logic.
+ * - Toggles the playback state of the `currentAudioPlayer` and updates button visual classes.
+ * * 6. ArtistDescription()
+ * - Encapsulates all logic for the Artist Detail Modal.
+ * - Handles opening the modal with data from `featuredArtistsData`.
+ * - Manages closing the modal via button click, backdrop click, or Escape key.
+ * * 7. updateRegisterModule(user) [Async]
+ * - personalized the "Call to Action" section.
+ * - If logged in: Fetches the username from Realtime Database (`/users/{uid}`) 
+ * to display a "Welcome Back" message and hides the register button.
+ * - If logged out: Displays a generic "Join Us" message and shows the register button.
+ * * ============================================================================
+ */
 //------ IMPORTING MODULES ------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
@@ -270,7 +311,7 @@ async function updateRegisterModule(user) {
     const button = document.getElementById("registerCtaButton");
 
     if (user) {
-        // 🟢 HAY SESIÓN
+        // exists session
         const userRef = databaseRef(db, `users/${user.uid}`);
         const snap = await get(userRef);
 
@@ -284,7 +325,7 @@ async function updateRegisterModule(user) {
 
         if (button) button.style.display = "none";
     } else {
-        // 🔴 NO HAY SESIÓN
+        // no session
         title.textContent = "Ready to start?";
         text.textContent =
             "Join Melody Stream to listen to your favorite music, upload podcasts, and connect with artists and friends.";
