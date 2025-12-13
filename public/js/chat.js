@@ -435,6 +435,7 @@ async function main() {
             name: a.name || "",
             images: [{ url: a.image || "" }],
             followers: { total: a.followers ?? 0 },
+            genres: a.genres || []
         };
         
     }

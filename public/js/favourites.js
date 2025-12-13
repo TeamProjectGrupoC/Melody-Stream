@@ -54,6 +54,7 @@ export async function saveFavouriteArtist(userId, artist) {
           name: artist.name,
           image: artist.images?.[0]?.url || "",
           followers: artist.followers.total,
+          genres: artist.genres || []
       };
 
       // Save the song data to the "artistas" node in Firebase
