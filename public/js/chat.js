@@ -420,32 +420,42 @@ async function main() {
             cachedUser = user;
     });
 
-    function normalizeArtistForFavourites(artist, att) {
+    async function normalizeArtistForFavourites(artistId) {
+        const db = getDatabase();
+
+        const snap = await get(ref(db, `artistas/${artistId}`));
+        if (!snap.exists()) {
+            alert(`Artist ${artistId} not found in /artistas`);
+        }
+
+        const a = snap.val();
+
         return {
-            id: artist.id,
-            name: artist.name,
-            images: [
-                { url: artist.image || att.imageURL }
-            ],
-            followers: {
-                total: artist.followers || 0
-            },
-            genres: Array.isArray(artist.genres) ? artist.genres : []
+            id: artistId,
+            name: a.name || "",
+            images: [{ url: a.image || "" }],
+            followers: { total: a.followers ?? 0 },
         };
+        
     }
 
-    function normalizeSongForFavourites(song, att) {
+    async function normalizeSongForFavourites(songId) {
+        const db = getDatabase();
+
+        const snap = await get(ref(db, `canciones/${songId}`));
+        if (!snap.exists()) {
+            alert(`Artist ${songId} not found in /canciones`);
+        }
+
+        const s = snap.val();
+
         return {
-            id: song.id,
-            name: song.title,
-            artists: [
-                { name: song.artist || att.author || "Unknown Artist" }
-            ],
+            id: songId,
+            name: s.title,
+            artists: s.artist.split(", ").map(name => ({ name })),
             album: {
-                name: song.album || "Unknown Album",
-                images: [
-                    { url: song.albumImageUrl || att.imageURL }
-                ]
+            name: s.album,
+            images: [{ url: s.albumImageUrl }]
             }
         };
     }
@@ -674,8 +684,8 @@ async function main() {
                         const user = auth.currentUser;
                         if (!user) return alert("You must log in");
 
-                        // 1. BUSCAR EL ARTISTA ENTRE LOS FAVORITOS DEL SENDER
-                        const senderFavRef = ref(db, `users/${senderId}/favourite_artists`);
+                        // 1. BUSCAR EL ARTISTA 
+                        const senderFavRef = ref(db, `artistas`);
                         const favSnap = await get(senderFavRef);
                         const data = favSnap.val() || {};
 
@@ -694,7 +704,7 @@ async function main() {
                         }
 
                         // 2. Llamar a favourites.js (misma función que usa profile.js)
-                        const normalized = normalizeArtistForFavourites(foundArtist, att);
+                        const normalized = normalizeArtistForFavourites(foundArtist);
                         await saveFavouriteArtist(user.uid, normalized);
 
 
@@ -741,7 +751,7 @@ async function main() {
                             return;
                         }
 
-                        const normalized = normalizeSongForFavourites(foundSong, att);
+                        const normalized = normalizeSongForFavourites(foundSong);
                         await saveFavouriteSong(user.uid, normalized);
 
 

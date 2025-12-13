@@ -11,7 +11,7 @@ export async function saveFavouriteSong(userId, track) {
   await set(favSongRef, true);
 
   const songSnapshot = await get(songRef);
-  if(songSnapshot.exists){
+  if(songSnapshot.exists()){
     alert("This song is already in your favourites.");
     return;
   }
@@ -22,7 +22,6 @@ export async function saveFavouriteSong(userId, track) {
         artist: track.artists.map(a => a.name).join(", "),
         album: track.album.name,
         albumImageUrl: track.album.images[0].url,
-        previewUrl: track.preview_url,
       };
 
     // Save the song data to the "canciones" node in Firebase
@@ -54,7 +53,6 @@ export async function saveFavouriteArtist(userId, artist) {
           name: artist.name,
           image: artist.images?.[0]?.url || "",
           followers: artist.followers.total,
-          genres: artist.genres
       };
 
       // Save the song data to the "artistas" node in Firebase
