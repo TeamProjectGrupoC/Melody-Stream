@@ -1,19 +1,16 @@
+// Firabase App initialization
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
-import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import {
-  getDatabase,
-  ref,
-  push,
-  set,
-  get
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-import {
-  getStorage,
-  ref as storageRef,
-  uploadBytes,
-  getDownloadURL
-} from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
+// Firebase authentication functions
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+
+// Firebase Realtime Database functions
+import { getDatabase, ref, push, set, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+// Firebase Storage functions
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
   authDomain: "melodystream123.firebaseapp.com",
@@ -26,7 +23,7 @@ const firebaseConfig = {
   measurementId: "G-J97KEDLYMB"
 };
 
-if (!getApps().length) initializeApp(firebaseConfig);
+if (!getApps().length) initializeApp(firebaseConfig); // Initialize Firebase if not already initialized
 const auth = getAuth();
 const db = getDatabase();
 const storage = getStorage();
@@ -37,26 +34,24 @@ const saveBtn = document.getElementById("saveFolderBtn");
 const cancelBtn = document.getElementById("cancelFolderBtn");
 const msg = document.getElementById("folderMsg");
 
-if (!saveBtn || !folderNameInput || !msg) {
-  console.warn("folder_upload.js: faltan elementos DOM (folderName/saveFolderBtn/folderMsg)");
-}
-
-// control de sesión
 let currentUser = null;
+
+// To verify if user is logged in
 onAuthStateChanged(auth, (user) => {
   currentUser = user;
+  // If user is not logged in and the save button exists, disable it
   if (saveBtn) saveBtn.disabled = !user;
+  // Show message if not logged in
   if (!user && msg) msg.textContent = "You must be logged in to create a folder.";
-  if (user && msg) msg.textContent = "";
 });
 
-// cancelar
+// Cancel button moves back to podcast page
 if (cancelBtn) cancelBtn.addEventListener("click", () => window.location.href = "podcast.html");
 
-// helper: crea carpeta (o error)
+// Function to create a new folder
 async function createFolder(name, iconFile) {
   if (!name) throw new Error("Folder name required");
-  // comprobar existencia por nombre (case-insensitive)
+  // Check for duplicate folder names
   const foldersRef = ref(db, "folders");
   const snap = await get(foldersRef);
   if (snap.exists()) {
@@ -72,14 +67,16 @@ async function createFolder(name, iconFile) {
   const folderId = newFolderRef.key;
   let iconURL = null;
 
+  // If icon file provided, upload to Storage
   if (iconFile) {
-    // sube el icono en Storage bajo la carpeta "folders/{folderId}/icon.jpg"
+    // Upload the icon to Storage under the folder "folders/{folderId}/icon.jpg"
     const iconPath = `folders/${folderId}/icon.jpg`;
     const iconRef = storageRef(storage, iconPath);
     await uploadBytes(iconRef, iconFile);
     iconURL = await getDownloadURL(iconRef);
   }
 
+  // Save folder metadata to Realtime Database
   await set(newFolderRef, {
     name,
     iconURL: iconURL || null,
@@ -90,11 +87,12 @@ async function createFolder(name, iconFile) {
   return { folderId, iconURL };
 }
 
-// handler del botón
+// Save button handler to create folder
 if (saveBtn) {
   saveBtn.addEventListener("click", async () => {
     msg.textContent = "Creating folder...";
     try {
+      // User must be logged in
       if (!currentUser) {
         msg.textContent = "You must be logged in.";
         return window.location.href = "login.html";
@@ -104,10 +102,11 @@ if (saveBtn) {
       const res = await createFolder(name, iconFile);
       msg.textContent = "Folder created.";
       console.log("Folder created:", res);
+      // Redirect back to podcast page after a short delay
       setTimeout(() => window.location.href = "podcast.html", 700);
-    } catch (err) {
+    } 
+    catch (err) {
       console.error("create folder error:", err);
-      // mostrar mensaje detallado para depuración
       msg.textContent = "Error creating folder: " + (err.message || err.toString());
     }
   });

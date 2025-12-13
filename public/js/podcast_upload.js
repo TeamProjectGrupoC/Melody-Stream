@@ -1,9 +1,16 @@
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+// Firabase App initialization
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+
+// Firebase authentication functions
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
-import { getDatabase, ref, push, set, get, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+// Firebase Realtime Database functions
+import { getDatabase, ref, push, set, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+
+// Firebase Storage functions
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
-// Firebase configuration (single source)
+// Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
   authDomain: "melodystream123.firebaseapp.com",
@@ -15,18 +22,19 @@ const firebaseConfig = {
   measurementId: "G-J97KEDLYMB"
 };
 
-// Reuse existing app if present
+// Initialize Firebase if not already initialized
 const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getDatabase(app);
 const storage = getStorage(app);
 
-// DOM elements (may be null until DOM ready)
+// DOM elements 
 let nameInput, descInput, iconInput, fileInput, uploadBtn, msg, formContainer, loginBtn;
-let folderInput, folderIconInput, folderSelect, hiddenFolderInput, viewPodcastsBtn;
+let folderSelect, viewPodcastsBtn;
 
 let currentUser = null;
 
+// Bind DOM elements
 function bindDomElements() {
   nameInput = document.getElementById('podcastName');
   descInput = document.getElementById('podcastDesc');
@@ -36,32 +44,26 @@ function bindDomElements() {
   msg = document.getElementById('msg');
   formContainer = document.getElementById('formContainer');
   loginBtn = document.getElementById('loginBtn');
-
-  // carpeta: puede ser un select (folderSelect) o input libre (podcastFolder)
-  folderInput = document.getElementById('podcastFolder'); // optional name-based input
-  folderIconInput = document.getElementById('folderIcon'); // optional
-  folderSelect = document.getElementById('folderSelect'); // preferred select
-  hiddenFolderInput = document.getElementById('podcastFolderId'); // hidden id field
+  folderSelect = document.getElementById('folderSelect');
   viewPodcastsBtn = document.getElementById('viewPodcastsBtn');
 }
 
-// Poblar select de carpetas (si existe). Si uid pasado, filtra solo carpetas del usuario (como en profile.js).
-// Excepto cuenta master que ve todas.
+// Populate folder select options
 async function populateFolderSelect(uid = null) {
   if (!folderSelect) return;
+  // Default option
   folderSelect.innerHTML = '<option value="">-- No folder --</option>';
   try {
     const snap = await get(ref(db, 'folders'));
     if (!snap.exists()) return;
     const folders = snap.val();
     
-    // Detectar si es master (misma cuenta que tiene header dorado)
+    // If user is master, show all folders
     const isMaster = currentUser && currentUser.email && currentUser.email.toLowerCase() === "teamprojectgrupoc@gmail.com";
     
     for (const fid in folders) {
-      if (!Object.prototype.hasOwnProperty.call(folders, fid)) continue;
       const f = folders[fid];
-      // Si NO es master, filtrar solo carpetas del usuario
+      // If not master, filter only user's folders
       if (!isMaster && uid && f.createdBy && String(f.createdBy) !== String(uid)) continue;
       const opt = document.createElement('option');
       opt.value = fid;
@@ -71,66 +73,17 @@ async function populateFolderSelect(uid = null) {
   } catch (err) {
     console.error('Error loading folders for select:', err);
   }
-
-  // sincronizar hidden input con la selección
-  if (hiddenFolderInput) {
-    folderSelect.addEventListener('change', () => {
-      hiddenFolderInput.value = folderSelect.value || '';
-    });
-  } else {
-    // si no hay hidden input, mantener dataset
-    folderSelect.addEventListener('change', () => {});
-  }
 }
 
-// Asegurar carpeta por nombre (copia de la lógica existente: buscar o crear)
-async function ensureFolder(folderName, folderIconFile) {
-  if (!folderName) return { folderId: null, folderIconURL: null };
-  try {
-    const foldersRef = ref(db, 'folders');
-    const foldersSnap = await get(foldersRef);
-    if (foldersSnap.exists()) {
-      const folders = foldersSnap.val();
-      for (const fid in folders) {
-        if (String(folders[fid].name).toLowerCase() === folderName.toLowerCase()) {
-          return { folderId: fid, folderIconURL: folders[fid].iconURL || null };
-        }
-      }
-    }
-
-    const newFolderRef = push(ref(db, 'folders'));
-    const folderId = newFolderRef.key;
-    let uploadedIconURL = null;
-    if (folderIconFile) {
-      const folderIconPath = `podcastsFolders/${folderId}/icon.jpg`;
-      const fRef = storageRef(storage, folderIconPath);
-      await uploadBytes(fRef, folderIconFile);
-      uploadedIconURL = await getDownloadURL(fRef);
-    }
-
-    await set(newFolderRef, {
-      name: folderName,
-      iconURL: uploadedIconURL || null,
-      createdBy: currentUser ? currentUser.uid : null,
-      createdAt: Date.now()
-    });
-
-    return { folderId, folderIconURL: uploadedIconURL };
-  } catch (e) {
-    console.warn('ensureFolder error:', e);
-    return { folderId: null, folderIconURL: null };
-  }
-}
-
-// Handler de subida: usa el folder seleccionado (select) si existe, si no lee folderInput (nombre)
+// Handle podcast upload
 async function handleUpload() {
   if (!currentUser) {
     if (msg) msg.textContent = "❌ Error: You are not logged in.";
     return;
   }
 
-  const nombre = nameInput?.value?.trim();
-  const descripcion = descInput?.value?.trim();
+  const nombre = nameInput?.value?.trim(); // Podcast name
+  const descripcion = descInput?.value?.trim(); // Podcast description
   const iconFile = iconInput?.files?.[0];
   const audioFile = fileInput?.files?.[0];
 
@@ -140,66 +93,48 @@ async function handleUpload() {
   }
 
   try {
-    // obtener folderId: prioridad select -> hidden -> input nombre (crear si necesario)
-    let folderId = null;
-    if (folderSelect && folderSelect.value) {
-      folderId = folderSelect.value || null;
-    } else if (hiddenFolderInput && hiddenFolderInput.value) {
-      folderId = hiddenFolderInput.value || null;
-    } else if (folderInput && folderInput.value.trim()) {
-      const folderName = folderInput.value.trim();
-      const folderFile = folderIconInput?.files?.[0];
-      const res = await ensureFolder(folderName, folderFile);
-      folderId = res.folderId;
-    }
+    // Obtain selected folder ID
+    const folderId = folderSelect?.value || null;
 
-    // crear entry del podcast
+    // Create podcast entry in Realtime Database
     const podcastsRef = ref(db, 'podcasts');
     const newPodcastRef = push(podcastsRef);
     const podcastId = newPodcastRef.key;
 
-    // subir icon
+    // Upload icon to Storage
     const iconPath = `podcasts/${podcastId}/icon.jpg`;
     const iconRef = storageRef(storage, iconPath);
     await uploadBytes(iconRef, iconFile);
     const iconURL = await getDownloadURL(iconRef);
 
-    // subir audio
+    // Upload audio to Storage
     const audioPath = `podcasts/${podcastId}/audio.mp3`;
     const audioRef = storageRef(storage, audioPath);
     await uploadBytes(audioRef, audioFile);
     const audioURL = await getDownloadURL(audioRef);
 
-    // obtener uploaderName
+    // Obtain uploader name from user profile
     let uploaderName = currentUser.displayName || currentUser.email || currentUser.uid;
-    try {
-      const userRef = ref(db, `users/${currentUser.uid}`);
-      const userSnap = await get(userRef);
-      if (userSnap.exists()) {
-        const userData = userSnap.val();
-        uploaderName = userData.username || userData.displayName || uploaderName;
-      }
-    } catch (e) {
-      console.warn('No se pudo leer users/{uid} para uploaderName', e);
-    }
 
+    // Save podcast metadata to Realtime Database
     await set(newPodcastRef, {
-      nombre,
-      descripcion,
+      nombre, // Podcast name
+      descripcion, // Podcast description
       iconURL,
       audioURL,
-      idcreador: currentUser.uid,
+      idcreador: currentUser.uid, // Uploader UID
       uploaderName,
       folderId: folderId || null,
       createdAt: Date.now()
     });
 
     if (msg) msg.textContent = "✅ Podcast saved successfully!";
+    // Clear form
     if (nameInput) nameInput.value = '';
     if (descInput) descInput.value = '';
     if (iconInput) iconInput.value = '';
     if (fileInput) fileInput.value = '';
-    // actualizar select disponible por si se creó carpeta nueva
+    // Refresh folder select
     await populateFolderSelect(currentUser.uid);
   } catch (err) {
     console.error(err);
@@ -207,16 +142,19 @@ async function handleUpload() {
   }
 }
 
+// Initialize on DOM load
 document.addEventListener('DOMContentLoaded', () => {
+  // Bind DOM elements
   bindDomElements();
 
-  // listeners
+  // Check if user is logged in
   onAuthStateChanged(auth, (user) => {
     currentUser = user;
-    // Poblar carpetas filtradas por usuario (o todas si es master)
+    // Populate folder select based on user (to show only their folders)
     populateFolderSelect(user ? user.uid : null).catch(e => console.error(e));
 
     if (msg && formContainer && loginBtn) {
+      // If user is logged in, show form, else show login prompt
       if (user) {
         msg.textContent = `✅ Logged in as ${user.email}`;
         if (formContainer) formContainer.style.display = 'block';
@@ -229,6 +167,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  // Button event listeners
   if (uploadBtn) uploadBtn.addEventListener('click', (e) => { e.preventDefault(); handleUpload(); });
   if (loginBtn) loginBtn.addEventListener('click', () => window.location.href = 'login.html');
   if (viewPodcastsBtn) viewPodcastsBtn.addEventListener('click', () => window.location.href = 'podcast.html');
