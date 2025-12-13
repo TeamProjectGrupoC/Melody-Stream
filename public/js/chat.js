@@ -683,7 +683,7 @@ async function main() {
 
                         for (const key in data) {
                             if (key === att.id) {
-                                foundArtist = data[key];
+                                foundArtist = key;
                                 break;
                             }
                         }
@@ -727,13 +727,11 @@ async function main() {
                         const favSnap = await get(senderFavRef);
                         const data = favSnap.val() || {};
 
-                        let foundKey = null;
                         let foundSong = null;
 
                         for (const key in data) {
                             if (key === att.id) {
-                                foundKey = key;
-                                foundSong = data[key];
+                                foundSong = key;
                                 break;
                             }
                         }
@@ -742,8 +740,6 @@ async function main() {
                             alert("The sender does not have this song saved in favourites.");
                             return;
                         }
-
-                        foundSong.id = foundKey;
 
                         const normalized = normalizeSongForFavourites(foundSong, att);
                         await saveFavouriteSong(user.uid, normalized);
