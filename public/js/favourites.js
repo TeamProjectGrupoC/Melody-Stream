@@ -38,6 +38,8 @@ export async function saveFavouriteArtist(userId, artist) {
     const artistRef = ref(db, `artistas/${artist.id}`);
     const favArtistRef = ref(db, `users/${userId}/favourite_artists/${artist.id}`);
 
+    console.log("Artista: ", artist);
+
     const favSnapshot = await get(favArtistRef);
     if (favSnapshot.exists()) {
       alert("This artist is already in your favourites.");
