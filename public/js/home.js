@@ -2,7 +2,7 @@
 //------ IMPORTING MODULES ------
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
-import { getDatabase, ref as databaseRef, onValue, set } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
+import { getDatabase, ref as databaseRef, onValue, set, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
 //----- FIREBASE CONFIGURATION ---
@@ -91,6 +91,7 @@ function startApp() {
     //Check authentication
     onAuthStateChanged(auth, (user) => {
         updateHeaderLinks(user);
+        updateRegisterModule(user); 
     });
 
     initializeHomeInteractions(); //initializing interactions
@@ -257,5 +258,41 @@ function ArtistDescription(){
         }
     });
 }
+
+//------------- SESION INITIALIZED ------------
+
+async function updateRegisterModule(user) {
+    const registerModule = document.getElementById("registerCtaModule");
+    if (!registerModule) return;
+
+    const title = registerModule.querySelector("h2");
+    const text = registerModule.querySelector("p");
+    const button = document.getElementById("registerCtaButton");
+
+    if (user) {
+        // 🟢 HAY SESIÓN
+        const userRef = databaseRef(db, `users/${user.uid}`);
+        const snap = await get(userRef);
+
+        if (!snap.exists()) {
+            alert(`ERROR: User not found`);
+        }
+        const userDb = snap.val();
+
+        title.textContent = "Welcome back!";
+        text.textContent = `We are glad to see you again, ${userDb.username}.`;
+
+        if (button) button.style.display = "none";
+    } else {
+        // 🔴 NO HAY SESIÓN
+        title.textContent = "Ready to start?";
+        text.textContent =
+            "Join Melody Stream to listen to your favorite music, upload podcasts, and connect with artists and friends.";
+
+        if (button) button.style.display = "inline-block";
+    }
+}
+
+
 
 
