@@ -682,7 +682,7 @@ async function main() {
                         let foundArtist = null;
 
                         for (const key in data) {
-                            if (data[key].name?.toLowerCase() === att.title.toLowerCase()) {
+                            if (data[key].id === att.id) {
                                 foundArtist = data[key];
                                 break;
                             }
@@ -730,12 +730,8 @@ async function main() {
                         let foundKey = null;
                         let foundSong = null;
 
-                        console.log("ATTACHMENT TITLE:", att.title);
-                        console.log("CANCIONES DEL SENDER:");
-                        console.log(data);
-
                         for (const key in data) {
-                            if (data[key].title?.toLowerCase() === att.title.toLowerCase()) {
+                            if (data[key].id === att.id) {
                                 foundKey = key;
                                 foundSong = data[key];
                                 break;
