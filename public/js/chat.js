@@ -704,7 +704,7 @@ async function main() {
                         }
 
                         // 2. Llamar a favourites.js (misma función que usa profile.js)
-                        const normalized = normalizeArtistForFavourites(foundArtist);
+                        const normalized = await normalizeArtistForFavourites(foundArtist);
                         await saveFavouriteArtist(user.uid, normalized);
 
 
@@ -751,7 +751,7 @@ async function main() {
                             return;
                         }
 
-                        const normalized = normalizeSongForFavourites(foundSong);
+                        const normalized = await normalizeSongForFavourites(foundSong);
                         await saveFavouriteSong(user.uid, normalized);
 
 
