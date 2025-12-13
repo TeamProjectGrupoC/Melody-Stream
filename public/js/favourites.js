@@ -12,9 +12,6 @@ export async function saveFavouriteSong(userId, track) {
       return;
     }
 
-    // Add to the user favourites
-    await set(favSongRef, true);
-
     const songSnapshot = await get(songRef);
     if (!songSnapshot.exists()) {
 
@@ -30,6 +27,9 @@ export async function saveFavouriteSong(userId, track) {
       await set(songRef, songData);
     }
 
+    // Add to the user favourites
+    await set(favSongRef, true);
+
     console.log(`Song ${track.name} added to favorites for user ${userId}`);
 }
 
@@ -38,16 +38,11 @@ export async function saveFavouriteArtist(userId, artist) {
     const artistRef = ref(db, `artistas/${artist.id}`);
     const favArtistRef = ref(db, `users/${userId}/favourite_artists/${artist.id}`);
 
-    console.log("Artista: ", artist);
-
     const favSnapshot = await get(favArtistRef);
     if (favSnapshot.exists()) {
       alert("This artist is already in your favourites.");
       return;
     } 
-
-    // Add to the user favourites
-    await set(favArtistRef, true);
 
     const artistSnapshot = await get(artistRef);
     if (!artistSnapshot.exists()) {
@@ -62,6 +57,9 @@ export async function saveFavouriteArtist(userId, artist) {
       // Save the song data to the "artistas" node in Firebase
       await set(artistRef, artistData);
     }
+    
+    // Add to the user favourites
+    await set(favArtistRef, true);
 
     console.log(`Artist ${artist.name} added to favorites for user ${userId}`);
 }
