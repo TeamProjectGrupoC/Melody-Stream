@@ -53,14 +53,11 @@ export async function saveFavouriteSong(userId, track) {
         };
 
       // Save the song data to the "canciones" node in Firebase
-      console.log("Voy a guardar en canciones:", track.id, track);
       await set(songRef, songData);
     }
 
     // Add to the user favourites
     await set(favSongRef, true);
-
-    console.log(`Song ${track.name} added to favorites for user ${userId}`);
 }
 
 export async function saveFavouriteArtist(userId, artist) {
@@ -90,7 +87,5 @@ export async function saveFavouriteArtist(userId, artist) {
     
     // Add to the user favourites
     await set(favArtistRef, true);
-
-    console.log(`Artist ${artist.name} added to favorites for user ${userId}`);
 }
 

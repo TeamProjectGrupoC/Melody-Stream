@@ -1,3 +1,35 @@
+/**
+ * ============================================================================
+ * PODCAST UPLOAD CONTROLLER
+ * ============================================================================
+ * This module handles the process of uploading new podcasts to the platform.
+ * It manages file uploads to Firebase Storage (Audio & Icons) and saves metadata 
+ * to the Realtime Database, linked to specific user-created folders.
+ *
+ * * KEY FUNCTIONALITIES:
+ *
+ * 1. Initialization & Auth:
+ * - Initializes Firebase services.
+ * - Listens for authentication state (`onAuthStateChanged`).
+ * - Security: Hides the upload form if the user is not logged in.
+ *
+ * 2. populateFolderSelect(uid) [Async]:
+ * - Fetches available folders from `/folders` in the Realtime DB.
+ * - Filtering Logic: 
+ * > "Master User" (Admin) sees ALL folders.
+ * > Regular Users see ONLY folders created by themselves (`createdBy === uid`).
+ * - Dynamically populates the `<select>` dropdown.
+ *
+ * 3. handleUpload() [Async]:
+ * - Validation: Checks that all fields (Name, Description, Icon, Audio) are filled.
+ * - Storage Uploads:
+ * > Uploads Icon -> `podcasts/{podcastId}/icon.jpg`
+ * > Uploads Audio -> `podcasts/{podcastId}/audio.mp3`
+ * - Database Record: 
+ * > Creates a new entry in `/podcasts` with metadata (URLs, uploader ID, folder ID).
+ * - UX: Displays success/error messages and clears the form upon success.
+ * ============================================================================
+ */
 // Firabase App initialization
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 

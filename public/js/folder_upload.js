@@ -121,7 +121,6 @@ if (saveBtn) {
       const iconFile = folderIconInput?.files?.[0] || null;
       const res = await createFolder(name, iconFile);
       msg.textContent = "Folder created.";
-      console.log("Folder created:", res);
       // Redirect back to podcast page after a short delay
       setTimeout(() => window.location.href = "podcast.html", 700);
     } 

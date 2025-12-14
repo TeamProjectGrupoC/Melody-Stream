@@ -1,3 +1,41 @@
+/**
+ * ============================================================================
+ * PODCAST & FOLDER MANAGEMENT CONTROLLER
+ * ============================================================================
+ * * OVERVIEW:
+ * This is the central logic for the "Podcasts" page. It handles:
+ * - Fetching and displaying podcasts and folders from Firebase Realtime Database.
+ * - Managing playback (HTML5 Audio) and visual presentation (Cards).
+ * - "Master User" privileges (Deleting content).
+ * - Social sharing features (Direct messaging of podcasts).
+ *
+ * * KEY FUNCTIONALITIES:
+ *
+ * 1. Data Loading & Display:
+ * - loadFolders() & listPodcasts(): Fetches data from `/folders` and `/podcasts`.
+ * - usersMap: Caches user data to display readable "Uploaded by [Username]" names instead of raw UIDs.
+ * - openFolderModal(folderId): Filters global podcasts to show only those belonging 
+ * to a specific folder within a modal view.
+ *
+ * 2. Role-Based Access Control (RBAC):
+ * - isMasterUser(): Checks if the current user is the admin ("teamprojectgrupoc@gmail.com").
+ * - Admin Powers: Only the Master User sees "Delete" buttons for podcasts and folders.
+ * - Regular Users: Can only View and Share content.
+ *
+ * 3. Content Deletion Logic:
+ * - deletePodcast(): Removes the DB entry AND deletes associated files (Audio/Icon) from Storage.
+ * - deleteFolder(): Removes the folder and updates all contained podcasts to have `folderId: null` 
+ * (orphaning them back to the main list rather than deleting them).
+ *
+ * 4. Sharing System (promptSharePodcast):
+ * - Opens a custom "User Select Modal" listing all registered users.
+ * - Upon selection, creates a new Chat or appends to an existing one.
+ * - Sends a structured "Attachment Message" containing the podcast metadata.
+ *
+ * 5. Search & Filtering:
+ * - Client-side filtering of the podcast list based on the search input query.
+ * ============================================================================
+ */
 // Firabase App initialization
 import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 
