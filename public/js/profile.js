@@ -835,21 +835,27 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
 
 //----------SHARE ARTISTS-------------------------------------------------------------------------------------------------------------------
 
-async function loadUserChatsForShare(selectEl) {
+async function loadUsersForShare(selectEl, { modalId, pickerId }) {
   const db = getDatabase();
 
-  // 1) Mantener el SELECT para que tu #shareArtistConfirm siga funcionando igual
+  // Mantener el SELECT para que tu confirm siga funcionando igual
   selectEl.innerHTML = "";
-  selectEl.style.display = "none"; // opcional
+  selectEl.style.display = "none";
 
-  // 2) Crear / reutilizar UI (buscador + lista) dentro del modal
-  const modal = document.getElementById("shareArtistModal");
+  const modal = document.getElementById(modalId);
   const box = modal.querySelector(".modal-content") || modal;
 
-  let picker = box.querySelector("#shareArtistUserPicker");
+  // ⚠️ Evitar IDs duplicados (si quedó colgado en otro modal)
+  const existingGlobal = document.getElementById(pickerId);
+  if (existingGlobal && !box.contains(existingGlobal)) {
+    existingGlobal.remove();
+  }
+
+  // Crear / reutilizar picker dentro del modal correcto
+  let picker = box.querySelector(`#${pickerId}`);
   if (!picker) {
     picker = document.createElement("div");
-    picker.id = "shareArtistUserPicker";
+    picker.id = pickerId;
 
     const search = document.createElement("input");
     search.type = "text";
@@ -877,7 +883,7 @@ async function loadUserChatsForShare(selectEl) {
   }
   function norm(s) { return (s || "").toString().toLowerCase().trim(); }
 
-  // 3) 🔥 Cargar TODOS los usuarios (lógica podcast.js)
+  // ✅ TODOS los usuarios (lógica podcast.js)
   const usersSnap = await get(ref(db, "users"));
   if (!usersSnap.exists()) {
     listEl.innerHTML = `<li class="user-select-empty">No users found.</li>`;
@@ -894,12 +900,11 @@ async function loadUserChatsForShare(selectEl) {
     const username = u.username || u.email || "(no name)";
     const email = u.email || "";
 
-    // Generar chatId como en shareToUser (determinístico)
     const a = currentUser.uid;
     const b = uid;
     const chatId = a < b ? `${a}_${b}` : `${b}_${a}`;
 
-    // Rellenar select (compatibilidad con tu confirm actual)
+    // Compatibilidad con tu confirm actual
     const opt = document.createElement("option");
     opt.value = chatId;
     opt.textContent = username;
@@ -908,7 +913,6 @@ async function loadUserChatsForShare(selectEl) {
     usersArray.push({ uid, chatId, username, email });
   }
 
-  // 4) Render lista + seleccionar (setea select.value)
   function render(filtered) {
     listEl.innerHTML = "";
 
@@ -936,8 +940,8 @@ async function loadUserChatsForShare(selectEl) {
       btn.addEventListener("click", () => {
         selectEl.value = u.chatId;
 
-        // feedback visual
-        [...listEl.querySelectorAll(".is-selected")].forEach(x => x.classList.remove("is-selected"));
+        [...listEl.querySelectorAll(".is-selected")]
+          .forEach(x => x.classList.remove("is-selected"));
         li.classList.add("is-selected");
       });
 
@@ -947,23 +951,20 @@ async function loadUserChatsForShare(selectEl) {
     });
   }
 
-  // Inicial
+  // Reset buscador y render inicial
+  searchEl.value = "";
   render(usersArray);
 
-  // Filtro realtime
-  searchEl.value = "";
   searchEl.oninput = () => {
     const q = norm(searchEl.value);
-    const filtered = !q
-      ? usersArray
-      : usersArray.filter(u => norm(u.username).includes(q) || norm(u.email).includes(q));
+    const filtered = !q ? usersArray : usersArray.filter(u =>
+      norm(u.username).includes(q) || norm(u.email).includes(q)
+    );
     render(filtered);
   };
 
-  // Seleccionar el primero por defecto (para que confirm funcione sin clicar)
-  if (usersArray.length) {
-    selectEl.value = usersArray[0].chatId;
-  }
+  // Selección por defecto
+  if (usersArray.length) selectEl.value = usersArray[0].chatId;
 }
 
 
@@ -980,7 +981,7 @@ function openShareArtistModal(artist) {
   modal.dataset.artistName = artist.name;
   modal.dataset.artistImage = artist.image;
 
-  loadUserChatsForShare(select);
+  loadUsersForShare(select, { modalId: "shareArtistModal", pickerId: "shareArtistUserPicker" });
 
   modal.style.display = "flex";
 }
@@ -1324,7 +1325,7 @@ function openShareSongModal(track) {
   modal.dataset.trackImage = track.albumImageUrl;
   modal.dataset.trackAudioUrl = track.previewUrl;
 
-  loadUserChatsForShare(select);
+  loadUsersForShare(select, { modalId: "shareSongModal", pickerId: "shareSongUserPicker" });
 
   modal.style.display = "flex";
 }
