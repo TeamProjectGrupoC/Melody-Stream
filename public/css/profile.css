@@ -1055,3 +1055,10 @@ main a:hover {
   font-weight: 600;
   margin-top: 0.6rem;
 }
+
+#userPodcasts, #userFolders,
+#favArtistsSection, #favSongsSection{
+  max-width: 1200px;
+  width: 100%;
+}
+
