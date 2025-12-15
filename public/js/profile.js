@@ -1,17 +1,79 @@
-// --- IMPORTACIONES ---
-// Módulos de App y Autenticación (como los tenías)
+// --- IMPORTS ---
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 import { saveFavouriteSong, saveFavouriteArtist } from "./favourites.js";
-
-// Módulos de Realtime Database (RTDB)
 import { getDatabase, ref, onValue, set, get, update, push, remove } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 const databaseRef = ref;
-
-// Módulos de Storage
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
-// --- CONFIGURACIÓN DE FIREBASE ---
+/**
+ * ============================================================================
+ * MAIN PROFILE
+ * ============================================================================
+
+DATABASE STRUCTURE AND LOGIC:
+/users/{uid} 
+    - Stores profile URL, username, phone.
+/podcasts/{pid} 
+    - Stores user-uploaded podcasts (idcreador = uid).
+    - Can be updated to include 'folderId'.
+/folders/{fid} 
+    - Stores user-created folders (createdBy = uid) for organizing podcasts.
+/users/{uid}/favourite_artists/{artistId} 
+    - Stores references to favourite artists (loaded from /artistas).
+/users/{uid}/favoritos/{songId} 
+    - Stores references to favourite songs (loaded from /canciones).
+
+LOGIC FOR DELETION:
+- Deleting a Podcast: Removes entry from /podcasts/{pid} and deletes associated files (audioURL, iconURL) from Storage.
+- Deleting a Folder: Removes entry from /folders/{fid} and cleans up 'folderId' from all associated podcasts.
+
+LOGIC FOR SHARING (Artists/Songs):
+- Uses loadUsersForShare for user selection.
+- Shares content by pushing a new message to /chats/{chatId}/messages with an 'attachment' object.
+- Updates /userChats/{uid}/{chatId} (lastMessage and isRead status).
+*/
+
+/**
+ * MAIN EXECUTION FLOW & FUNCTION SUMMARY:
+ * * 1. CONFIGURATION & STATE
+ * - Initializes Firebase services (App, DB, Auth, Storage).
+ * - Declares global state (currentUser, Spotify tokens/player state).
+ * 
+ * * 2. SPOTIFY INTEGRATION
+ * - isSpotifyTokenValid(token): Checks if the token is active.
+ * - initSpotifyPlaybackSDK(): Loads Spotify SDK, connects player, and sets deviceId (Premium required).
+ * - IIFE: Auto-starts SDK if tokens are valid.
+ * 
+ * * 3. PROFILE DATA: cargarDatosDePerfil()
+ * - Listener (onAuthStateChanged): Sets currentUser, loads profile data (/users/{uid}).
+ * - Calls content loaders: loadUserPodcasts, loadUserFolders, loadFavouriteArtists, loadFavouriteSongs.
+ * 
+ * * 4. CONTENT MANAGEMENT: loadUserPodcasts(uid) / loadUserFolders(uid)
+ * - Fetches user content (podcasts where idcreador=uid, folders where createdBy=uid).
+ * - Renders lists with functionality (play, add to folder, REMOVE from DB and Storage).
+ * 
+ * * 5. PROFILE PICTURE UPLOAD: setupFormUploadListener()
+ * - Handles form submission. Uploads file to Storage (`profile_images/{uid}`).
+ * - Saves resulting download URL in RTDB (`users/{uid}/urlFotoPerfil`).
+ * 
+ * * 6. FOLDER MODAL: loadFolderPodcasts(fid, fname)
+ * - Renders a modal view displaying all podcasts associated with a given folderId.
+ * 
+ * * 7. FAV ARTISTS: loadFavouriteArtists(uid) & renderSavedArtists(artists)
+ * - Listens to /users/{uid}/favourite_artists, fetches details from /artistas, and renders the list.
+ * - Includes search (searchArtist) and Add/Remove/Share functionality.
+ * 
+ * * 8. FAV SONGS: loadFavouriteSongs(uid) & renderSavedSongs(ids, data)
+ * - Listens to /users/{uid}/favoritos, fetches details from /canciones, and renders the list.
+ * - Includes Playback (playTrack) and Remove/Share functionality.
+ * 
+ * * 9. SHARING LOGIC: loadUsersForShare & shareArtistToChat / shareSongToChat
+ * - loadUsersForShare: Creates a searchable user picker within the sharing modal (used for both Artists and Songs).
+ * - share...ToChat: Constructs a message with an 'attachment' and executes DB updates to send content via chat.
+ */
+
+// --- FIREBASE CONFIGURATION ---
 const firebaseConfig = {
   apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
   authDomain: "melodystream123.firebaseapp.com",
@@ -23,12 +85,13 @@ const firebaseConfig = {
   measurementId: "G-J97KEDLYMB"
 };
 
-// --- INICIALIZACIÓN DE SERVICIOS ---
+// --- service initialization ---
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
-let currentUser = null; // Guardaremos el usuario aquí para que la función de subida lo vea
+let currentUser = null; 
+
 // --- SPOTIFY PLAYER VARIABLES (Same logic as chats.js) ---
 let playerReady = false;
 let isPlaying = false;
@@ -102,10 +165,8 @@ function cargarDatosDePerfil() {
   const msgElemento = document.getElementById('msg');
 
   if (!imagenElemento || !msgElemento) {
-    console.error("Faltan elementos HTML (msg o fotoPerfilUsuario)");
     return;
   }
-
 
   onAuthStateChanged(auth, async (user) => {
     currentUser = user; // set global user for upload function
@@ -154,7 +215,6 @@ function cargarDatosDePerfil() {
       loadFavouriteArtists(user.uid);
       loadFavouriteSongs(user.uid);
 
-
     } else {
       msgElemento.textContent = "⚠️ You must be logged in to see your profile.";
       imagenElemento.src = "images/logos/silueta.png";
@@ -178,6 +238,7 @@ async function loadUserPodcasts(uid) {
   let container = document.getElementById('userPodcasts');
   let heading = document.getElementById('podcast-heading');
 
+  //If the container does not exist, create it
   if (!container) {
     container = document.createElement('div');
     container.id = 'userPodcasts';
@@ -193,6 +254,7 @@ async function loadUserPodcasts(uid) {
     profileMain.appendChild(container);
   }
 
+  //Wrapper where podcasts cards will be rendered
   let contentWrapper = document.getElementById('podcasts-content-wrapper');
   if (!contentWrapper) {
         contentWrapper = document.createElement('div');
@@ -217,8 +279,11 @@ async function loadUserPodcasts(uid) {
     
     let found = false;
 
+    //Load all folders from the db
     const foldersSnap = await get(databaseRef(db, 'folders'));
     const userFolders = {};
+
+    //Filter only folders created by current user
     if (foldersSnap.exists()) {
       const allFolders = foldersSnap.val();
       for (const fid in allFolders) {
@@ -237,25 +302,25 @@ async function loadUserPodcasts(uid) {
         const item = document.createElement('div');
         item.className = 'podcast-card';
 
-        // Image
+        //Podcast image
         const img = document.createElement('img');
         img.src = p.iconURL || 'images/logos/silueta.png';
         img.alt = (p.nombre || 'podcast') + ' icon';
         item.appendChild(img);
 
-        // Títle
+        //Podcast title
         const title = document.createElement('h4');
         title.textContent = p.nombre || '(no title)';
         item.appendChild(title);
 
-        // Description
+        //Podcast description
         if (p.descripcion) {
           const desc = document.createElement('p');
           desc.textContent = p.descripcion;
           item.appendChild(desc);
         }
 
-        // Audio
+        //Podcast audio player
         if (p.audioURL || p.audioUrl || p.audio) {
           const audio = document.createElement('audio');
           audio.controls = true;
@@ -263,10 +328,11 @@ async function loadUserPodcasts(uid) {
           item.appendChild(audio);
         }
 
+        //Folder selection controls
         const controlWrapper = document.createElement('div');
         controlWrapper.className = 'folder-selection-container';
 
-        // Selectfolders
+        //Folder label
         const folderLabel = document.createElement('label');
         folderLabel.textContent = 'Folder:';
         folderLabel.htmlFor = `folder-select-${pid}`;
@@ -279,6 +345,7 @@ async function loadUserPodcasts(uid) {
         noneOpt.textContent = '-- No folder --';
         select.appendChild(noneOpt);
 
+        //Add user's folders to the dropdown
         for (const fid in userFolders) {
           const opt = document.createElement('option');
           opt.value = fid;
@@ -306,19 +373,17 @@ async function loadUserPodcasts(uid) {
             addBtn.textContent = 'Saved!';
             setTimeout(() => (addBtn.textContent = originalText), 1500);
           } catch (err) {
-            console.error('Error updating podcast folder:', err);
             alert('Error updating folder: ' + (err.message || err));
           }
         });
 
-        // Botón Delete para el podcast
+        //Delete podcast button
         const deleteBtn = document.createElement('button');
         deleteBtn.textContent = 'Remove';
         deleteBtn.className = 'btn btn-outline-danger mt-3';
         deleteBtn.addEventListener('click', async () => {
           if (!confirm(`Are you sure you want to delete "${p.nombre || 'this podcast'}"?`)) return;
           try {
-            // Borrar archivos de storage si existen
             if (p.audioURL) {
               try {
                 const audioRef = storageRef(storage, p.audioURL);
@@ -335,13 +400,11 @@ async function loadUserPodcasts(uid) {
                 console.warn('Could not delete icon from storage:', e);
               }
             }
-            // Borrar entrada de la base de datos
+            //Remove podcast entry from the db
             await remove(databaseRef(db, `podcasts/${pid}`));
-            // Recargar la lista
             await loadUserPodcasts(uid);
             alert('Podcast deleted successfully');
           } catch (err) {
-            console.error('Error deleting podcast:', err);
             alert('Failed to delete podcast: ' + (err.message || err));
           }
         });
@@ -351,6 +414,7 @@ async function loadUserPodcasts(uid) {
       }
     }
 
+    //Render final result
     contentWrapper.innerHTML = '';
     if (found) {
       contentWrapper.appendChild(list);
@@ -359,7 +423,6 @@ async function loadUserPodcasts(uid) {
     }
 
   } catch (err) {
-    console.error('Error loading user podcasts:', err);
     contentWrapper.innerHTML = '<p class="empty-message">Failed to load your podcasts.</p>';
   }
 }
@@ -368,6 +431,7 @@ async function loadUserFolders(uid) {
   let container = document.getElementById("userFolders");
   let heading = document.getElementById('folders-heading');
 
+  //If container does not exist, create it
   if (!container) {
     container = document.createElement("div");
     container.id = "userFolders";
@@ -383,7 +447,8 @@ async function loadUserFolders(uid) {
     container.appendChild(heading);
     profileMain.appendChild(container);
   }
-
+  
+  // Wrapper for dynamic content
   let contentWrapper = document.getElementById('folders-content-wrapper');
   if (!contentWrapper) {
         contentWrapper = document.createElement('div');
@@ -409,23 +474,25 @@ async function loadUserFolders(uid) {
     
     for (const fid in folders) {
       const f = folders[fid];
+
+      // Only folders created by current user
       if (f.createdBy === uid) {
         found = true;
         const item = document.createElement("div");
         item.className = "folder-item";
 
-        // Imagen
+        //Folder image
         const img = document.createElement("img");
         img.src = f.iconURL || "images/logos/silueta.png";
         img.alt = f.name + " icon";
         item.appendChild(img);
 
-        // Título
+        //Folder title
         const title = document.createElement("h4");
         title.textContent = f.name || "(no name)";
         item.appendChild(title);
 
-        // Descripción
+        //Folder description
         if (f.description) {
           const desc = document.createElement("p");
           desc.textContent = f.description;
@@ -437,6 +504,7 @@ async function loadUserFolders(uid) {
         viewBtn.textContent = "View";
         viewBtn.classList.add("main-button", "view-folder");
 
+        //Store folder data in attributes
         viewBtn.setAttribute('data-folder-id', fid);
         viewBtn.setAttribute('data-folder-name', f.name || '');
 
@@ -449,7 +517,6 @@ async function loadUserFolders(uid) {
         deleteBtn.addEventListener('click', async () => {
           if (!confirm(`Are you sure you want to delete the folder "${f.name || fid}"?`)) return;
           try {
-            // Borrar icono de storage si existe
             if (f.iconURL) {
               try {
                 const iconRef = storageRef(storage, f.iconURL);
@@ -458,10 +525,10 @@ async function loadUserFolders(uid) {
                 console.warn('Could not delete folder icon from storage:', e);
               }
             }
-            // Borrar entrada de la carpeta
+            //Remove folder from database
             await remove(databaseRef(db, `folders/${fid}`));
             
-            // Limpiar folderId de todos los podcasts que estaban en esta carpeta
+            //Remove folderID from all podcasts that used this folder
             const podsSnap = await get(databaseRef(db, 'podcasts'));
             if (podsSnap.exists()) {
               const allPods = podsSnap.val();
@@ -473,11 +540,9 @@ async function loadUserFolders(uid) {
               }
             }
             
-            // Recargar la lista
             await loadUserFolders(uid);
             alert('Folder deleted successfully');
           } catch (err) {
-            console.error('Error deleting folder:', err);
             alert('Failed to delete folder: ' + (err.message || err));
           }
         });
@@ -494,7 +559,6 @@ async function loadUserFolders(uid) {
     }
   } 
   catch (err) {
-    console.error("Error loading user folders:", err);
     contentWrapper.innerHTML = '<p class="empty-message">Failed to load your folders.</p>';
   }
 }
@@ -509,36 +573,36 @@ function setupFormUploadListener() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // 1. Validaciones
+    //Validations
     if (!currentUser) {
       alert("You must be logged in to upload a photo.");
       return;
     }
+
+    //Get selected file
     const file = fileInput.files[0];
     if (!file) {
       alert("Please select a file.");
       return;
     }
 
-    // 2. Crear la ruta de subida en Firebase Storage
+    //Create storage path
     const filePath = `profile_images/${currentUser.uid}/${file.name}`;
-    const sRef = storageRef(storage, filePath); // Usamos storageRef
+    const sRef = storageRef(storage, filePath);
 
     try {
-      // 3. Subir el archivo
+      //Upload file
       alert("Uploading photo...");
       const snapshot = await uploadBytes(sRef, file);
-      console.log('Photo uploaded!', snapshot);
 
-      // 4. Obtener la URL de descarga
+      //Get download url
       const downloadURL = await getDownloadURL(snapshot.ref);
-      console.log('File URL:', downloadURL);
 
-      // 5. Guardar la URL en Realtime Database
+      //Save URL in db
       const userDbRef = databaseRef(db, 'users/' + currentUser.uid + '/urlFotoPerfil');
       await set(userDbRef, downloadURL);
 
-      // 6. Actualizar la imagen en la página (la silueta)
+      //Update ui
       document.getElementById('fotoPerfilUsuario').src = downloadURL;
       const headerPic = document.getElementById('headerUserPic');
       if (headerPic) headerPic.src = downloadURL;
@@ -548,33 +612,38 @@ function setupFormUploadListener() {
       alert("¡Profile picture updated!");
 
     } catch (error) {
-      console.error("Error al subir el archivo:", error);
       alert("Error uploading photo. Check your console.");
     }
   });
 }
 
 function createPodcastCard(p) {
+
+  //Create the main wrapper for the podcast card
   const wrapper = document.createElement('div');
   wrapper.className = 'podcast-card';
 
+  //Create thumbnail image element
   const thumb = document.createElement('img');
   thumb.src = p.thumbnail || 'images/logos/default.png';
   thumb.alt = p.title || 'thumbnail';
 
+  //Container for podcast information
   const info = document.createElement('div');
   info.className = 'podcast-card-info';
 
+  //Podcast title
   const title = document.createElement('h3');
   title.textContent = p.title || 'Sin título';
 
+  //Podcast description
   const desc = document.createElement('p');
   desc.textContent = p.description || '';
 
   info.appendChild(title);
   info.appendChild(desc);
 
-  // Audio player si existe
+  //Resolver audio source from multiple possible property names
   const audioSrc = p.audioURL || p.audioUrl || p.audio || p.url || p.audio_src || '';
   if (audioSrc) {
     const audioEl = document.createElement('audio');
@@ -605,7 +674,10 @@ function closeModal() {
   if (titleEl) titleEl.textContent = 'Podcasts de la carpeta';
 }
 
+
 async function loadFolderPodcasts(folderId, folderName) {
+
+  //Get modal elements where podcasts will be rendered
   const listEl = document.getElementById('folder-podcast-list');
   const titleEl = document.getElementById('folder-modal-title');
   if (!listEl || !titleEl) return;
@@ -614,6 +686,7 @@ async function loadFolderPodcasts(folderId, folderName) {
   openModal();
 
   try {
+    //Retrieve all podcasts from the db
     const podsSnap = await get(databaseRef(db, 'podcasts'));
     if (!podsSnap.exists()) {
       listEl.innerHTML = '<p class="modal-empty-message">This folder is empty.</p>';
@@ -621,6 +694,8 @@ async function loadFolderPodcasts(folderId, folderName) {
     }
     const all = podsSnap.val();
     const items = [];
+
+    //Filter podcasts that belong to the selected folder
     for (const pid in all) {
       const p = all[pid];
       if (p.folderId && String(p.folderId) === String(folderId)) {
@@ -640,20 +715,20 @@ async function loadFolderPodcasts(folderId, folderName) {
     }
     items.forEach(p => listEl.appendChild(createPodcastCard(p)));
   } catch (err) {
-    console.error(err);
     titleEl.textContent = 'Error al cargar';
     listEl.innerHTML = '<p class="modal-empty-message">No se pudieron cargar los podcasts.</p>';
   }
 }
 
-// --- INICIAR LAS FUNCIONES ---
-// Cuando el HTML esté cargado, ejecuta ambas funciones
+//------ INITIALIZATION ---------------
+
+//Run when the DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-  cargarDatosDePerfil(); // Carga el email y la foto existente
-  setupFormUploadListener(); // Prepara el formulario de subida
+  cargarDatosDePerfil(); 
+  setupFormUploadListener();
 });
 
-// handlers globales que usan los elementos si existen
+//------- GLOBAL NAVIGATION HANDLERS ------------
 const goToChatBtn = document.getElementById('goToChatBtn');
 if (goToChatBtn) {
   goToChatBtn.addEventListener('click', () => {
@@ -661,8 +736,7 @@ if (goToChatBtn) {
   });
 }
 
-
-// Evento para abrir modal al hacer click en botón .view-folder (delegación)
+//------ OPEN FOLDER MODAL (EVENT DELEGATION) ---------
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.view-folder');
   if (!btn) return;
@@ -673,20 +747,17 @@ document.addEventListener('click', (e) => {
   loadFolderPodcasts(fid, fname);
 });
 
-// Cerrar modal - botones existentes en DOM
+//Close modal
 document.getElementById('folder-modal-close')?.addEventListener('click', closeModal);
 document.getElementById('folder-form-close')?.addEventListener('click', closeModal);
 
-// cerrar al hacer click fuera del contenido
 document.getElementById('folder-modal')?.addEventListener('click', (e) => {
   if (e.target && e.target.id === 'folder-modal') closeModal();
 });
 
 
-
-
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-//SECCION DE ARTISTAS FAVORITOS
+//FAVOURITE ARTIST SECTION
 function getSpotifyUserToken() {
   return localStorage.getItem("spotify_access_token");
 }
@@ -708,6 +779,7 @@ async function fetchArtistData(artistIds) {
   for (const id of artistIds) {
     const artistSnap = await get(ref(db, `artistas/${id}`));
     if (artistSnap.exists()) {
+      //Merge artist ID with the stored artist data
       artists.push({ id, ...artistSnap.val() });
     }
   }
@@ -720,10 +792,9 @@ function loadFavouriteArtists(userId) {
   const favRef = ref(db, `users/${userId}/favourite_artists`);
 
   onValue(favRef, snapshot => {
-    const favData = snapshot.val() || {};
+    const favData = snapshot.val() || {}; //Get favourite artists data or an empty object if none exists
     const artistIds = Object.keys(favData);
 
-    // LLAMAMOS A UNA FUNCIÓN ASYNC EXTERNA
     fetchArtistData(artistIds);
   });
 }
@@ -732,6 +803,7 @@ function loadFavouriteArtists(userId) {
 async function removeFavouriteArtist(artistId) {
   const db = getDatabase();
 
+  //Reference to the specific favourite artist of the current user
   const favRef = ref(db, `users/${currentUser.uid}/favourite_artists/${artistId}`);
   await remove(favRef);
 
@@ -740,6 +812,8 @@ async function removeFavouriteArtist(artistId) {
 
 
 function renderSavedArtists(artists) {
+
+  //Get containser where saved artist will be rendered
   const container = document.getElementById("savedArtists");
   container.innerHTML = "";
 
@@ -747,6 +821,7 @@ function renderSavedArtists(artists) {
     const div = document.createElement("div");
     div.classList.add("artistCard");
 
+    //Build artist card HTML
     div.innerHTML = `
       <img src="${a.image || 'images/default_artist.png'}" style="width:80px;border-radius:50%">
       <p>${a.name}</p>
@@ -755,12 +830,12 @@ function renderSavedArtists(artists) {
       <button class="removeArtistBtn">Remove</button>
     `;
 
-    // REMOVE
+    //Remove artist button
     div.querySelector(".removeArtistBtn").addEventListener("click", async () => {
       removeFavouriteArtist(a.id);
     });
 
-    // SHARE
+    //Share artist button
     div.querySelector(".shareArtistBtn").addEventListener("click", () => {
       openShareArtistModal(a);
     });
@@ -769,13 +844,12 @@ function renderSavedArtists(artists) {
   });
 }
 
-
-
+//Event listener for "Search Artist" button
 document.getElementById("btnSearchArtist").addEventListener("click", async () => {
   const query = document.getElementById("artistSearch").value.trim();
   const resultContainer = document.getElementById("artistResults");
 
-  resultContainer.innerHTML = ""; // limpia resultados previos
+  resultContainer.innerHTML = ""; 
 
   if (query === "") {
     resultContainer.innerHTML = "<p>Please enter an artist name.</p>";
@@ -794,6 +868,7 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
       reconnectBtn.className = "main-button";
       reconnectBtn.style.marginTop = "10px";
 
+      //Redirect to Spotify connection page on click
       reconnectBtn.addEventListener("click", () => {
           window.location.href = "test_register_spotify.html";
       });
@@ -802,6 +877,7 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
       return;
     }
 
+    //Search for artists via Spotify API
     const artists = await searchArtist(query);
 
     if (!artists || artists.length === 0) {
@@ -809,6 +885,7 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
       return;
     }
 
+    //Render each artist
     artists.forEach(artist => {
       const card = document.createElement("div");
       card.classList.add("artistCard");
@@ -828,30 +905,27 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
     });
 
   } catch (error) {
-    console.error("Error searching artists:", error);
     resultContainer.innerHTML = "<p>Error searching artists.</p>";
   }
 });
 
 //----------SHARE ARTISTS-------------------------------------------------------------------------------------------------------------------
-
 async function loadUsersForShare(selectEl, { modalId, pickerId }) {
   const db = getDatabase();
 
-  // Mantener el SELECT para que tu confirm siga funcionando igual
   selectEl.innerHTML = "";
   selectEl.style.display = "none";
 
   const modal = document.getElementById(modalId);
   const box = modal.querySelector(".modal-content") || modal;
-
-  // ⚠️ Evitar IDs duplicados (si quedó colgado en otro modal)
+ 
+  //Remove global picker if it exists outside the current modal
   const existingGlobal = document.getElementById(pickerId);
   if (existingGlobal && !box.contains(existingGlobal)) {
     existingGlobal.remove();
   }
 
-  // Crear / reutilizar picker dentro del modal correcto
+  //Create the picker if it does not exist
   let picker = box.querySelector(`#${pickerId}`);
   if (!picker) {
     picker = document.createElement("div");
@@ -875,6 +949,7 @@ async function loadUsersForShare(selectEl, { modalId, pickerId }) {
   const searchEl = picker.querySelector("input");
   const listEl = picker.querySelector("ul");
 
+  //Escape HTML to prevent injection
   function escapeHtml(str) {
     if (!str) return "";
     return str.replace(/[&<>"']/g, (m) => ({
@@ -883,7 +958,6 @@ async function loadUsersForShare(selectEl, { modalId, pickerId }) {
   }
   function norm(s) { return (s || "").toString().toLowerCase().trim(); }
 
-  // ✅ TODOS los usuarios (lógica podcast.js)
   const usersSnap = await get(ref(db, "users"));
   if (!usersSnap.exists()) {
     listEl.innerHTML = `<li class="user-select-empty">No users found.</li>`;
@@ -893,6 +967,7 @@ async function loadUsersForShare(selectEl, { modalId, pickerId }) {
   const users = usersSnap.val();
   const usersArray = [];
 
+  //Build array of users and options for the hidden select
   for (const uid in users) {
     if (uid === currentUser.uid) continue;
 
@@ -904,7 +979,6 @@ async function loadUsersForShare(selectEl, { modalId, pickerId }) {
     const b = uid;
     const chatId = a < b ? `${a}_${b}` : `${b}_${a}`;
 
-    // Compatibilidad con tu confirm actual
     const opt = document.createElement("option");
     opt.value = chatId;
     opt.textContent = username;
@@ -913,6 +987,7 @@ async function loadUsersForShare(selectEl, { modalId, pickerId }) {
     usersArray.push({ uid, chatId, username, email });
   }
 
+  //Function to render filtered users
   function render(filtered) {
     listEl.innerHTML = "";
 
@@ -928,11 +1003,13 @@ async function loadUsersForShare(selectEl, { modalId, pickerId }) {
       const li = document.createElement("li");
       li.className = "user-select-item";
 
+      //User info
       const info = document.createElement("div");
       info.className = "user-select-info";
       info.innerHTML = `<strong>${escapeHtml(u.username)}</strong>
                         <div class="user-select-email">${escapeHtml(u.email)}</div>`;
 
+      //Select button
       const btn = document.createElement("button");
       btn.type = "button";
       btn.className = "btn user-select-btn";
@@ -951,7 +1028,7 @@ async function loadUsersForShare(selectEl, { modalId, pickerId }) {
     });
   }
 
-  // Reset buscador y render inicial
+  //Initial render with all users
   searchEl.value = "";
   render(usersArray);
 
@@ -963,7 +1040,6 @@ async function loadUsersForShare(selectEl, { modalId, pickerId }) {
     render(filtered);
   };
 
-  // Selección por defecto
   if (usersArray.length) selectEl.value = usersArray[0].chatId;
 }
 
@@ -976,11 +1052,12 @@ function openShareArtistModal(artist) {
 
   nameEl.innerText = artist.name;
 
-  // guardamos datos del artista en el modal
+  //Store artist data in modal's dataset
   modal.dataset.artistId = artist.id;
   modal.dataset.artistName = artist.name;
   modal.dataset.artistImage = artist.image;
 
+  //Load de users into the custom picker
   loadUsersForShare(select, { modalId: "shareArtistModal", pickerId: "shareArtistUserPicker" });
 
   modal.style.display = "flex";
@@ -1059,12 +1136,11 @@ document.getElementById("shareArtistConfirm").addEventListener("click", async ()
   alert("Artist shared!");
 });
 
-// SONGS
-//----------------------------------------------------------------------------------------------------------------------------------------------------------------------z
-
+//------------------SONGS---------------------
 async function searchSong(query) {
-  const token = getSpotifyUserToken();
+  const token = getSpotifyUserToken(); //Get spotify user acces token
 
+  //make a reques to spotify search api
   const resp = await fetch(
     `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=6`,
     {
@@ -1079,7 +1155,7 @@ async function searchSong(query) {
 function loadFavouriteSongs(userId) {
   const db = getDatabase();
   const favRef = ref(db, `users/${userId}/favoritos`);
-
+  
   onValue(favRef, snapshot => {
     const data = snapshot.val() || {};
     const songIds = Object.keys(data);
@@ -1094,7 +1170,7 @@ async function playTrack(uri, playButton) {
         return;
     }
 
-    // Otra canción → parar la anterior
+    //If a different track is currently playing, pause it first
     if (currentPlayingUri && currentPlayingUri !== uri) {
         await fetch(
             `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`,
@@ -1106,7 +1182,7 @@ async function playTrack(uri, playButton) {
         }
     }
 
-    // Misma canción → pausar
+    //If the same track is playing, pause it
     if (currentPlayingUri === uri && currentPlayingUri && playButton.textContent === "⏹ Stop") {
         await fetch(
             `https://api.spotify.com/v1/me/player/pause?device_id=${deviceId}`,
@@ -1118,7 +1194,7 @@ async function playTrack(uri, playButton) {
         return;
     }
 
-    // Reproducir
+    //Play the selected track
     await fetch(
         `https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
         {
@@ -1131,10 +1207,13 @@ async function playTrack(uri, playButton) {
         }
     );
 
+    //Update current playing state
     currentPlayingUri = uri;
     playButton.textContent = "⏹ Stop";
     currentActivePlayButton = playButton;
 }
+
+
 async function removeFavSongs(songId){
   const db = getDatabase();
 
@@ -1304,7 +1383,6 @@ document.getElementById("btnSearchSong").addEventListener("click", async () => {
     });
 
   } catch (error) {
-    console.error("Error searching songs:", error);
     resultContainer.innerHTML = "<p>Error searching songs.</p>";
   }
 });
@@ -1387,6 +1465,7 @@ document.getElementById("shareSongConfirm").addEventListener("click", async () =
   const chatId = document.getElementById("chatSelectSong").value;
   const modal = document.getElementById("shareSongModal");
 
+  //create a track object from modal dataset
   const track = {
     id: modal.dataset.trackId,
     title: modal.dataset.trackTitle,
@@ -1396,21 +1475,19 @@ document.getElementById("shareSongConfirm").addEventListener("click", async () =
     previewUrl: modal.dataset.trackAudioUrl
   };
 
-
-  await shareSongToChat(chatId, track);
+  await shareSongToChat(chatId, track); //share song to selected chat
 
   modal.style.display = "none";
   alert("Song shared!");
 });
 
-// Crea un objeto global compartido entre módulos
+//Create a global object shared between modules
 if (!globalThis.MelodyStreamAPI) {
     globalThis.MelodyStreamAPI = {};
 }
 
-// Nueva función para abrir el modal de carpeta (puedes llamarla desde cualquier parte)
+//Function to open a folder modal and display its podcast
 async function openFolderModal(folderId, folderName = '') {
-  // asegúrate de que existe #folder-modal y #folder-podcast-list en el DOM
   let modal = document.getElementById('folder-modal');
   if (!modal) {
     modal = document.createElement('div');
@@ -1418,7 +1495,7 @@ async function openFolderModal(folderId, folderName = '') {
     document.body.appendChild(modal);
   }
 
-  // estructura mínima dentro del modal
+  //Modal content structure
   modal.innerHTML = `
     <div class="folder-modal-inner" style="max-width:1100px;width:95%;padding:20px;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -1442,7 +1519,6 @@ async function openFolderModal(folderId, folderName = '') {
   modal.style.display = 'flex';
 
   try {
-    // intenta usar allPodcasts en memoria si existe, si no, consulta la DB
     let all = window.allPodcasts || {};
     if (!Object.keys(all).length) {
       const snap = await get(ref(db, 'podcasts'));
@@ -1464,7 +1540,7 @@ async function openFolderModal(folderId, folderName = '') {
       return;
     }
 
-    // crear tarjetas EXACTAS como en podcast.js
+    //Render each podcast card
     for (const it of items) {
       const p = it.data;
       const card = document.createElement('div');
@@ -1479,6 +1555,7 @@ async function openFolderModal(folderId, folderName = '') {
       titleEl.textContent = p.nombre || p.title || '(Sin título)';
       card.appendChild(titleEl);
 
+      //Show uploader info if avaliable
       if (p.uploaderName || p.idcreador) {
         const uploader = document.createElement('div');
         uploader.className = 'podcast-uploader';
@@ -1504,7 +1581,6 @@ async function openFolderModal(folderId, folderName = '') {
         card.appendChild(audio);
       }
 
-      // botones: delete (si puede) y share (igual que en podcasts)
       const canDelete = (typeof isMasterUser === 'function' && isMasterUser()) ||
                         (currentUser && p.idcreador && String(p.idcreador) === String(currentUser.uid));
       if (canDelete) {
@@ -1518,6 +1594,7 @@ async function openFolderModal(folderId, folderName = '') {
         card.appendChild(del);
       }
 
+      //Share button for each podcast
       const share = document.createElement('button');
       share.className = 'btn btn-outline-primary mt-2';
       share.textContent = 'Share';
@@ -1526,10 +1603,9 @@ async function openFolderModal(folderId, folderName = '') {
       });
       card.appendChild(share);
 
-      listEl.appendChild(card);
+      listEl.appendChild(card); //Add poscast card to the list
     }
   } catch (err) {
-    console.error('openFolderModal error:', err);
     listEl.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--color-blanco)">Error al cargar podcasts.</p>';
   }
 }
