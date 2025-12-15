@@ -799,6 +799,7 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
       });
 
       resultContainer.appendChild(reconnectBtn);
+      return;
     }
 
     const artists = await searchArtist(query);
@@ -1164,7 +1165,7 @@ document.getElementById("btnSearchSong").addEventListener("click", async () => {
 
     if (!tokenValid) {
       resultContainer.innerHTML = ""; 
-      
+
       const reconnectBtn = document.createElement("button");
       reconnectBtn.textContent = "Connect Spotify";
       reconnectBtn.className = "main-button";
@@ -1175,6 +1176,7 @@ document.getElementById("btnSearchSong").addEventListener("click", async () => {
       });
 
       resultContainer.appendChild(reconnectBtn);
+      return;
     }
 
     const songs = await searchSong(query);
