@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       } catch (err) {
         // 6. Error Handling: Force cleanup and reload if sign-out fails
-        console.error("Sign out error:", err);
+        //console.error("Sign out error:", err);
         localStorage.removeItem("spotify_access_token");
         window.location.reload();
       }
@@ -294,7 +294,7 @@ document.addEventListener("DOMContentLoaded", () => {
         headerPic.src = "images/logos/silueta.png";
       }
     } catch (err) {
-      console.error("Error loading header data:", err);
+      //console.error("Error loading header data:", err);
       if (headerPic) headerPic.src = "images/logos/silueta.png";
     }
 

@@ -48,6 +48,8 @@ import { getDatabase, ref, push, set, get, remove, update } from "https://www.gs
 // Firebase Storage functions
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
+import { showAlert } from "./alert.js";
+
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
@@ -97,7 +99,9 @@ onAuthStateChanged(auth, (user) => {
   }
 
   // Reload podcasts to show uploader info properly
-  listPodcasts().catch(e => console.error('Error reloading podcasts after auth change:', e));
+  listPodcasts().catch(err => {
+    // console.error('Error reloading podcasts after auth change:', err);
+  });
 });
 
 // Load users map
@@ -107,7 +111,7 @@ async function loadUsersMap() {
     const snap = await get(usersRef);
     usersMap = snap.exists() ? snap.val() : {};
   } catch (err) {
-    console.error('Error loading users map:', err);
+    //console.error('Error loading users map:', err);
     usersMap = {};
   }
 }
@@ -119,7 +123,7 @@ async function loadFolders() {
     const snapshot = await get(foldersRef);
     allFolders = snapshot.exists() ? snapshot.val() : {};
   } catch (error) {
-    console.error("Error loading folders:", error);
+    //console.error("Error loading folders:", error);
     allFolders = {};
   }
 }
@@ -151,7 +155,7 @@ function makeDeleteButton(onClick) {
   btn.className = "btn btn-outline-danger mt-3";
   // Confirm before deleting (for safety)
   btn.addEventListener("click", () => {
-    if (!isMasterUser()) return alert("You are not allowed to delete this podcast.");
+    if (!isMasterUser()) return showAlert("You are not allowed to delete this podcast", "error");
     onClick();
   });
   return btn;
@@ -288,7 +292,7 @@ async function listPodcasts() {
 
     allPodcasts = snapshot.exists() ? snapshot.val() : {};
   } catch (error) {
-    console.error("Error listing podcasts:", error);
+    //console.error("Error listing podcasts:", error);
     allPodcasts = {};
   }
 }
@@ -338,21 +342,23 @@ async function deletePodcast(podcastId, audioURL, iconURL) {
     delete allPodcasts[podcastId];
     displayPodcasts(allPodcasts);
 
-    alert(`Podcast "${podcastId}" deleted successfully.`);
+    const podcastDelete = `Podcast "${podcastId}" deleted successfully`;
+    showAlert(podcastDelete, "info");
+
   } catch (error) {
-    console.error("Error deleting podcast:", error);
-    alert("Failed to delete the podcast.");
+    //console.error("Error deleting podcast:", error);
+    showAlert("Failed to delete the podcast", "error");
   }
 }
 
 // Share podcast
 async function promptSharePodcast(podcastId, podcast) {
-  if (!currentUser) return alert("Log in to share.");
+  if (!currentUser) return showAlert("Log in to share", "warning");
 
   try {
     const usersRef = ref(db, "users");
     const snap = await get(usersRef);
-    if (!snap.exists()) return alert("No users found.");
+    if (!snap.exists()) return showAlert("No users found", "error");
     const users = snap.val();
 
     const usersArray = [];
@@ -362,7 +368,7 @@ async function promptSharePodcast(podcastId, podcast) {
     }
 
     // There must be at least one other user to share with
-    if (usersArray.length === 0) return alert('No other users to share with.');
+    if (usersArray.length === 0) return showAlert("No users found to share with", "error");
 
     // Open user selection modal
     openUserSelectModal(usersArray, async (recipientUid) => {
@@ -380,16 +386,16 @@ async function promptSharePodcast(podcastId, podcast) {
 
       try {
         await shareToUser(recipientUid, attachment);
-        alert("Podcast shared successfully.");
+        showAlert("Podcast shared successfully", "success");
       } catch (err) {
-        console.error(err);
-        alert("Error sharing podcast.");
+        //console.error(err);
+        showAlert("Error sharing podcast", "error");
       }
     });
 
   } catch (err) {
-    console.error(err);
-    alert("Error sharing podcast.");
+    //console.error(err);
+    showAlert("Error sharing podcast", "error");
   }
 }
 
@@ -503,7 +509,7 @@ function escapeHtml(str) {
 // Share to user function
 async function shareToUser(recipientUid, attachment) {
   // User must be logged in
-  if (!currentUser) return alert("you must log in.");
+  if (!currentUser) return showAlert("You must log in", "warning");
   const senderUid = currentUser.uid;
   const chatId = senderUid < recipientUid ? `${senderUid}_${recipientUid}` : `${recipientUid}_${senderUid}`;
 
@@ -676,8 +682,8 @@ function buildFolderCard(folderId, folder) {
         await listPodcasts();
         handleSearch(); // refresca lo que estás viendo
       } catch (err) {
-        console.error("Error deleting folder:", err);
-        alert("Failed to delete folder.");
+        //console.error("Error deleting folder:", err);
+        showAlert("Failed to delete folder", "error");
       }
     });
     folderItem.appendChild(deleteButton);
@@ -854,7 +860,7 @@ async function deleteFolder(folderId, iconURL) {
         const iconRef = storageRef(storage, iconURL);
         await deleteObject(iconRef);
       } catch (e) {
-        console.warn("Could not delete folder icon from storage (may be URL):", e);
+        //console.warn("Could not delete folder icon from storage (may be URL):", e);
       }
     }
 
@@ -877,7 +883,7 @@ async function deleteFolder(folderId, iconURL) {
             allPodcasts[pid].folderName = null;
           }
         } catch (e) {
-          console.warn(`Failed to clear folderId for podcast ${pid}:`, e);
+          //console.warn(`Failed to clear folderId for podcast ${pid}:`, e);
         }
       }
     }

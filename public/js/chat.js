@@ -171,7 +171,7 @@ async function main() {
             });
 
             spotifyPlayer.addListener("ready", ({ device_id }) => {
-                console.log("Device ready:", device_id);
+                //console.log("Device ready:", device_id);
                 deviceId = device_id;
                 playerReady = true;
             });
@@ -183,15 +183,15 @@ async function main() {
     
     (async () => {
         if (token && isPremium && await isSpotifyTokenValid(token)) {
-            console.log("Spotify token OK, PREMIUM — Loading Web Playback SDK...");
+            //console.log("Spotify token OK, PREMIUM — Loading Web Playback SDK...");
             initSpotifyPlaybackSDK();
 
         } else if(token && !isPremium && await isSpotifyTokenValid(token)){
-            console.log("Spotify token OK, NO PREMIUM — Loading Web Playback SDK...");
+            //console.log("Spotify token OK, NO PREMIUM — Loading Web Playback SDK...");
             initSpotifyPlaybackSDK();
             
         } else {
-            console.log("Spotify not available — token invalid.");
+            //console.log("Spotify not available — token invalid.");
         }
     })();
 
@@ -221,7 +221,7 @@ async function main() {
             });
 
         } catch (e) {
-            console.error(e);
+            //console.error(e);
             statusMessage.textContent = "Error loading users.";
         }
     });
@@ -462,7 +462,7 @@ async function main() {
                     // Scroll again because the div height changed after loading the card
                     messagesDiv.scrollTop = messagesDiv.scrollHeight;
                 } else {
-                    console.warn("Attachment card is not a node:", card);
+                    //console.warn("Attachment card is not a node:", card);
                 }
             }
         });
@@ -519,7 +519,7 @@ async function main() {
     async function playTrack(uri, playButton) {
 
         if (!playerReady || !deviceId) {
-            console.warn("Spotify player not ready yet.");
+            //console.warn("Spotify player not ready yet.");
             return;
         }
 
@@ -568,7 +568,7 @@ async function main() {
             }
         );
 
-        console.log("Playing:", uri);
+        //console.log("Playing:", uri);
 
         //uodate state
         currentPlayingUri = uri;
@@ -700,7 +700,7 @@ async function main() {
                         playTrack(track.uri, playBtn);
 
                     } catch (err) {
-                        console.error("Error playing track:", err);
+                        //console.error("Error playing track:", err);
                     }
                 });
 
@@ -752,7 +752,7 @@ async function main() {
                         showAlert("Artist added to favourites!", "success");
 
                     } catch (err) {
-                        console.error(err);
+                        //console.error(err);
                         showAlert("Error saving artist", "error");
                     }
 
@@ -799,7 +799,7 @@ async function main() {
                         showAlert("Song added to favourites!", "success");
 
                     } catch (err) {
-                        console.error(err);
+                        //console.error(err);
                         showAlert("Error saving song", "error");
                     }
                 });
@@ -872,7 +872,7 @@ async function main() {
             messageInput.value = "";
 
         } catch (e) {
-            console.error("Error sending message:", e);
+            //console.error("Error sending message:", e);
         }
     };
 

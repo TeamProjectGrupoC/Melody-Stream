@@ -125,7 +125,7 @@ if (saveBtn) {
       setTimeout(() => window.location.href = "podcast.html", 700);
     } 
     catch (err) {
-      console.error("create folder error:", err);
+      //console.error("create folder error:", err);
       msg.textContent = "Error creating folder: " + (err.message || err.toString());
     }
   });

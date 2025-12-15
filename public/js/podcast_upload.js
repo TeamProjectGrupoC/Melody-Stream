@@ -103,7 +103,7 @@ async function populateFolderSelect(uid = null) {
       folderSelect.appendChild(opt);
     }
   } catch (err) {
-    console.error('Error loading folders for select:', err);
+    //console.error('Error loading folders for select:', err);
   }
 }
 
@@ -169,7 +169,7 @@ async function handleUpload() {
     // Refresh folder select
     await populateFolderSelect(currentUser.uid);
   } catch (err) {
-    console.error(err);
+    //console.error(err);
     if (msg) msg.textContent = `❌ Error saving podcast: ${err.message || err}`;
   }
 }
@@ -183,8 +183,11 @@ document.addEventListener('DOMContentLoaded', () => {
   onAuthStateChanged(auth, (user) => {
     currentUser = user;
     // Populate folder select based on user (to show only their folders)
-    populateFolderSelect(user ? user.uid : null).catch(e => console.error(e));
-
+    populateFolderSelect(user ? user.uid : null)
+      .catch(err => {
+        // console.error(err);
+      });
+      
     if (msg && formContainer && loginBtn) {
       // If user is logged in, show form, else show login prompt
       if (user) {

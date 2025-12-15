@@ -45,6 +45,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 import { getDatabase, ref as databaseRef, onValue, set, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 import { getStorage, ref as storageRef, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
+import { showAlert } from "./alert.js";
 
 //----- FIREBASE CONFIGURATION ---
 const firebaseConfig = {
@@ -182,8 +183,8 @@ async function loadPlayFirebaseAudio(audioFilePath, title, artist){
 
     }
     catch (error){
-        console.error(`Error uploading the audio "${title}"`, error);
-        alert("This song cannot be played");
+        //console.error(`Error uploading the audio "${title}"`, error);
+        showAlert("This song cannot be played", "error");
     };
 }
 
@@ -212,7 +213,7 @@ function initializeHomeInteractions() {
                     loadPlayFirebaseAudio(song.audioFile, song.titulo, song.artista);
                 } 
                 else {
-                    console.warn(`Link not found for song ID ${songId}`);
+                    //console.warn(`Link not found for song ID ${songId}`);
                 }
             });
         }
@@ -231,7 +232,7 @@ function setupPlayerControls(){
     playPauseButton.addEventListener('click', ()=> {
 
         if(!currentAudioPlayer){
-            console.warn("There is no song loaded to play");
+            //console.warn("There is no song loaded to play");
             return;
         }
 
@@ -316,7 +317,7 @@ async function updateRegisterModule(user) {
         const snap = await get(userRef);
 
         if (!snap.exists()) {
-            alert(`ERROR: User not found`);
+            showAlert("ERROR: User not found", "error");
         }
         const userDb = snap.val();
 
