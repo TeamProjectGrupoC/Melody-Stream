@@ -835,38 +835,65 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
 
 //----------SHARE ARTISTS-------------------------------------------------------------------------------------------------------------------
 
-async function loadUserChatsForShare(selectEl) {
+// Devuelve [{ chatId, displayName }]
+async function loadUserChatsForShareData() {
   const db = getDatabase();
   const chatsRef = ref(db, `userChats/${currentUser.uid}`);
-
   const snapshot = await get(chatsRef);
   const data = snapshot.val() || {};
 
-  selectEl.innerHTML = "";
+  const out = [];
 
   for (const chatId in data) {
-
-    // 1. Obtener los dos UIDs del chat
     const parts = chatId.split("_");
     const userA = parts[0];
     const userB = parts[1];
-
-    // 2. Saber quién es el otro usuario
     const otherUid = (userA === currentUser.uid) ? userB : userA;
 
-    // 3. Obtener datos del otro usuario
     const userSnap = await get(ref(db, `users/${otherUid}`));
     const userData = userSnap.val();
-
     const displayedName = userData?.username || userData?.email || otherUid;
 
-    // 4. Crear la opción
+    out.push({ chatId, displayName: displayedName });
+  }
+
+  // orden opcional por nombre
+  out.sort((a, b) => a.displayName.localeCompare(b.displayName));
+  return out;
+}
+
+function fillChatSelect(selectEl, chats) {
+  selectEl.innerHTML = "";
+
+  chats.forEach(({ chatId, displayName }) => {
     const option = document.createElement("option");
     option.value = chatId;
-    option.textContent = displayedName;
-
+    option.textContent = displayName;
     selectEl.appendChild(option);
-  }
+  });
+}
+
+// ✅ Reemplaza tu función actual por esta (misma firma)
+async function loadUserChatsForShare(selectEl, searchInputEl) {
+  const chats = await loadUserChatsForShareData();
+
+  // pinta todo
+  fillChatSelect(selectEl, chats);
+
+  // si no pasas input, listo
+  if (!searchInputEl) return;
+
+  // filtro en vivo
+  const norm = (s) => (s || "").toString().toLowerCase().trim();
+
+  searchInputEl.value = "";
+  searchInputEl.addEventListener("input", () => {
+    const q = norm(searchInputEl.value);
+    const filtered = !q
+      ? chats
+      : chats.filter(c => norm(c.displayName).includes(q));
+    fillChatSelect(selectEl, filtered);
+  });
 }
 
 
@@ -1215,6 +1242,7 @@ function openShareSongModal(track) {
   const modal = document.getElementById("shareSongModal");
   const nameEl = document.getElementById("shareSongName");
   const select = document.getElementById("chatSelectSong");
+  const search = document.getElementById("chatSearchSong");
 
   nameEl.innerText = track.name;
 
@@ -1226,7 +1254,7 @@ function openShareSongModal(track) {
   modal.dataset.trackImage = track.albumImageUrl;
   modal.dataset.trackAudioUrl = track.previewUrl;
 
-  loadUserChatsForShare(select);
+  loadUserChatsForShare(select, search);
 
   modal.style.display = "flex";
 }

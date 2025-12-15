@@ -1055,3 +1055,20 @@ main a:hover {
   font-weight: 600;
   margin-top: 0.6rem;
 }
+
+#shareSongModal .user-select-search {
+  width: 100%;
+  padding: 0.8rem;
+  margin-top: 10px;
+  margin-bottom: 10px;
+  background-color: #1e1e2e;
+  color: #fff;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  outline: none;
+  caret-color: #fff;
+}
+
+#shareSongModal .user-select-search::placeholder {
+  color: rgba(255,255,255,0.6);
+}
