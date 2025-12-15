@@ -783,6 +783,8 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
   }
 
   try {
+    // Validate token
+    const tokenValid = token && await isSpotifyTokenValid(token);
 
     if (!tokenValid) {
       const reconnectBtn = document.createElement("button");
@@ -1155,6 +1157,9 @@ document.getElementById("btnSearchSong").addEventListener("click", async () => {
   }
 
   try {
+    // Validate token
+    const tokenValid = token && await isSpotifyTokenValid(token);
+
     if (!tokenValid) {
       const reconnectBtn = document.createElement("button");
       reconnectBtn.textContent = "Connect Spotify";
