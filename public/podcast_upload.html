@@ -41,7 +41,7 @@
     <main>
       <h1>Upload Podcast</h1>
 
-      <!-- Formulario -->
+      <!-- Form -->
       <div id="formContainer">
         <label>Podcast Name</label>
         <input
@@ -64,7 +64,6 @@
         <label>Podcast File (.mp3)</label>
         <input id="podcastFile" type="file" accept=".mp3" required />
         
-        <!-- NUEVO: seleccionar carpeta donde guardar (o ninguna) -->
         <label for="folderSelect">Upload to folder (optional)</label>
         <select id="folderSelect">
           <option value="">-- No folder --</option>
@@ -74,14 +73,11 @@
         <div style="margin-top: 10px">
           <button id="uploadBtn">Save Podcast</button>
           <button id="viewPodcastsBtn">View Podcasts</button>
-          <!-- Nuevo botón -->
         </div>
       </div>
 
-      <!-- Mensajes -->
       <p id="msg"></p>
 
-      <!-- Botón visible solo si no hay sesión -->
       <button id="loginBtn" style="display: none">Go to Login</button>
     </main>
 
