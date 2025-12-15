@@ -43,10 +43,10 @@ import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/9.23.
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
 // Firebase Realtime Database functions
-import { getDatabase, ref, push, set, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { getDatabase, ref, push, set, get, remove, update } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
 // Firebase Storage functions
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-storage.js";
 
 // Firebase configuration
 const firebaseConfig = {
@@ -68,8 +68,8 @@ const storage = getStorage(app);
 const auth = getAuth(app);
 
 // Get the containers
-const podcastList = document.getElementById("podcastList");
-const foldersList = document.getElementById("foldersList");
+const resultsTitle = document.getElementById("resultsTitle");
+const resultsList  = document.getElementById("resultsList");
 const searchInput = document.getElementById("searchInput");
 const searchButton = document.getElementById("searchButton");
 
@@ -112,24 +112,16 @@ async function loadUsersMap() {
 
 // Load and display folders
 async function loadFolders() {
-  if (!foldersList) return;
-  foldersList.innerHTML = "Loading folders...";
-
   try {
     const foldersRef = ref(db, "folders");
     const snapshot = await get(foldersRef);
-
-    if (snapshot.exists()) {
-      allFolders = snapshot.val();
-      displayFolders(allFolders);
-    } else {
-      foldersList.innerHTML = "<p>No folders available.</p>";
-    }
+    allFolders = snapshot.exists() ? snapshot.val() : {};
   } catch (error) {
     console.error("Error loading folders:", error);
-    foldersList.innerHTML = "<p>Failed to load folders.</p>";
+    allFolders = {};
   }
 }
+
 
 // Check if current user is master
 function isMasterUser() {
@@ -226,88 +218,6 @@ function buildPodcastCard(podcastId, podcast, options = {}) {
   return podcastItem;
 }
 
-// Display folders
-function displayFolders(folders) {
-  foldersList.innerHTML = "";
-
-  for (const folderId in folders) {
-    const folder = folders[folderId];
-
-    const folderItem = document.createElement("div");
-    folderItem.classList.add("podcast-card");
-
-    // Icon
-    const img = document.createElement("img");
-    img.src = folder.iconURL || "images/logos/silueta.png";
-    img.alt = `${folder.name || 'Folder'} icon`;
-    folderItem.appendChild(img);
-
-    // Title
-    const title = document.createElement("h3");
-    title.textContent = folder.name || "(No name)";
-    folderItem.appendChild(title);
-
-    // Creator
-    let displayName = null;
-    if (folder.createdBy && usersMap[folder.createdBy]) {
-      const u = usersMap[folder.createdBy];
-      displayName = u.username || u.displayName || u.email || folder.createdBy;
-    } else if (folder.createdBy) {
-      displayName = folder.createdBy;
-    }
-    if (displayName) {
-      const creator = document.createElement("div");
-      creator.className = "podcast-uploader";
-      creator.textContent = `Created by: ${displayName}`;
-      folderItem.appendChild(creator);
-    }
-
-    // Description
-    if (folder.description) {
-      const description = document.createElement("p");
-      description.textContent = folder.description;
-      folderItem.appendChild(description);
-    }
-
-    // View button 
-    const viewButton = document.createElement("button");
-    viewButton.textContent = "View";
-    viewButton.className = "btn btn-outline-primary mt-2";
-    // Bind to open modal with folder podcasts
-    viewButton.addEventListener("click", () => {
-      // Open folder modal
-      openFolderModal(folderId, folder.name || "Folder");
-    });
-
-    // View button
-    folderItem.appendChild(viewButton);
-
-    // Show delete button if master
-    if (isMasterUser()) {
-      const deleteButton = document.createElement("button");
-      deleteButton.textContent = "Delete";
-      deleteButton.className = "btn btn-outline-danger mt-3";
-      deleteButton.addEventListener("click", async () => {
-        if (!confirm(`Are you sure you want to delete the folder "${folder.name || folderId}"?`)) return;
-        try {
-          // Delete folder
-          await deleteFolder(folderId, folder.iconURL);
-          // Reload folders and podcasts
-          await loadFolders();
-          await listPodcasts();
-          alert(`Folder "${folder.name || folderId}" deleted.`);
-        } catch (err) {
-          console.error("Error deleting folder:", err);
-          alert("Failed to delete folder.");
-        }
-      });
-      folderItem.appendChild(deleteButton);
-    }
-
-    foldersList.appendChild(folderItem);
-  }
-}
-
 // Open modal with podcasts from folder
 async function openFolderModal(folderId, folderName) {
   const modal = document.getElementById("folder-modal");
@@ -374,28 +284,11 @@ async function listPodcasts() {
     const podcastsRef = ref(db, "podcasts");
     const snapshot = await get(podcastsRef);
 
-    if (snapshot.exists()) {
-      allPodcasts = snapshot.val();
-      displayPodcasts(allPodcasts);
-    } else {
-      podcastList.textContent = "No podcasts available.";
-    }
+    allPodcasts = snapshot.exists() ? snapshot.val() : {};
   } catch (error) {
     console.error("Error listing podcasts:", error);
-    podcastList.textContent = "Failed to load podcasts.";
+    allPodcasts = {};
   }
-}
-
-// Get podcasts in a folder
-function getFolderPodcastsMap(folderId) {
-  const folderPodcasts = {};
-  for (const pid in allPodcasts) {
-    const p = allPodcasts[pid];
-    if (String(p.folderId) === String(folderId) || String(p.idcarpeta) === String(folderId)) {
-      folderPodcasts[pid] = p;
-    }
-  }
-  return folderPodcasts;
 }
 
 // Display podcasts
@@ -601,56 +494,222 @@ async function shareToUser(recipientUid, attachment) {
   await update(ref(db, `userChats/${recipientUid}/${chatId}`), { lastMessage: lastMessageData });
 }
 
-// Filter podcasts
-function filterPodcasts(query) {
-  const filteredPodcasts = {};
+function getSearchType() {
+  return document.querySelector('input[name="searchType"]:checked')?.value || "podcasts";
+}
 
-  if (!query) {
-    for (const podcastId in allPodcasts) {
-      const podcast = allPodcasts[podcastId];
-      if (podcast.folderId || podcast.idcarpeta) continue;
-      filteredPodcasts[podcastId] = podcast;
-    }
+function clearResults() {
+  if (resultsList) resultsList.innerHTML = "";
+  if (resultsTitle) resultsTitle.style.display = "none";
+}
 
-    return displayPodcasts(filteredPodcasts);
-  }
+function showResultsHeader(text) {
+  if (!resultsTitle) return;
+  resultsTitle.style.display = "block";
+  resultsTitle.textContent = text;
+}
+
+function norm(s) {
+  return (s || "").toString().toLowerCase().trim();
+}
+
+function scoreMatch(query, text) {
+  const q = norm(query);
+  const t = norm(text);
+  if (!q || !t) return 999999;
+  if (t === q) return 0;
+  if (t.startsWith(q)) return 5;
+  const idx = t.indexOf(q);
+  if (idx >= 0) return 20 + idx;
+  const parts = q.split(/\s+/).filter(Boolean);
+  if (parts.length > 1 && parts.every(p => t.includes(p))) return 80;
+  return 999999;
+}
+
+function pickTop8(scoredItems) {
+  return scoredItems
+    .sort((a, b) => a.score - b.score)
+    .slice(0, 8)
+    .map(x => x.item);
+}
+
+function renderNoResults(msg) {
+  if (!resultsList) return;
+  resultsList.innerHTML = `<p style="opacity:.7;text-align:center;">${msg}</p>`;
+}
+
+function searchPodcasts(query) {
+  const q = norm(query);
+  if (!q) return clearResults();
+
+  const master = isMasterUser();
+  const scored = [];
 
   for (const podcastId in allPodcasts) {
-    const podcast = allPodcasts[podcastId];
-    
-    // Excluir podcasts que están en carpetas
-    if (podcast.folderId || podcast.idcarpeta) {
-      continue;
-    }
-    
-    if (podcast.nombre.toLowerCase().includes(query.toLowerCase())) {
-      filteredPodcasts[podcastId] = podcast;
-    }
+    const p = allPodcasts[podcastId];
+    if (!p) continue;
+
+    const uploaderName = getUploaderDisplayName(p) || "";
+
+    const matchName = scoreMatch(q, uploaderName);
+
+    if (matchName < 999999) scored.push({ score: matchName, item: { id: podcastId, p } });
   }
 
-  displayPodcasts(filteredPodcasts);
+  const top = pickTop8(scored);
+
+  resultsList.innerHTML = "";
+
+  if (top.length === 0) return renderNoResults("No podcasts found.");
+
+  top.forEach(({ id, p }) => {
+    const card = buildPodcastCard(id, p, {
+      showDelete: master,
+      onDelete: () => deletePodcast(id, p.audioURL, p.iconURL),
+    });
+    resultsList.appendChild(card);
+  });
 }
+
+function buildFolderCard(folderId, folder) {
+  const folderItem = document.createElement("div");
+  folderItem.classList.add("podcast-card");
+
+  const img = document.createElement("img");
+  img.src = folder.iconURL || "images/logos/silueta.png";
+  img.alt = `${folder.name || 'Folder'} icon`;
+  folderItem.appendChild(img);
+
+  const title = document.createElement("h3");
+  title.textContent = folder.name || "(No name)";
+  folderItem.appendChild(title);
+
+  let displayName = null;
+  if (folder.createdBy && usersMap[folder.createdBy]) {
+    const u = usersMap[folder.createdBy];
+    displayName = u.username || u.displayName || u.email || folder.createdBy;
+  } else if (folder.createdBy) {
+    displayName = folder.createdBy;
+  }
+
+  if (displayName) {
+    const creator = document.createElement("div");
+    creator.className = "podcast-uploader";
+    creator.textContent = `Created by: ${displayName}`;
+    folderItem.appendChild(creator);
+  }
+
+  if (folder.description) {
+    const description = document.createElement("p");
+    description.textContent = folder.description;
+    folderItem.appendChild(description);
+  }
+
+  const viewButton = document.createElement("button");
+  viewButton.textContent = "View";
+  viewButton.className = "btn btn-outline-primary mt-2";
+  viewButton.addEventListener("click", () => {
+    openFolderModal(folderId, folder.name || "Folder");
+  });
+  folderItem.appendChild(viewButton);
+
+  if (isMasterUser()) {
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete";
+    deleteButton.className = "btn btn-outline-danger mt-3";
+    deleteButton.addEventListener("click", async () => {
+      if (!confirm(`Are you sure you want to delete the folder "${folder.name || folderId}"?`)) return;
+      try {
+        await deleteFolder(folderId, folder.iconURL);
+        await loadFolders();
+        await listPodcasts();
+        handleSearch(); // refresca lo que estás viendo
+      } catch (err) {
+        console.error("Error deleting folder:", err);
+        alert("Failed to delete folder.");
+      }
+    });
+    folderItem.appendChild(deleteButton);
+  }
+
+  return folderItem;
+}
+
+function searchFolders(query) {
+  const q = norm(query);
+  if (!q) return clearResults();
+
+  const scored = [];
+
+  for (const folderId in allFolders) {
+    const f = allFolders[folderId];
+    if (!f) continue;
+
+    let creatorName = "";
+    if (f.createdBy && usersMap[f.createdBy]) {
+      const u = usersMap[f.createdBy];
+      creatorName = u.username || u.displayName || u.email || f.createdBy;
+    } else {
+      creatorName = f.createdBy || "";
+    }
+
+    const best = Math.min(
+      scoreMatch(q, f.name),
+      scoreMatch(q, creatorName)
+    );
+
+    if (best < 999999) scored.push({ score: best, item: { id: folderId, f } });
+  }
+
+  const top = pickTop8(scored);
+
+  resultsList.innerHTML = "";
+
+  if (top.length === 0) return renderNoResults("No folders found.");
+
+  top.forEach(({ id, f }) => {
+    resultsList.appendChild(buildFolderCard(id, f));
+  });
+}
+
+
+
+// Filter podcasts
+function handleSearch() {
+  const query = searchInput.value.trim();
+  if (!query) return clearResults();
+
+  const type = getSearchType();
+  if (type === "folders") searchFolders(query);
+  else searchPodcasts(query);
+}
+
 
 // Initialize page
 document.addEventListener("DOMContentLoaded", async () => {
+  clearResults();
   await loadUsersMap();
   await loadFolders();
   await listPodcasts();
 });
 
 // Search
-searchButton?.addEventListener("click", () => {
-  const query = searchInput.value.trim();
-  filterPodcasts(query);
-});
+searchButton?.addEventListener("click", handleSearch);
 
 searchInput?.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
     e.preventDefault();
-    const query = searchInput.value.trim();
-    filterPodcasts(query);
+    handleSearch();
   }
 });
+
+document.querySelectorAll('input[name="searchType"]').forEach(r => {
+  r.addEventListener("change", () => {
+    if (searchInput.value.trim()) handleSearch();
+    else clearResults();
+  });
+});
+
 
 // Upload button
 const goToUploadButton = document.getElementById("goToUpload") || document.getElementById("uploadPodcastBtn");

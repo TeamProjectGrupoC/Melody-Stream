@@ -110,14 +110,12 @@ main h1 {
 
 /* Botón "Cancel" */
 #cancelFolderBtn {
-  background-color: transparent;
-  border: 1px solid #dc3545;
-  color: #dc3545;
+  background-color: #dc3545;
+  color: var(--color-blanco);
 }
 
 #cancelFolderBtn:hover {
-  background-color: #dc3545;
-  color: var(--color-blanco);
+  background-color: #a12f3b;
   transform: scale(1.03);
 }
 

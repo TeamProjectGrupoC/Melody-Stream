@@ -1,4 +1,3 @@
-
 const datosChopin = {
     "album_1": {
         "nombre": "Chopin: Piano Concerto No. 1 in E Minor, Op. 11, B. 53",
