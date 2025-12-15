@@ -31,7 +31,7 @@
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
-import { showAlert } from "./alerts.js";
+import { showAlert } from "./alert.js";
 
 async function main() {
   // --- 1. FIREBASE CONFIGURATION & INITIALIZATION ---
@@ -194,7 +194,7 @@ async function main() {
       showUserData(ud, user.uid);
     } catch (err) {
       console.error(err);
-      showAlert("Login error. Wrong user or password", "error");
+      showAlert("LOGIN ERROR: Wrong user or password", "error");
     }
   });
 

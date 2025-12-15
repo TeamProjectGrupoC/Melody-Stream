@@ -1,24 +1,28 @@
 #alert-container {
   position: fixed;
-  top: 20px;
+  top: 30px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
   pointer-events: none;
 }
 
+/* ALERTA */
 .alert {
-  min-width: 300px;
-  max-width: 90vw;
-  margin-bottom: 10px;
-  padding: 14px 20px;
-  border-radius: 8px;
+  width: 600px;
+  max-width: 95vw;
+  padding: 16px 24px;
+  border-radius: 10px;
   color: white;
   font-weight: 500;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  font-size: 15px;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+
+  transform: translateY(-40px);
   opacity: 0;
-  transform: translateY(-20px);
-  animation: slideDown 0.3s ease forwards;
+
+  animation: slideDown 0.35s ease-out forwards;
 }
 
 /* Tipos */
@@ -27,22 +31,22 @@
 .alert-warning { background-color: #f39c12; }
 .alert-info    { background-color: #3E9ADE; }
 
-/* Entrada */
+/* Entrada: baixa desde arriba */
 @keyframes slideDown {
   to {
-    opacity: 1;
     transform: translateY(0);
+    opacity: 1;
   }
 }
 
-/* Saída */
+/* Saída: volve subir cara arriba */
 .alert.hide {
-  animation: slideUp 0.3s ease forwards;
+  animation: slideUp 0.35s ease-in forwards;
 }
 
 @keyframes slideUp {
   to {
+    transform: translateY(-40px);
     opacity: 0;
-    transform: translateY(-20px);
   }
 }
