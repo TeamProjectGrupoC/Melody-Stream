@@ -743,3 +743,12 @@ main h2 {
   grid-column: 1 / -1;
 }
 
+.top-actions #viewAllButton{
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: var(--color-blanco);
+}
+.top-actions #viewAllButton:hover{
+  background: rgba(255,255,255,0.12);
+}
+

@@ -694,7 +694,6 @@ function renderAll() {
   if (searchInput) searchInput.value = "";
 
   resultsList.innerHTML = "";
-  showResultsHeader("All folders and podcasts");
 
   const master = isMasterUser();
 
