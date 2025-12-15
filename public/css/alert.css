@@ -1,0 +1,48 @@
+#alert-container {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.alert {
+  min-width: 300px;
+  max-width: 90vw;
+  margin-bottom: 10px;
+  padding: 14px 20px;
+  border-radius: 8px;
+  color: white;
+  font-weight: 500;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  opacity: 0;
+  transform: translateY(-20px);
+  animation: slideDown 0.3s ease forwards;
+}
+
+/* Tipos */
+.alert-success { background-color: #2ecc71; }
+.alert-error   { background-color: #e74c3c; }
+.alert-warning { background-color: #f39c12; }
+.alert-info    { background-color: #3E9ADE; }
+
+/* Entrada */
+@keyframes slideDown {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Saída */
+.alert.hide {
+  animation: slideUp 0.3s ease forwards;
+}
+
+@keyframes slideUp {
+  to {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+}
