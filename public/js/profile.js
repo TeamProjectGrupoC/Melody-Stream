@@ -1,16 +1,17 @@
-// --- IMPORT ---
+// --- IMPORTACIONES ---
+// Módulos de App y Autenticación (como los tenías)
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 import { saveFavouriteSong, saveFavouriteArtist } from "./favourites.js";
 
-// Modules Realtime Database (RTDB)
+// Módulos de Realtime Database (RTDB)
 import { getDatabase, ref, onValue, set, get, update, push, remove } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 const databaseRef = ref;
 
-// Módulos Storage
+// Módulos de Storage
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
 
-// --- CONFIGURATION FIREBASE ---
+// --- CONFIGURACIÓN DE FIREBASE ---
 const firebaseConfig = {
   apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
   authDomain: "melodystream123.firebaseapp.com",
@@ -22,12 +23,12 @@ const firebaseConfig = {
   measurementId: "G-J97KEDLYMB"
 };
 
-// --- INIT ---
+// --- INICIALIZACIÓN DE SERVICIOS ---
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 const storage = getStorage(app);
-let currentUser = null; // save here the user so the function saves it
+let currentUser = null; // Guardaremos el usuario aquí para que la función de subida lo vea
 // --- SPOTIFY PLAYER VARIABLES (Same logic as chats.js) ---
 let playerReady = false;
 let isPlaying = false;
@@ -419,12 +420,12 @@ async function loadUserFolders(uid) {
         img.alt = f.name + " icon";
         item.appendChild(img);
 
-        // Title
+        // Título
         const title = document.createElement("h4");
         title.textContent = f.name || "(no name)";
         item.appendChild(title);
 
-        // Description
+        // Descripción
         if (f.description) {
           const desc = document.createElement("p");
           desc.textContent = f.description;
@@ -448,7 +449,7 @@ async function loadUserFolders(uid) {
         deleteBtn.addEventListener('click', async () => {
           if (!confirm(`Are you sure you want to delete the folder "${f.name || fid}"?`)) return;
           try {
-            // remove storage icon if it exists
+            // Borrar icono de storage si existe
             if (f.iconURL) {
               try {
                 const iconRef = storageRef(storage, f.iconURL);
@@ -457,10 +458,10 @@ async function loadUserFolders(uid) {
                 console.warn('Could not delete folder icon from storage:', e);
               }
             }
-            // remove folder from database
+            // Borrar entrada de la carpeta
             await remove(databaseRef(db, `folders/${fid}`));
             
-            // remove folderId of all podcasts that were in this folder
+            // Limpiar folderId de todos los podcasts que estaban en esta carpeta
             const podsSnap = await get(databaseRef(db, 'podcasts'));
             if (podsSnap.exists()) {
               const allPods = podsSnap.val();
@@ -472,7 +473,7 @@ async function loadUserFolders(uid) {
               }
             }
             
-            // update list
+            // Recargar la lista
             await loadUserFolders(uid);
             alert('Folder deleted successfully');
           } catch (err) {
@@ -508,7 +509,7 @@ function setupFormUploadListener() {
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    // 1. Validate
+    // 1. Validaciones
     if (!currentUser) {
       alert("You must be logged in to upload a photo.");
       return;
@@ -521,23 +522,23 @@ function setupFormUploadListener() {
 
     // 2. Crear la ruta de subida en Firebase Storage
     const filePath = `profile_images/${currentUser.uid}/${file.name}`;
-    const sRef = storageRef(storage, filePath); 
+    const sRef = storageRef(storage, filePath); // Usamos storageRef
 
     try {
-      // 3. Upload the file
+      // 3. Subir el archivo
       alert("Uploading photo...");
       const snapshot = await uploadBytes(sRef, file);
       console.log('Photo uploaded!', snapshot);
 
-      // 4. get download URL
+      // 4. Obtener la URL de descarga
       const downloadURL = await getDownloadURL(snapshot.ref);
       console.log('File URL:', downloadURL);
 
-      // 5. save URL in Realtime Database
+      // 5. Guardar la URL en Realtime Database
       const userDbRef = databaseRef(db, 'users/' + currentUser.uid + '/urlFotoPerfil');
       await set(userDbRef, downloadURL);
 
-      // 6. Update the image in the web
+      // 6. Actualizar la imagen en la página (la silueta)
       document.getElementById('fotoPerfilUsuario').src = downloadURL;
       const headerPic = document.getElementById('headerUserPic');
       if (headerPic) headerPic.src = downloadURL;
@@ -573,7 +574,7 @@ function createPodcastCard(p) {
   info.appendChild(title);
   info.appendChild(desc);
 
-  // Audio player if exists
+  // Audio player si existe
   const audioSrc = p.audioURL || p.audioUrl || p.audio || p.url || p.audio_src || '';
   if (audioSrc) {
     const audioEl = document.createElement('audio');
@@ -645,13 +646,14 @@ async function loadFolderPodcasts(folderId, folderName) {
   }
 }
 
-// --- INIT the functions ---
+// --- INICIAR LAS FUNCIONES ---
+// Cuando el HTML esté cargado, ejecuta ambas funciones
 document.addEventListener('DOMContentLoaded', () => {
   cargarDatosDePerfil(); // Carga el email y la foto existente
   setupFormUploadListener(); // Prepara el formulario de subida
 });
 
-// global handlers 
+// handlers globales que usan los elementos si existen
 const goToChatBtn = document.getElementById('goToChatBtn');
 if (goToChatBtn) {
   goToChatBtn.addEventListener('click', () => {
@@ -660,7 +662,7 @@ if (goToChatBtn) {
 }
 
 
-// Event to open modal if doing click in the button .view-folder
+// Evento para abrir modal al hacer click en botón .view-folder (delegación)
 document.addEventListener('click', (e) => {
   const btn = e.target.closest('.view-folder');
   if (!btn) return;
@@ -671,11 +673,11 @@ document.addEventListener('click', (e) => {
   loadFolderPodcasts(fid, fname);
 });
 
-// Close modal - existents buttons in DOM
+// Cerrar modal - botones existentes en DOM
 document.getElementById('folder-modal-close')?.addEventListener('click', closeModal);
 document.getElementById('folder-form-close')?.addEventListener('click', closeModal);
 
-// Close modal if doing click outside content
+// cerrar al hacer click fuera del contenido
 document.getElementById('folder-modal')?.addEventListener('click', (e) => {
   if (e.target && e.target.id === 'folder-modal') closeModal();
 });
@@ -684,7 +686,7 @@ document.getElementById('folder-modal')?.addEventListener('click', (e) => {
 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
-//ARTISTS FAV SECTION
+//SECCION DE ARTISTAS FAVORITOS
 function getSpotifyUserToken() {
   return localStorage.getItem("spotify_access_token");
 }
@@ -721,7 +723,7 @@ function loadFavouriteArtists(userId) {
     const favData = snapshot.val() || {};
     const artistIds = Object.keys(favData);
 
-    // CALL ASYNC FUNCTION TO FETCH ARTIST DATA
+    // LLAMAMOS A UNA FUNCIÓN ASYNC EXTERNA
     fetchArtistData(artistIds);
   });
 }
@@ -773,7 +775,7 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
   const query = document.getElementById("artistSearch").value.trim();
   const resultContainer = document.getElementById("artistResults");
 
-  resultContainer.innerHTML = ""; // remove previous results
+  resultContainer.innerHTML = ""; // limpia resultados previos
 
   if (query === "") {
     resultContainer.innerHTML = "<p>Please enter an artist name.</p>";
@@ -833,65 +835,38 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
 
 //----------SHARE ARTISTS-------------------------------------------------------------------------------------------------------------------
 
-// Devuelve [{ chatId, displayName }]
-async function loadUserChatsForShareData() {
+async function loadUserChatsForShare(selectEl) {
   const db = getDatabase();
   const chatsRef = ref(db, `userChats/${currentUser.uid}`);
+
   const snapshot = await get(chatsRef);
   const data = snapshot.val() || {};
 
-  const out = [];
+  selectEl.innerHTML = "";
 
   for (const chatId in data) {
+
+    // 1. Obtener los dos UIDs del chat
     const parts = chatId.split("_");
     const userA = parts[0];
     const userB = parts[1];
+
+    // 2. Saber quién es el otro usuario
     const otherUid = (userA === currentUser.uid) ? userB : userA;
 
+    // 3. Obtener datos del otro usuario
     const userSnap = await get(ref(db, `users/${otherUid}`));
     const userData = userSnap.val();
+
     const displayedName = userData?.username || userData?.email || otherUid;
 
-    out.push({ chatId, displayName: displayedName });
-  }
-
-  // orden opcional por nombre
-  out.sort((a, b) => a.displayName.localeCompare(b.displayName));
-  return out;
-}
-
-function fillChatSelect(selectEl, chats) {
-  selectEl.innerHTML = "";
-
-  chats.forEach(({ chatId, displayName }) => {
+    // 4. Crear la opción
     const option = document.createElement("option");
     option.value = chatId;
-    option.textContent = displayName;
+    option.textContent = displayedName;
+
     selectEl.appendChild(option);
-  });
-}
-
-// ✅ Reemplaza tu función actual por esta (misma firma)
-async function loadUserChatsForShare(selectEl, searchInputEl) {
-  const chats = await loadUserChatsForShareData();
-
-  // pinta todo
-  fillChatSelect(selectEl, chats);
-
-  // si no pasas input, listo
-  if (!searchInputEl) return;
-
-  // filtro en vivo
-  const norm = (s) => (s || "").toString().toLowerCase().trim();
-
-  searchInputEl.value = "";
-  searchInputEl.addEventListener("input", () => {
-    const q = norm(searchInputEl.value);
-    const filtered = !q
-      ? chats
-      : chats.filter(c => norm(c.displayName).includes(q));
-    fillChatSelect(selectEl, filtered);
-  });
+  }
 }
 
 
@@ -902,7 +877,7 @@ function openShareArtistModal(artist) {
 
   nameEl.innerText = artist.name;
 
-  // save data artist in modal dataset
+  // guardamos datos del artista en el modal
   modal.dataset.artistId = artist.id;
   modal.dataset.artistName = artist.name;
   modal.dataset.artistImage = artist.image;
@@ -1240,7 +1215,6 @@ function openShareSongModal(track) {
   const modal = document.getElementById("shareSongModal");
   const nameEl = document.getElementById("shareSongName");
   const select = document.getElementById("chatSelectSong");
-  const search = document.getElementById("chatSearchSong");
 
   nameEl.innerText = track.name;
 
@@ -1252,7 +1226,7 @@ function openShareSongModal(track) {
   modal.dataset.trackImage = track.albumImageUrl;
   modal.dataset.trackAudioUrl = track.previewUrl;
 
-  loadUserChatsForShare(select, search);
+  loadUserChatsForShare(select);
 
   modal.style.display = "flex";
 }
@@ -1330,14 +1304,14 @@ document.getElementById("shareSongConfirm").addEventListener("click", async () =
   alert("Song shared!");
 });
 
-// Creaate a shared global object if not exists
+// Crea un objeto global compartido entre módulos
 if (!globalThis.MelodyStreamAPI) {
     globalThis.MelodyStreamAPI = {};
 }
 
-//Open folder modal and load podcasts inside
+// Nueva función para abrir el modal de carpeta (puedes llamarla desde cualquier parte)
 async function openFolderModal(folderId, folderName = '') {
-  // make sure that exists #folder-modal #folder-podcast-list 
+  // asegúrate de que existe #folder-modal y #folder-podcast-list en el DOM
   let modal = document.getElementById('folder-modal');
   if (!modal) {
     modal = document.createElement('div');
@@ -1345,7 +1319,7 @@ async function openFolderModal(folderId, folderName = '') {
     document.body.appendChild(modal);
   }
 
-  // structure inside the modal
+  // estructura mínima dentro del modal
   modal.innerHTML = `
     <div class="folder-modal-inner" style="max-width:1100px;width:95%;padding:20px;">
       <div style="display:flex;justify-content:space-between;align-items:center;">
@@ -1369,7 +1343,7 @@ async function openFolderModal(folderId, folderName = '') {
   modal.style.display = 'flex';
 
   try {
-    // try using allPodcasts in memory, if it doesn't exist, fetch from database
+    // intenta usar allPodcasts en memoria si existe, si no, consulta la DB
     let all = window.allPodcasts || {};
     if (!Object.keys(all).length) {
       const snap = await get(ref(db, 'podcasts'));
@@ -1391,7 +1365,7 @@ async function openFolderModal(folderId, folderName = '') {
       return;
     }
 
-    // create exact cards as in podcast.js
+    // crear tarjetas EXACTAS como en podcast.js
     for (const it of items) {
       const p = it.data;
       const card = document.createElement('div');
@@ -1431,7 +1405,7 @@ async function openFolderModal(folderId, folderName = '') {
         card.appendChild(audio);
       }
 
-      // buttons: delete and  share 
+      // botones: delete (si puede) y share (igual que en podcasts)
       const canDelete = (typeof isMasterUser === 'function' && isMasterUser()) ||
                         (currentUser && p.idcreador && String(p.idcreador) === String(currentUser.uid));
       if (canDelete) {
