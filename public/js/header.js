@@ -214,7 +214,7 @@ document.addEventListener("DOMContentLoaded", () => {
         msgLi.id = "new-msg-li";
         
         const link = document.createElement("a");
-        link.href = "chat.html";
+        link.href = "/chat.html";
         link.textContent = "New Messages!";
         
         // CSS Class applied here

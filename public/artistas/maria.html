@@ -7,18 +7,20 @@
       name="author"
       content="Carolina Alba García, Celtia Castelo Gajino, Guillermo Arcos Salgado, Ines Vilariño, Mario Seoane, Francisco"
     />
-    <meta name="description" content="Melody Stream: listen to music; upload your own podcast; and chat and share your favourite songs with your friends" />
-  <meta name="keywords" content="Melody Stream, music, podcast, friends" />
-    <title>Artista — Maria Pages</title> <link rel="stylesheet" href="../css/general.css" />
+    <meta name="description" content="Melody Stream: Listen to Maria Pages." />
+    <meta name="keywords" content="Melody Stream, music, podcast, friends, flamenco" />
+    <title>Artist — Maria Pages</title> 
+    <link rel="stylesheet" href="../css/general.css" />
     <link rel="stylesheet" href="artista.css" />
-    <link rel="icon" type="image/png" href="../images/logos/melodystream.svg" />  </head>
+    <link rel="icon" type="image/png" href="../images/logos/melodystream.svg" />
+  </head>
   <body>
 
-  <header id="headerPrincipal">
+    <header id="headerPrincipal">
       <figure>
-        <img src="../images/logos/logo.png" alt="Webpage logo" />
+        <img src="../favicon.ico" alt="Webpage logo" />
       </figure>
-      <p id="menuToggle"><a href="#" class="hamburguesa"> &#x2630; </a></p>
+      <p id="menuToggle"><a href="#" class="hamburguesa"> ☰ </a></p>
       <nav id="NavPrincipal">
         <ul>
           <li><a href="../index.html">HOME</a></li>
@@ -41,24 +43,25 @@
 
     <main> 
         <section class="PerfilArtista">
-            <h1>Maria Pajes</h1>
+            <h1>Maria Pages</h1>
             <div class="artist-image">
                 <img src="../images/maria.jpg" alt="Maria Image">
             </div>
         </section> 
         
         <section class="MusicSelector">
-            
-            <h2 class="section-title">Discography</h2> <div class="selector-container discography-controls"> <label for="albumSelect">Select an album:</label>
+            <h2 class="section-title">Discography</h2> 
+            <div class="selector-container discography-controls"> 
+                <label for="albumSelect">Select an album:</label>
                 <select id="albumSelect">
                     <option value="" disabled selected>-- Select an album --</option>
-                    </select>
+                </select>
             </div>
 
             <div id="songsContainer" class="songs-list-module" style="display: none;">
                 <h3>Songs</h3>
                 <ul id="songList">
-                    </ul>
+                </ul>
             </div>
             
             <div id="playerContainer" class="player-module">
@@ -72,6 +75,7 @@
 
     <script src="../js/headerPic.js"></script>
     <script type="module" src="../js/header.js"></script>
+    
     <script type="module" src="maria.js"></script>
 
   </body>
