@@ -76,6 +76,51 @@ main#spotifyLoginContainer {
     margin-right: 20px;
 }
 
+/* Botón Go to Music Library (estilo Spotify pero azul) */
+#musicLibrary {
+  background-color: var(--color-azul1);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  border-radius: 50px;            /* 👈 igual de redondeado */
+  font-size: 1.2rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+
+  transition: transform 0.25s ease,
+              box-shadow 0.25s ease,
+              background-color 0.25s ease;
+
+  box-shadow: 0 0 20px rgba(62, 154, 222, 0.45);
+}
+
+/* Icono dentro del botón */
+#musicLibrary img {
+  width: 28px;
+  height: 28px;
+}
+
+/* Hover */
+#musicLibrary:hover {
+  background-color: var(--color-azul2);
+  transform: scale(1.05);
+  box-shadow: 0 0 30px rgba(62, 154, 222, 0.7);
+}
+
+/* Click */
+#musicLibrary:active {
+  transform: scale(0.97);
+  box-shadow: 0 0 15px rgba(62, 154, 222, 0.4);
+}
+
+
 /* Animación */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
