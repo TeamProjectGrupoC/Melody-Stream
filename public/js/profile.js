@@ -837,37 +837,135 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
 
 async function loadUserChatsForShare(selectEl) {
   const db = getDatabase();
-  const chatsRef = ref(db, `userChats/${currentUser.uid}`);
 
-  const snapshot = await get(chatsRef);
-  const data = snapshot.val() || {};
-
+  // 1) Mantener el SELECT para que tu #shareArtistConfirm siga funcionando igual
   selectEl.innerHTML = "";
+  selectEl.style.display = "none"; // opcional
 
-  for (const chatId in data) {
+  // 2) Crear / reutilizar UI (buscador + lista) dentro del modal
+  const modal = document.getElementById("shareArtistModal");
+  const box = modal.querySelector(".modal-content") || modal;
 
-    // 1. Obtener los dos UIDs del chat
-    const parts = chatId.split("_");
-    const userA = parts[0];
-    const userB = parts[1];
+  let picker = box.querySelector("#shareArtistUserPicker");
+  if (!picker) {
+    picker = document.createElement("div");
+    picker.id = "shareArtistUserPicker";
 
-    // 2. Saber quién es el otro usuario
-    const otherUid = (userA === currentUser.uid) ? userB : userA;
+    const search = document.createElement("input");
+    search.type = "text";
+    search.placeholder = "Search user...";
+    search.autocomplete = "off";
+    search.className = "user-select-search";
 
-    // 3. Obtener datos del otro usuario
-    const userSnap = await get(ref(db, `users/${otherUid}`));
-    const userData = userSnap.val();
+    const list = document.createElement("ul");
+    list.className = "user-select-list";
 
-    const displayedName = userData?.username || userData?.email || otherUid;
+    picker.appendChild(search);
+    picker.appendChild(list);
 
-    // 4. Crear la opción
-    const option = document.createElement("option");
-    option.value = chatId;
-    option.textContent = displayedName;
+    selectEl.parentNode.insertBefore(picker, selectEl);
+  }
 
-    selectEl.appendChild(option);
+  const searchEl = picker.querySelector("input");
+  const listEl = picker.querySelector("ul");
+
+  function escapeHtml(str) {
+    if (!str) return "";
+    return str.replace(/[&<>"']/g, (m) => ({
+      "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+    }[m]));
+  }
+  function norm(s) { return (s || "").toString().toLowerCase().trim(); }
+
+  // 3) 🔥 Cargar TODOS los usuarios (lógica podcast.js)
+  const usersSnap = await get(ref(db, "users"));
+  if (!usersSnap.exists()) {
+    listEl.innerHTML = `<li class="user-select-empty">No users found.</li>`;
+    return;
+  }
+
+  const users = usersSnap.val();
+  const usersArray = [];
+
+  for (const uid in users) {
+    if (uid === currentUser.uid) continue;
+
+    const u = users[uid] || {};
+    const username = u.username || u.email || "(no name)";
+    const email = u.email || "";
+
+    // Generar chatId como en shareToUser (determinístico)
+    const a = currentUser.uid;
+    const b = uid;
+    const chatId = a < b ? `${a}_${b}` : `${b}_${a}`;
+
+    // Rellenar select (compatibilidad con tu confirm actual)
+    const opt = document.createElement("option");
+    opt.value = chatId;
+    opt.textContent = username;
+    selectEl.appendChild(opt);
+
+    usersArray.push({ uid, chatId, username, email });
+  }
+
+  // 4) Render lista + seleccionar (setea select.value)
+  function render(filtered) {
+    listEl.innerHTML = "";
+
+    if (!filtered.length) {
+      const li = document.createElement("li");
+      li.className = "user-select-empty";
+      li.textContent = "No users found.";
+      listEl.appendChild(li);
+      return;
+    }
+
+    filtered.forEach(u => {
+      const li = document.createElement("li");
+      li.className = "user-select-item";
+
+      const info = document.createElement("div");
+      info.className = "user-select-info";
+      info.innerHTML = `<strong>${escapeHtml(u.username)}</strong>
+                        <div class="user-select-email">${escapeHtml(u.email)}</div>`;
+
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "btn user-select-btn";
+      btn.textContent = "Select";
+      btn.addEventListener("click", () => {
+        selectEl.value = u.chatId;
+
+        // feedback visual
+        [...listEl.querySelectorAll(".is-selected")].forEach(x => x.classList.remove("is-selected"));
+        li.classList.add("is-selected");
+      });
+
+      li.appendChild(info);
+      li.appendChild(btn);
+      listEl.appendChild(li);
+    });
+  }
+
+  // Inicial
+  render(usersArray);
+
+  // Filtro realtime
+  searchEl.value = "";
+  searchEl.oninput = () => {
+    const q = norm(searchEl.value);
+    const filtered = !q
+      ? usersArray
+      : usersArray.filter(u => norm(u.username).includes(q) || norm(u.email).includes(q));
+    render(filtered);
+  };
+
+  // Seleccionar el primero por defecto (para que confirm funcione sin clicar)
+  if (usersArray.length) {
+    selectEl.value = usersArray[0].chatId;
   }
 }
+
 
 
 function openShareArtistModal(artist) {

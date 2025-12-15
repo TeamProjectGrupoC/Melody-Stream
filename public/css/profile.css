@@ -519,13 +519,13 @@ main a:hover {
 
 
 .podcast-card audio::-webkit-media-controls-panel {
-    background-color: rgba(62, 154, 222, 0.2); 
+    background-color: rgba(255, 255, 255, 0.15); 
     color: var(--color-blanco); 
 }
 
 .podcast-card audio::-webkit-media-controls-current-time-display,
 .podcast-card audio::-webkit-media-controls-time-remaining-display {
-    color: var(--color-blanco);
+    color: rgba(0, 0, 0, 0.85);
 }
 
 .podcast-card audio::-webkit-media-controls-play-button {
@@ -1054,4 +1054,185 @@ main a:hover {
   border-radius: 8px;
   font-weight: 600;
   margin-top: 0.6rem;
+}
+
+/* ==========================================
+   ✅ User Picker UI (Share Artist / Share Song)
+   Reutiliza: .user-select-search, .user-select-list, etc.
+   ========================================== */
+
+/* Contenedores (uno para artista y otro para canción) */
+#shareArtistUserPicker,
+#shareSongUserPicker {
+  width: 100%;
+  margin-top: 12px;
+}
+
+/* Buscador: funciona en ambos modales */
+#shareArtistModal .user-select-search,
+#shareSongModal .user-select-search {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(62, 154, 222, 0.35);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--color-blanco);
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+#shareArtistModal .user-select-search::placeholder,
+#shareSongModal .user-select-search::placeholder {
+  color: rgba(255, 255, 255, 0.55);
+}
+
+#shareArtistModal .user-select-search:focus,
+#shareSongModal .user-select-search:focus {
+  border-color: rgba(62, 154, 222, 0.75);
+  box-shadow: 0 0 0 3px rgba(62, 154, 222, 0.18);
+  background: rgba(255, 255, 255, 0.10);
+}
+
+/* Lista */
+#shareArtistModal .user-select-list,
+#shareSongModal .user-select-list {
+  list-style: none;
+  margin: 12px 0 0 0;
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(0, 0, 0, 0.18);
+  max-height: 320px;
+  overflow: auto;
+}
+
+/* Scrollbar (Chrome/Edge) */
+#shareArtistModal .user-select-list::-webkit-scrollbar,
+#shareSongModal .user-select-list::-webkit-scrollbar {
+  width: 10px;
+}
+#shareArtistModal .user-select-list::-webkit-scrollbar-thumb,
+#shareSongModal .user-select-list::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+}
+#shareArtistModal .user-select-list::-webkit-scrollbar-thumb:hover,
+#shareSongModal .user-select-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* Item */
+#shareArtistModal .user-select-item,
+#shareSongModal .user-select-item {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  background: rgba(255, 255, 255, 0.06);
+  margin: 8px 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+#shareArtistModal .user-select-item:hover,
+#shareSongModal .user-select-item:hover {
+  transform: translateY(-1px);
+  border-color: rgba(62, 154, 222, 0.45);
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.35);
+}
+
+/* Info */
+#shareArtistModal .user-select-info,
+#shareSongModal .user-select-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 auto;
+}
+
+#shareArtistModal .user-select-info strong,
+#shareSongModal .user-select-info strong {
+  color: var(--color-blanco);
+  font-weight: 700;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px; /* un pelín más ancho */
+}
+
+#shareArtistModal .user-select-email,
+#shareSongModal .user-select-email {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.65);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+/* Botón Select */
+#shareArtistModal .user-select-btn,
+#shareSongModal .user-select-btn {
+  width: auto !important;
+  margin-top: 0 !important;
+  padding: 0.55rem 0.9rem !important;
+  border-radius: 10px;
+  background: var(--color-azul1);
+  color: var(--color-blanco);
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, background-color 0.2s ease;
+  flex: 0 0 auto;
+}
+
+#shareArtistModal .user-select-btn:hover,
+#shareSongModal .user-select-btn:hover {
+  background: var(--color-azul2);
+  transform: scale(1.03);
+}
+
+/* Seleccionado */
+#shareArtistModal .user-select-item.is-selected,
+#shareSongModal .user-select-item.is-selected {
+  border-color: rgba(62, 154, 222, 0.90);
+  box-shadow: 0 0 0 3px rgba(62, 154, 222, 0.22);
+}
+
+/* Vacío */
+#shareArtistModal .user-select-empty,
+#shareSongModal .user-select-empty {
+  padding: 14px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px dashed rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.70);
+  text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 520px) {
+  #shareArtistModal .user-select-item,
+  #shareSongModal .user-select-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  #shareArtistModal .user-select-btn,
+  #shareSongModal .user-select-btn {
+    width: 100% !important;
+  }
+
+  #shareArtistModal .user-select-info strong,
+  #shareSongModal .user-select-info strong,
+  #shareArtistModal .user-select-email,
+  #shareSongModal .user-select-email {
+    max-width: 100%;
+  }
 }
