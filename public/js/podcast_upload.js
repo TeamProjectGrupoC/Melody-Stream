@@ -146,7 +146,7 @@ async function handleUpload() {
     const audioURL = await getDownloadURL(audioRef);
 
     // Obtain uploader name from user profile
-    let uploaderName = currentUser.displayName || currentUser.email || currentUser.uid;
+    let uploaderName = currentUser.displayName;
 
     // Save podcast metadata to Realtime Database
     await set(newPodcastRef, {
