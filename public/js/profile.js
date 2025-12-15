@@ -787,6 +787,8 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
     const tokenValid = token && await isSpotifyTokenValid(token);
 
     if (!tokenValid) {
+      resultContainer.innerHTML = ""; 
+
       const reconnectBtn = document.createElement("button");
       reconnectBtn.textContent = "Connect Spotify";
       reconnectBtn.className = "main-button";
@@ -796,7 +798,7 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
           window.location.href = "test_register_spotify.html";
       });
 
-      resultContainer.innerHTML.appendChild(reconnectBtn);
+      resultContainer.appendChild(reconnectBtn);
     }
 
     const artists = await searchArtist(query);
@@ -1161,6 +1163,8 @@ document.getElementById("btnSearchSong").addEventListener("click", async () => {
     const tokenValid = token && await isSpotifyTokenValid(token);
 
     if (!tokenValid) {
+      resultContainer.innerHTML = ""; 
+      
       const reconnectBtn = document.createElement("button");
       reconnectBtn.textContent = "Connect Spotify";
       reconnectBtn.className = "main-button";
@@ -1170,7 +1174,7 @@ document.getElementById("btnSearchSong").addEventListener("click", async () => {
           window.location.href = "test_register_spotify.html";
       });
 
-      resultContainer.innerHTML.appendChild(reconnectBtn);
+      resultContainer.appendChild(reconnectBtn);
     }
 
     const songs = await searchSong(query);
