@@ -313,7 +313,7 @@ async function loadUserPodcasts(uid) {
 
         // Botón Delete para el podcast
         const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
+        deleteBtn.textContent = 'Remove';
         deleteBtn.className = 'btn btn-outline-danger mt-3';
         deleteBtn.addEventListener('click', async () => {
           if (!confirm(`Are you sure you want to delete "${p.nombre || 'this podcast'}"?`)) return;
@@ -444,7 +444,7 @@ async function loadUserFolders(uid) {
 
         // Delete button
         const deleteBtn = document.createElement('button');
-        deleteBtn.textContent = 'Delete';
+        deleteBtn.textContent = 'Remove';
         deleteBtn.className = 'btn btn-outline-danger mt-3';
         deleteBtn.addEventListener('click', async () => {
           if (!confirm(`Are you sure you want to delete the folder "${f.name || fid}"?`)) return;
@@ -1411,7 +1411,7 @@ async function openFolderModal(folderId, folderName = '') {
       if (canDelete) {
         const del = document.createElement('button');
         del.className = 'btn btn-outline-danger mt-3';
-        del.textContent = 'Delete';
+        del.textContent = 'Remove';
         del.addEventListener('click', () => {
           if (!confirm('Confirm delete?')) return;
           if (typeof deletePodcast === 'function') deletePodcast(it.id, p.audioURL, p.iconURL);
