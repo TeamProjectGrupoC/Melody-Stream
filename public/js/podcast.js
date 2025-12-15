@@ -405,31 +405,74 @@ function openUserSelectModal(usersArray, onSelect) {
   title.textContent = 'Select a user';
   box.appendChild(title);
 
+  const search = document.createElement('input');
+  search.type = 'text';
+  search.placeholder = 'Search user...';
+  search.className = 'user-select-search';
+  search.autocomplete = 'off';
+  box.appendChild(search);
+
   const list = document.createElement('ul');
   list.className = 'user-select-list';
+  box.appendChild(list);
 
-  usersArray.forEach(u => {
-    const li = document.createElement('li');
-    li.className = 'user-select-item';
+  // Renderiza la lista aplicando filtro
+  function render(filtered) {
+    list.innerHTML = '';
 
-    const info = document.createElement('div');
-    info.className = 'user-select-info';
-    info.innerHTML = `<strong>${escapeHtml(u.username)}</strong><div class="user-select-email">${escapeHtml(u.email)}</div>`;
+    if (!filtered.length) {
+      const empty = document.createElement('li');
+      empty.className = 'user-select-empty';
+      empty.textContent = 'No users found.';
+      list.appendChild(empty);
+      return;
+    }
 
-    const btn = document.createElement('button');
-    btn.textContent = 'Share';
-    btn.className = 'btn user-select-btn';
-    btn.addEventListener('click', () => {
-      document.body.removeChild(overlay);
-      onSelect(u.uid);
+    filtered.forEach(u => {
+      const li = document.createElement('li');
+      li.className = 'user-select-item';
+
+      const info = document.createElement('div');
+      info.className = 'user-select-info';
+      info.innerHTML = `<strong>${escapeHtml(u.username)}</strong><div class="user-select-email">${escapeHtml(u.email)}</div>`;
+
+      const btn = document.createElement('button');
+      btn.textContent = 'Share';
+      btn.className = 'btn user-select-btn';
+      btn.addEventListener('click', () => {
+        document.body.removeChild(overlay);
+        onSelect(u.uid);
+      });
+
+      li.appendChild(info);
+      li.appendChild(btn);
+      list.appendChild(li);
     });
+  }
 
-    li.appendChild(info);
-    li.appendChild(btn);
-    list.appendChild(li);
+  render(usersArray);
+
+  //Real time filter
+  function norm(s) { return (s || '').toString().toLowerCase().trim(); }
+
+  search.addEventListener('input', () => {
+    const q = norm(search.value);
+    const filtered = !q
+      ? usersArray
+      : usersArray.filter(u =>
+          norm(u.username).includes(q) || norm(u.email).includes(q)
+        );
+    render(filtered);
   });
 
-  box.appendChild(list);
+  setTimeout(() => search.focus(), 0);
+  search.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') e.preventDefault();
+    if (e.key === 'Escape') {
+      document.body.removeChild(overlay);
+      onSelect(null);
+    }
+  });
 
   const cancel = document.createElement('button');
   cancel.textContent = 'Cancel';

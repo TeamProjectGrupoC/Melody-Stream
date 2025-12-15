@@ -752,3 +752,22 @@ main h2 {
   background: rgba(255,255,255,0.12);
 }
 
+.user-select-search {
+  width: 100%;
+  padding: 10px 12px;
+  margin: 8px 0 12px;
+  color: #000000;             
+  caret-color: #000000;        
+  border-radius: 10px;
+  outline: none;
+}
+
+.user-select-search::placeholder {
+  color: rgba(255,255,255,0.6);
+}
+
+.user-select-empty{
+  opacity: .7;
+  padding: 10px;
+}
+
