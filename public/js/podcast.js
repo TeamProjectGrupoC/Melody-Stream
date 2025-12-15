@@ -594,11 +594,17 @@ function searchPodcasts(query) {
     const p = allPodcasts[podcastId];
     if (!p) continue;
 
+    const podcastName = p.nombre || "";
     const uploaderName = getUploaderDisplayName(p) || "";
+    const description = p.descripcion || "";
 
-    const matchName = scoreMatch(q, uploaderName);
+    const matchScore = Math.min(
+      scoreMatch(q, podcastName),
+      scoreMatch(q, uploaderName),
+      scoreMatch(q, description)
+    );
 
-    if (matchName < 999999) scored.push({ score: matchName, item: { id: podcastId, p } });
+    if (matchScore < 999999) scored.push({ score: matchScore, item: { id: podcastId, p } });
   }
 
   const top = pickTop8(scored);
