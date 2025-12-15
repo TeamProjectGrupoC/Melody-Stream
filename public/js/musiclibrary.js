@@ -20,3 +20,8 @@ const uuu = document.getElementById("Quevedo");
     uuu.addEventListener("click", function() {
         window.location.href = "artistas/quevedo.html";
     });
+
+const maria = document.getElementById("maria");
+    maria.addEventListener("click", function() {
+        window.location.href = "artistas/maria.html";
+    });
