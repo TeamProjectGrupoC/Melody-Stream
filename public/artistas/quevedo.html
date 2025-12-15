@@ -11,7 +11,7 @@
   <meta name="keywords" content="Melody Stream, music, podcast, friends" />
     <title>Artista — Quevedo</title> <link rel="stylesheet" href="../css/general.css" />
     <link rel="stylesheet" href="artista.css" />
-    <link rel="icon" type="image/png" href="../images/logos/melodystream.svg" />  </head>
+    <link rel="icon" type="image/png" href="../images/logos/melodystream.svg" /> </head>
   <body>
 
     <header id="headerPrincipal">
@@ -39,6 +39,12 @@
    </header>
 
     <main> 
+
+        <div class="back-to-library">
+            <a href="../musiclibrary.html" class="library-button">
+            Back to the Music Library
+            </a>
+        </div>
         <section class="PerfilArtista">
             <h1>Quevedo</h1>
             <div class="artist-image">
@@ -51,10 +57,10 @@
             <h2 class="section-title">Discography</h2> <div class="selector-container discography-controls"> <label for="albumSelect">Select an album:</label>
                 <select id="albumSelect">
                     <option value="" disabled selected>-- Select an album --</option>
-                    </select>
+                </select>
             </div>
 
-            <div id="songsContainer" class="songs-list-module" style="display: none;">
+            <div id="songsContainer" class="songs-list-module hidden">
                 <h3>Songs</h3>
                 <ul id="songList">
                     </ul>

@@ -27,14 +27,23 @@ const storage = getStorage(app);
 // ============================================================================
 const datosMaria = {
     "album_1": {
-        "nombre": "Luna 5: Jaleo",
+        "nombre": "RECOPILATORIO",
         "canciones": [
-            {
-                "titulo": "Luna 5: Jaleo",
-                "spotifyLink": "https://open.spotify.com/embed/track/2eGrPWHycj8dBj3Kp64EBa?utm_source=generator",
-                // MANUAL FILENAME: This tells the code to look for "jaleo5.mp3"
-                // instead of auto-generating "luna5jaleo.mp3"
-                "fileName": "jaleo5.mp3" 
+            { 
+                "titulo": "FIREDANCE", 
+                "fileName": "Firedance.mp3"
+            },
+            { 
+                "titulo": "YO CARMEN", 
+                "fileName": "yocarmen.mp3"
+            },
+            { 
+                "titulo": "AUTORRETRATO", 
+                "fileName": "autorretrato.mp3"
+            },
+            { 
+                "titulo": "UNA ODA AL TIEMPO", 
+                "fileName": "odatiempo.mp3"
             }
         ]
     }
@@ -44,88 +53,68 @@ const datosMaria = {
 // 4. MAIN DOM LOGIC
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
-
-    // Get DOM elements
     const albumSelect = document.getElementById('albumSelect');
     const songsContainer = document.getElementById('songsContainer');
     const songList = document.getElementById('songList');
 
-    // Initialize Dropdown
-    albumSelect.innerHTML = '<option value="" disabled selected>-- Select an album --</option>';
-    
-    // Populate Album Options
-    for (const key in datosMaria) {
-        const album = datosMaria[key];
-        const option = document.createElement('option');
-        option.value = key;             
-        option.textContent = album.nombre; 
-        albumSelect.appendChild(option);
+    // Hide Dropdown
+    if (albumSelect) {
+        const selectorBox = albumSelect.closest('.selector-container');
+        if (selectorBox) selectorBox.classList.add('hidden');
     }
 
-    // Event Listener: Album Selection Change
-    albumSelect.addEventListener('change', (e) => {
-        const albumKey = e.target.value;
-        const album = datosMaria[albumKey];
+    const onlyAlbumKey = Object.keys(datosMaria)[0];
+    const album = datosMaria[onlyAlbumKey];
+    if (!album) return;
+
+    songList.innerHTML = '';
+    songsContainer.classList.remove('hidden');
+    songsContainer.style.display = 'block';
+    
+
+    // Iterate through songs
+    album.canciones.forEach(cancion => {
+        const li = document.createElement('li');
+        li.textContent = "🎵 " + cancion.titulo;
         
-        if (!album) return;
+        li.classList.add("song-item");
 
-        // Reset list and show container
-        songList.innerHTML = '';
-        songsContainer.style.display = 'block';
+        // CLICK EVENT: Play Song
+        li.addEventListener('click', async () => {
+            const playerContainer = document.getElementById('playerContainer');
+            
+            // Show loading state
+            playerContainer.innerHTML = '<p style="color:white; text-align:center;">Loading audio from Firebase...</p>';
 
-        // Iterate through songs and create list items
-        album.canciones.forEach(cancion => {
-            const li = document.createElement('li');
-            li.textContent = "🎵 " + cancion.titulo;
+            // 1. DETERMINE FILENAME
+            // Check if specific 'fileName' exists in JSON. If not, auto-generate it.
+            let finalFileName;
+            if (cancion.fileName) {
+                finalFileName = cancion.fileName;
+            } else {
+                finalFileName = formatFilename(cancion.titulo);
+            }
+            
+            // 2. Define path
+            const pathStorage = `/songsLibrary/maria/${finalFileName}`;
+            
+            let mp3Url = null;
 
-            // Apply Styles
-            li.style.cursor = "pointer";
-            li.style.padding = "10px";
-            li.style.borderBottom = "1px solid rgba(255,255,255,0.2)";
-            li.style.color = "white"; 
-            li.style.textAlign = "left";
+            try {
+                // 3. Attempt to get download URL
+                const fileRef = ref(storage, pathStorage);
+                mp3Url = await getDownloadURL(fileRef);
+                console.log(`Audio found for ${cancion.titulo}:`, mp3Url);
+            } catch (error) {
+                console.warn(`File not found in Storage: ${pathStorage}`);
+                // mp3Url remains null
+            }
 
-            // Hover Effects
-            li.onmouseover = () => li.style.backgroundColor = "rgba(255,255,255,0.1)";
-            li.onmouseout = () => li.style.backgroundColor = "transparent";
-
-            // CLICK EVENT: Play Song (Async for Firebase Fetch)
-            li.addEventListener('click', async () => {
-                const playerContainer = document.getElementById('playerContainer');
-                
-                // Show loading state
-                playerContainer.innerHTML = '<p style="color:white; text-align:center;">Loading audio from Firebase...</p>';
-
-                // 1. DETERMINE FILENAME
-                let finalFileName;
-                if (cancion.fileName) {
-                    finalFileName = cancion.fileName; // Use manual filename (jaleo5.mp3)
-                } else {
-                    finalFileName = formatFilename(cancion.titulo); // Auto-generate
-                }
-                
-                // 2. DEFINE STORAGE PATH
-                // NOTE: We are using a new folder "maria"
-                const pathStorage = `songsLibrary/maria/${finalFileName}`;
-                
-                let mp3Url = null;
-
-                try {
-                    // 3. GET DOWNLOAD URL
-                    const fileRef = ref(storage, pathStorage);
-                    mp3Url = await getDownloadURL(fileRef);
-                    console.log(`Audio found: ${mp3Url}`);
-                } catch (error) {
-                    console.warn(`Error finding file: ${pathStorage}`, error);
-                    // mp3Url remains null, error message will be shown in displayPlayer
-                }
-
-                // 4. RENDER PLAYER
-                displayPlayer(cancion.spotifyLink, mp3Url, cancion.titulo, pathStorage);
-            });
-
-            songList.appendChild(li);
+            // 4. Render players
+            displayPlayer(cancion.spotifyLink, mp3Url, cancion.titulo, pathStorage);
         });
+
+        songList.appendChild(li);
     });
 });
 
@@ -134,33 +123,32 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================================================
 
 /**
- * Formats title to filename (removes spaces/accents).
- * "Luna 5" -> "luna5.mp3"
+ * Fallback function: Formats a song title into a standardized filename
+ * if no manual filename is provided.
  */
 function formatFilename(title) {
     return title
         .toLowerCase()
-        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") 
+        .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // Remove accents
         .trim()
-        .replace(/\s+/g, '') // Removes spaces completely
+        .replace(/\s+/g, '_') // Replace spaces with underscores
         + ".mp3";
 }
 
 /**
- * Renders the HTML for both players (Firebase MP3 + Spotify Iframe)
+ * Renders the HTML for both players.
  */
 function displayPlayer(spotifyLink, mp3Link, songTitle, debugPath) {
     const playerContainer = document.getElementById('playerContainer');
-    if(!playerContainer) return;
+    if (!playerContainer) return;
 
-    // A. Build Firebase MP3 Player HTML
     let htmlAudioFirebase = '';
-    
+
     if (mp3Link) {
         htmlAudioFirebase = `
-            <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
-                <p style="color: #ccc; margin: 0 0 5px 0; font-size: 0.9rem;">Melody Stream MP3:</p>
-                <audio controls autoplay style="width: 100%; height: 40px;">
+            <div class="firebase-player">
+                <p>Melody Stream MP3:</p>
+                <audio controls autoplay>
                     <source src="${mp3Link}" type="audio/mpeg">
                     Your browser does not support the audio element.
                 </audio>
@@ -168,31 +156,23 @@ function displayPlayer(spotifyLink, mp3Link, songTitle, debugPath) {
         `;
     } else {
         htmlAudioFirebase = `
-            <div style="margin-bottom: 20px; color: #ff6b6b; font-size: 0.9em; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+            <div class="firebase-error">
                 ⚠️ MP3 file not found in Firebase Storage.<br>
-                <small>Path tried: ${debugPath}</small><br>
-                <small>Ensure file is in: <b>songsLibrary/maria/</b></small>
+                <small>(Tried path: ${debugPath})</small>
             </div>
         `;
     }
 
-    // B. Build Spotify Player HTML
-    let htmlSpotify = `
-        <h4 style="color:white; margin-bottom:10px;">Spotify:</h4>
-        <iframe 
-            style="border-radius:12px" 
-            src="${spotifyLink}" 
-            width="100%" 
-            height="152" 
-            frameBorder="0" 
-            allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" 
-            loading="lazy">
-        </iframe>
-    `;
+    const htmlSpotify = `
+        <h4 class="spotify-player-title">Spotify:</h4>
+        <div class="spotify-unavailable">
+            Songs unaviable in Spotify for this artist
+        </div>
+        `;
 
-    // C. Inject into DOM
+
     playerContainer.innerHTML = `
-        <h2 style="color:white; margin-bottom:20px; border-bottom: 1px solid #444; padding-bottom: 10px;">${songTitle}</h2>
+        <h2 class="player-title">${songTitle}</h2>
         ${htmlAudioFirebase}
         ${htmlSpotify}
     `;

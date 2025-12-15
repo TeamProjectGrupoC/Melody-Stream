@@ -2,7 +2,7 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center; 
-    max-width: 1000px;
+    max-width: 750;
     width: 90%;
     margin: 3rem auto 5rem;
 }
@@ -93,9 +93,6 @@ main {
     outline: none;
 }
 
-.selector-container {
-    margin-bottom: 20px;
-}
 
 select#albumSelect {
     padding: 10px;
@@ -138,4 +135,270 @@ select#albumSelect {
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
+}
+
+/* ===============================
+   Back to Music Library button
+   =============================== */
+
+.back-to-library {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.library-button {
+    background-color: var(--color-azul1, #1db954);
+    color: white;
+    padding: 10px 18px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.library-button:hover {
+    background-color: var(--color-azul2, #3e9ade);
+    transform: translateY(-2px);
+}
+
+
+.hidden {
+    display: none;
+}
+
+.song-item {
+    list-style: none;
+    padding: 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+    color: white;
+    text-align: left;
+    transition: background 0.2s;
+}
+
+.song-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    font-weight: bold;
+}
+
+.library-button,
+.library-button:visited {
+    color: white;
+}
+
+.library-button:hover,
+.library-button:active {
+    color: white;
+    text-decoration: none;
+}
+
+
+
+/* ===============================
+   Album selector
+   =============================== */
+
+.discography-controls {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 22px;
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto 30px auto;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+.discography-controls label {
+    color: white;
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: block;
+    text-align: center;
+}
+
+.discography-controls select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+
+    background: rgba(0, 0, 0, 0.4);
+    color: white;
+
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    outline: none;
+    cursor: pointer;
+
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.discography-controls select:hover {
+    border-color: var(--color-azul2, #3e9ade);
+}
+
+.discography-controls select:focus {
+    border-color: var(--color-azul1, #1db954);
+    box-shadow: 0 0 0 3px rgba(62, 154, 222, 0.35);
+}
+
+
+
+/* ===============================
+   Songs list
+   =============================== */
+
+.songs-list-module {
+    width: 100%;
+    max-width: 500px;
+    margin: 0 auto 30px auto;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 18px;
+    padding: 20px 22px;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.45);
+}
+
+.songs-list-module h3 {
+    color: white;
+    text-align: center;
+    font-size: 1.4rem;
+    margin-bottom: 15px;
+    letter-spacing: 0.5px;
+}
+
+#songList {
+    padding: 0;
+    margin: 0;
+}
+
+.song-item {
+    list-style: none;
+    padding: 12px 14px;
+    margin-bottom: 8px;
+
+    border-radius: 10px;
+    cursor: pointer;
+
+    color: white;
+    font-weight: 500;
+
+    background: rgba(255, 255, 255, 0.04);
+    transition: background 0.25s ease, transform 0.15s ease;
+}
+
+.song-item:last-child {
+    margin-bottom: 0;
+}
+
+.song-item:hover {
+    background: rgba(62, 154, 222, 0.35);
+    transform: translateX(4px);
+    font-weight: 600;
+}
+
+
+.MusicSelector {
+  width: 100% !important;
+    max-width: 700px !important;
+
+}
+
+.selector-container.discography-controls,
+.songs-list-module {
+  width: 100% !important;
+  max-width: 700px !important;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* ===============================
+   Player container
+   =============================== */
+
+.player-module {
+    width: 100%;
+    max-width: 1200px;
+    margin: 30px auto;
+}
+
+/* Song title */
+.player-title {
+    color: white;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #444;
+    padding-bottom: 10px;
+}
+
+/* ===============================
+   Firebase MP3 player
+   =============================== */
+
+.firebase-player {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.firebase-player p {
+    color: #ccc;
+    margin: 0 0 5px 0;
+    font-size: 0.9rem;
+}
+
+.firebase-player audio {
+    width: 100%;
+    height: 40px;
+}
+
+/* ===============================
+   Firebase error message
+   =============================== */
+
+.firebase-error {
+    margin-bottom: 20px;
+    color: #ff6b6b;
+    font-size: 0.9em;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.firebase-error small {
+    color: #ccc;
+}
+
+/* ===============================
+   Spotify player
+   =============================== */
+
+.spotify-player-title {
+    color: white;
+    margin-bottom: 10px;
+}
+
+.spotify-player iframe {
+    width: 100%;
+    height: 152px;
+    border-radius: 12px;
+    border: none;
+}
+
+
+.loading-text{
+  color: white;
+  text-align: center;
+}
+
+.spotify-unavailable{
+  background: rgba(0,0,0,0.35);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 14px 16px;
+  border-radius: 12px;
+  color: #ddd;
+  text-align: center;
 }

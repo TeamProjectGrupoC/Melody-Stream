@@ -105,16 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const li = document.createElement('li');
             li.textContent = "🎵 " + cancion.titulo;
             
-            // Apply Styles
-            li.style.cursor = "pointer";
-            li.style.padding = "10px";
-            li.style.borderBottom = "1px solid rgba(255,255,255,0.2)";
-            li.style.color = "white"; 
-            li.style.textAlign = "left";
-
-            // Hover Effects
-            li.onmouseover = () => li.style.backgroundColor = "rgba(255,255,255,0.1)";
-            li.onmouseout = () => li.style.backgroundColor = "transparent";
+            li.classList.add("song-item");
 
             // CLICK EVENT: Play Song
             li.addEventListener('click', async () => {
@@ -178,16 +169,15 @@ function formatFilename(title) {
  */
 function displayPlayer(spotifyLink, mp3Link, songTitle, debugPath) {
     const playerContainer = document.getElementById('playerContainer');
-    if(!playerContainer) return;
+    if (!playerContainer) return;
 
-    // A. Build Firebase MP3 Player HTML
     let htmlAudioFirebase = '';
-    
+
     if (mp3Link) {
         htmlAudioFirebase = `
-            <div style="background: rgba(255, 255, 255, 0.1); padding: 15px; border-radius: 12px; margin-bottom: 20px;">
-                <p style="color: #ccc; margin: 0 0 5px 0; font-size: 0.9rem;">Melody Stream MP3:</p>
-                <audio controls autoplay style="width: 100%; height: 40px;">
+            <div class="firebase-player">
+                <p>Melody Stream MP3:</p>
+                <audio controls autoplay>
                     <source src="${mp3Link}" type="audio/mpeg">
                     Your browser does not support the audio element.
                 </audio>
@@ -195,22 +185,26 @@ function displayPlayer(spotifyLink, mp3Link, songTitle, debugPath) {
         `;
     } else {
         htmlAudioFirebase = `
-            <div style="margin-bottom: 20px; color: #ff6b6b; font-size: 0.9em; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px;">
+            <div class="firebase-error">
                 ⚠️ MP3 file not found in Firebase Storage.<br>
                 <small>(Tried path: ${debugPath})</small>
             </div>
         `;
     }
 
-    // B. Build Spotify Player HTML
-    let htmlSpotify = `
-        <h4 style="color:white; margin-bottom:10px;">Spotify:</h4>
-        <iframe style="border-radius:12px" src="${spotifyLink}" width="100%" height="152" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe>
+    const htmlSpotify = `
+        <h4 class="spotify-player-title">Spotify:</h4>
+        <div class="spotify-player">
+            <iframe
+                src="${spotifyLink}"
+                allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+                loading="lazy">
+            </iframe>
+        </div>
     `;
 
-    // C. Inject into DOM
     playerContainer.innerHTML = `
-        <h2 style="color:white; margin-bottom:20px; border-bottom: 1px solid #444; padding-bottom: 10px;">${songTitle}</h2>
+        <h2 class="player-title">${songTitle}</h2>
         ${htmlAudioFirebase}
         ${htmlSpotify}
     `;
