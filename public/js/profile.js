@@ -692,12 +692,6 @@ function getSpotifyUserToken() {
 }
 
 async function searchArtist(query) {
-  const token = getSpotifyUserToken();
-  if (!token) {
-    alert("Please sign in with Spotify first.");
-    return [];
-  }
-
   const resp = await fetch(
     `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=artist&limit=6`,
     { headers: { "Authorization": "Bearer " + token } }
@@ -789,6 +783,20 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
   }
 
   try {
+
+    if (!tokenValid) {
+      const reconnectBtn = document.createElement("button");
+      reconnectBtn.textContent = "Connect Spotify";
+      reconnectBtn.className = "main-button";
+      reconnectBtn.style.marginTop = "10px";
+
+      reconnectBtn.addEventListener("click", () => {
+          window.location.href = "test_register_spotify.html";
+      });
+
+      meta.appendChild(reconnectBtn);
+    }
+
     const artists = await searchArtist(query);
 
     if (!artists || artists.length === 0) {
@@ -952,10 +960,6 @@ document.getElementById("shareArtistConfirm").addEventListener("click", async ()
 
 async function searchSong(query) {
   const token = getSpotifyUserToken();
-  if (!token) {
-    alert("Please sign in with Spotify first.");
-    return [];
-  }
 
   const resp = await fetch(
     `https://api.spotify.com/v1/search?q=${encodeURIComponent(query)}&type=track&limit=6`,
@@ -1151,6 +1155,19 @@ document.getElementById("btnSearchSong").addEventListener("click", async () => {
   }
 
   try {
+    if (!tokenValid) {
+      const reconnectBtn = document.createElement("button");
+      reconnectBtn.textContent = "Connect Spotify";
+      reconnectBtn.className = "main-button";
+      reconnectBtn.style.marginTop = "10px";
+
+      reconnectBtn.addEventListener("click", () => {
+          window.location.href = "test_register_spotify.html";
+      });
+
+      meta.appendChild(reconnectBtn);
+    }
+
     const songs = await searchSong(query);
 
     if (!songs || songs.length === 0) {

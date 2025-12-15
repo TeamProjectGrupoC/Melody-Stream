@@ -190,8 +190,6 @@ async function main() {
             initSpotifyPlaybackSDK();
             
         } else {
-            token=null;
-            isPremium = false;
             console.log("Spotify not available — token invalid.");
         }
     })();
