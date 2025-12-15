@@ -5,6 +5,7 @@ import { saveFavouriteSong, saveFavouriteArtist } from "./favourites.js";
 import { getDatabase, ref, onValue, set, get, update, push, remove } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 const databaseRef = ref;
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-storage.js";
+import { showAlert } from "./alert.js";
 
 /**
  * ============================================================================
@@ -110,7 +111,7 @@ async function isSpotifyTokenValid(token) {
         });
         return res.status === 200;
     } catch (e) {
-        console.warn("Token validation failed", e);
+        //console.warn("Token validation failed", e);
         return false;
     }
 }
@@ -134,13 +135,13 @@ function initSpotifyPlaybackSDK() {
 
         // Listen for the 'ready' event to get the Device ID
         window.spotifyPlayer.addListener("ready", ({ device_id }) => {
-            console.log("Device ready:", device_id);
+            //console.log("Device ready:", device_id);
             deviceId = device_id;
             playerReady = true;
         });
 
         window.spotifyPlayer.addListener("not_ready", ({ device_id }) => {
-            console.log("Device ID has gone offline", device_id);
+            //console.log("Device ID has gone offline", device_id);
             playerReady = false;
         });
 
@@ -151,10 +152,10 @@ function initSpotifyPlaybackSDK() {
 // 3. Auto-start SDK if token and premium status are valid
 (async () => {
     if (token && isPremium && await isSpotifyTokenValid(token)) {
-        console.log("Spotify token OK — Loading Web Playback SDK...");
+        //console.log("Spotify token OK — Loading Web Playback SDK...");
         initSpotifyPlaybackSDK();
     } else {
-        console.log("Spotify not available — premium or token invalid.");
+        //console.log("Spotify not available — premium or token invalid.");
     }
 })();
 
@@ -373,7 +374,7 @@ async function loadUserPodcasts(uid) {
             addBtn.textContent = 'Saved!';
             setTimeout(() => (addBtn.textContent = originalText), 1500);
           } catch (err) {
-            alert('Error updating folder: ' + (err.message || err));
+            showAlert("Error updating folder", "error");
           }
         });
 
@@ -389,7 +390,7 @@ async function loadUserPodcasts(uid) {
                 const audioRef = storageRef(storage, p.audioURL);
                 await deleteObject(audioRef);
               } catch (e) {
-                console.warn('Could not delete audio from storage:', e);
+                //console.warn('Could not delete audio from storage:', e);
               }
             }
             if (p.iconURL) {
@@ -397,15 +398,16 @@ async function loadUserPodcasts(uid) {
                 const iconRef = storageRef(storage, p.iconURL);
                 await deleteObject(iconRef);
               } catch (e) {
-                console.warn('Could not delete icon from storage:', e);
+                //console.warn('Could not delete icon from storage:', e);
               }
             }
             //Remove podcast entry from the db
             await remove(databaseRef(db, `podcasts/${pid}`));
             await loadUserPodcasts(uid);
-            alert('Podcast deleted successfully');
+
+            showAlert("Podcast deleted successfully", "success");
           } catch (err) {
-            alert('Failed to delete podcast: ' + (err.message || err));
+            showAlert("Failed to delete podcast", "error");
           }
         });
         item.appendChild(deleteBtn);
@@ -522,7 +524,7 @@ async function loadUserFolders(uid) {
                 const iconRef = storageRef(storage, f.iconURL);
                 await deleteObject(iconRef);
               } catch (e) {
-                console.warn('Could not delete folder icon from storage:', e);
+                //console.warn('Could not delete folder icon from storage:', e);
               }
             }
             //Remove folder from database
@@ -541,9 +543,9 @@ async function loadUserFolders(uid) {
             }
             
             await loadUserFolders(uid);
-            alert('Folder deleted successfully');
+            showAlert("Folder deleted successfully", "success");
           } catch (err) {
-            alert('Failed to delete folder: ' + (err.message || err));
+            showAlert("Failed to delete folder", "error");
           }
         });
         item.appendChild(deleteBtn);
@@ -575,14 +577,14 @@ function setupFormUploadListener() {
 
     //Validations
     if (!currentUser) {
-      alert("You must be logged in to upload a photo.");
+      showAlert("You must be logged in to upload a photo", "warning");
       return;
     }
 
     //Get selected file
     const file = fileInput.files[0];
     if (!file) {
-      alert("Please select a file.");
+      showAlert("Please select a file", "info");
       return;
     }
 
@@ -592,7 +594,7 @@ function setupFormUploadListener() {
 
     try {
       //Upload file
-      alert("Uploading photo...");
+      showAlert("Uploading photo...", "info");
       const snapshot = await uploadBytes(sRef, file);
 
       //Get download url
@@ -609,10 +611,9 @@ function setupFormUploadListener() {
 
       localStorage.setItem('profilePic', downloadURL);
 
-      alert("¡Profile picture updated!");
-
+      showAlert("Profile picture updated!", "success");
     } catch (error) {
-      alert("Error uploading photo. Check your console.");
+      showAlert("Error uploading photo", "error");
     }
   });
 }
@@ -743,7 +744,7 @@ document.addEventListener('click', (e) => {
   e.preventDefault();
   const fid = btn.dataset.folderId || btn.getAttribute('data-folder-id');
   const fname = btn.dataset.folderName || btn.getAttribute('data-folder-name') || '';
-  if (!fid) return console.warn('El botón view necesita data-folder-id');
+  if (!fid) return; //console.warn('El botón view necesita data-folder-id');
   loadFolderPodcasts(fid, fname);
 });
 
@@ -807,7 +808,7 @@ async function removeFavouriteArtist(artistId) {
   const favRef = ref(db, `users/${currentUser.uid}/favourite_artists/${artistId}`);
   await remove(favRef);
 
-  alert("Artist removed from favourites");
+  showAlert("Artist removed from favourites", "info");
 }
 
 
@@ -1133,7 +1134,8 @@ document.getElementById("shareArtistConfirm").addEventListener("click", async ()
   await shareArtistToChat(chatId, artist);
 
   modal.style.display = "none";
-  alert("Artist shared!");
+
+  showAlert("Artist shared!", "success");
 });
 
 //------------------SONGS---------------------
@@ -1166,7 +1168,7 @@ function loadFavouriteSongs(userId) {
 async function playTrack(uri, playButton) {
 
     if (!playerReady || !deviceId) {
-        console.warn("Spotify player not ready.");
+        //console.warn("Spotify player not ready.");
         return;
     }
 
@@ -1220,7 +1222,8 @@ async function removeFavSongs(songId){
   const favSongRef = ref(db, `users/${currentUser.uid}/favoritos/${songId}`);
   await remove(favSongRef);
 
-  console.log(`Song with id ${songId} removed from favorites`);
+  showAlert("Song removed from favourites", "info");
+  //console.log(`Song with id ${songId} removed from favorites`);
 }
 
 // --- RENDER SAVED SONGS (Logic matching Chats) ---
@@ -1478,7 +1481,7 @@ document.getElementById("shareSongConfirm").addEventListener("click", async () =
   await shareSongToChat(chatId, track); //share song to selected chat
 
   modal.style.display = "none";
-  alert("Song shared!");
+  showAlert("Song shared!", "success");
 });
 
 //Create a global object shared between modules
