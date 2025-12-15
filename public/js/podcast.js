@@ -72,6 +72,8 @@ const resultsTitle = document.getElementById("resultsTitle");
 const resultsList  = document.getElementById("resultsList");
 const searchInput = document.getElementById("searchInput");
 const searchButton = document.getElementById("searchButton");
+const viewAllButton = document.getElementById("viewAllButton");
+
 
 // Global variables
 let allPodcasts = {};
@@ -684,6 +686,66 @@ function handleSearch() {
   else searchPodcasts(query);
 }
 
+// See all podcast and folders
+function renderAll() {
+  if (!resultsList) return;
+
+  // opcional: vaciar input y "resetear" radio
+  if (searchInput) searchInput.value = "";
+
+  resultsList.innerHTML = "";
+  showResultsHeader("All folders and podcasts");
+
+  const master = isMasterUser();
+
+  // --- FOLDERS ---
+  const folderIds = Object.keys(allFolders || {});
+  if (folderIds.length > 0) {
+    const h = document.createElement("h3");
+    h.style.margin = "0.5rem 0 0";
+    h.textContent = `Folders (${folderIds.length})`;
+    resultsList.appendChild(h);
+
+    folderIds.forEach(folderId => {
+      const f = allFolders[folderId];
+      if (!f) return;
+      resultsList.appendChild(buildFolderCard(folderId, f));
+    });
+  } else {
+    const p = document.createElement("p");
+    p.style.opacity = "0.7";
+    p.textContent = "No folders available.";
+    resultsList.appendChild(p);
+  }
+
+  // --- PODCASTS ---
+  const podcastIds = Object.keys(allPodcasts || {});
+  if (podcastIds.length > 0) {
+    const h = document.createElement("h3");
+    h.style.margin = "1rem 0 0";
+    h.textContent = `Podcasts (${podcastIds.length})`;
+    resultsList.appendChild(h);
+
+    podcastIds.forEach(podcastId => {
+      const p = allPodcasts[podcastId];
+      if (!p) return;
+
+      const card = buildPodcastCard(podcastId, p, {
+        showDelete: master,
+        onDelete: () => deletePodcast(podcastId, p.audioURL, p.iconURL),
+      });
+
+      resultsList.appendChild(card);
+    });
+  } else {
+    const p = document.createElement("p");
+    p.style.opacity = "0.7";
+    p.textContent = "No podcasts available.";
+    resultsList.appendChild(p);
+  }
+}
+
+
 
 // Initialize page
 document.addEventListener("DOMContentLoaded", async () => {
@@ -695,6 +757,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 // Search
 searchButton?.addEventListener("click", handleSearch);
+viewAllButton?.addEventListener("click", renderAll);
 
 searchInput?.addEventListener("keypress", (e) => {
   if (e.key === "Enter") {
@@ -709,7 +772,6 @@ document.querySelectorAll('input[name="searchType"]').forEach(r => {
     else clearResults();
   });
 });
-
 
 // Upload button
 const goToUploadButton = document.getElementById("goToUpload") || document.getElementById("uploadPodcastBtn");

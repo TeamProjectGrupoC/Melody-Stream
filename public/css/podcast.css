@@ -739,3 +739,7 @@ main h2 {
   transform: scale(1.03);
 }
 
+#resultsList > h3{
+  grid-column: 1 / -1;
+}
+
