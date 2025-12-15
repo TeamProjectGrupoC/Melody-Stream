@@ -1,48 +1,36 @@
-/*
- * Este archivo (chat.css) se carga DESPUÉS de general.css
- * y adapta el estilo del chat al tema oscuro.
- */
 
-/* 1. Layout del Body (Específico para esta página)
-   general.css define el fondo, pero este CSS define el layout.
-*/
 body {
     display: flex;
-    flex-direction: column; /* Apila el header y el chat */
+    flex-direction: column; 
     height: 100vh;
     overflow: hidden;
 }
 
-/* 2. Contenedor Principal del Chat
-   Ocupa el espacio restante debajo del header.
-*/
+
 .chat-container {
     display: flex;
     width: 100%;
-    flex: 1; /* Regla clave: ocupa el espacio restante */
-    background: #0C0C14; /* Un negro un poco más claro que el fondo */
+    flex: 1; 
+    background: #0C0C14;
     overflow: hidden;
 }
 
-/* 3. Sidebar (Columna Izquierda)
-   Usa las variables de general.css
-*/
+
 .sidebar {
     display: flex;
     flex-direction: column;
     flex: 0 0 30%; 
     min-width: 300px;
-    background: #101018; /* Fondo oscuro para el sidebar */
+    background: #101018; 
     border-right: 1px solid var(--color-gris);
 }
 
 .sidebar-header {
     padding: 16px;
-    background: #191922; /* Fondo de header oscuro */
+    background: #191922; 
     border-bottom: 1px solid var(--color-gris);
 }
 
-/* Anula los estilos H1 de general.css (centrado) */
 .sidebar-header h1 {
     font-size: 20px;
     margin-bottom: 12px;
@@ -65,7 +53,7 @@ body {
 
 #statusMessage {
     padding: 16px;
-    color: #aaa; /* Texto secundario */
+    color: #aaa;
 }
 
 #userList {
@@ -102,16 +90,13 @@ body {
     text-overflow: ellipsis;
 }
 
-/* 4. Área del Chat (Columna Derecha) */
 .chat-area {
     display: flex;
     flex-direction: column;
     flex: 1;
-    /* El fondo del body (con degradado) se verá aquí */
     background: transparent; 
 }
 
-/* Anula los estilos H2 de general.css */
 #chatPlaceholder h2 {
     color: #aaa;
     text-align: center;
@@ -119,7 +104,7 @@ body {
 }
 
 #chatBox {
-    display: none; /* JS lo cambia a 'flex' */
+    display: none; 
     flex-direction: column;
     height: 100%;
 }
@@ -130,11 +115,10 @@ body {
     border-bottom: 1px solid var(--color-gris);
 }
 
-/* Anula los estilos H3 de general.css */
 #chatWith {
     font-size: 18px;
     color: var(--color-blanco);
-    text-align: left; /* Lo alineamos a la izquierda */
+    text-align: left;
 }
 
 #messages {
@@ -158,24 +142,23 @@ body {
 
 .message.you {
     align-self: flex-end;
-    background-color: var(--color-morado); /* Color de tu tema */
+    background-color: var(--color-morado); 
     color: var(--color-blanco);
     border-bottom-right-radius: 2px;
 }
 
 .message.other {
     align-self: flex-start;
-    background-color: var(--color-gris); /* Color de tu tema */
+    background-color: var(--color-gris); 
     color: var(--color-blanco);
     border-bottom-left-radius: 2px;
 }
 
-/* 5. Input del Chat (Abajo) */
 #inputContainer {
     display: flex;
     gap: 10px;
     padding: 16px;
-    background: #191922; /* Fondo oscuro */
+    background: #191922; 
     border-top: 1px solid var(--color-gris);
 }
 
@@ -192,8 +175,7 @@ body {
     color: #ccc;
 }
 
-/* El botón #sendBtn usará los estilos de "button" de general.css */
-/* Solo añadimos lo específico */
+
 #sendBtn {
     border-radius: 20px;
     font-weight: bold;
@@ -214,9 +196,7 @@ body {
     margin-right: 20px;
 }
 
-/* ======================================================
-   ESTILO PARA MENSAJES MUSICALES
-   ====================================================== */
+
 
 .message.music-message {
     background: #1db95420; 
@@ -236,7 +216,6 @@ body {
     border-color: #1db95440;
 }
 
-/* --- Tarjeta del attachment musical --- */
 .attachment-card {
     display: flex;
     flex-direction: column;
@@ -285,13 +264,12 @@ body {
 }
 
 
-/* 6. Estilos Responsive (Solo para el layout del chat) */
 @media (max-width: 800px) {
     .chat-container {
-        flex-direction: column; /* Apila el sidebar encima del chat */
+        flex-direction: column;
     }
     .sidebar {
-        flex: 0 0 40%; /* Elige la altura que prefieras */
+        flex: 0 0 40%; 
         min-width: 100%;
         border-right: none;
         border-bottom: 1px solid var(--color-gris);
@@ -315,13 +293,13 @@ body {
 
 /* Override default bubble styles for request cards */
 .message.follow-request-card {
-    background: #2a2a35; /* Dark card background */
+    background: #2a2a35; 
     border: 1px solid #3f3f4b;
     border-radius: 12px;
     padding: 16px;
     max-width: 280px;
     width: 100%;
-    margin: 10px auto; /* Center the card horizontally */
+    margin: 10px auto;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -368,16 +346,14 @@ body {
     transform: scale(0.95);
 }
 
-/* Accept Button (Gradient matching your theme) */
 .btn-accept {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
 }
 
-/* Reject Button (Subtle Dark Grey) */
 .btn-reject {
     background: #3e3e4a;
-    color: #ff6b6b; /* Soft red for reject */
+    color: #ff6b6b;
 }
 
 .btn-accept:hover { opacity: 0.9; }
@@ -389,8 +365,8 @@ body {
    ========================================= */
 
 .message.status-message {
-    background: transparent; /* Remove bubble background */
-    align-self: center;      /* Center in the chat stream */
+    background: transparent; 
+    align-self: center;     
     margin: 10px 0;
     padding: 0;
     max-width: 100%;
@@ -400,7 +376,7 @@ body {
     background: rgba(255, 255, 255, 0.1);
     color: #e0e0e0;
     padding: 6px 16px;
-    border-radius: 20px; /* Pill shape */
+    border-radius: 20px; 
     font-size: 0.75rem;
     text-align: center;
     border: 1px solid rgba(255, 255, 255, 0.05);

@@ -2,7 +2,7 @@
    MelodyStream — Upload Podcast Page
    =============================== */
 
-/* Fondo y layout */
+
 main {
   display: flex;
   flex-direction: column;
@@ -13,7 +13,7 @@ main {
   gap: 2rem;
 }
 
-/* Título */
+
 main h1 {
   font-size: 2.6rem;
   font-weight: 700;
@@ -24,9 +24,6 @@ main h1 {
   letter-spacing: 1px;
 }
 
-/* ===============================
-   🧾 Formulario principal
-   =============================== */
 #formContainer {
   width: 100%;
   max-width: 650px;
@@ -38,7 +35,7 @@ main h1 {
   animation: fadeIn 0.8s ease-in-out;
 }
 
-/* Etiquetas */
+
 #formContainer label {
   display: block;
   margin-top: 1rem;
@@ -77,7 +74,7 @@ main h1 {
   background-color: #6a6a6a;
 }
 
-/* Efectos focus */
+/* Focus */
 #formContainer input:focus,
 #formContainer textarea:focus {
   outline: none;
@@ -85,7 +82,7 @@ main h1 {
   box-shadow: 0 0 0 3px rgba(62, 154, 222, 0.3);
 }
 
-/* Placeholders visibles */
+/* Placeholders */
 #formContainer input::placeholder,
 #formContainer textarea::placeholder {
   color: rgba(255, 255, 255, 0.6);
@@ -98,9 +95,7 @@ main h1 {
   resize: vertical;
 }
 
-/* ===============================
-   🎛️ Botones
-   =============================== */
+/* Buttons */
 #formContainer button {
   width: 100%;
   border: none;
@@ -113,7 +108,7 @@ main h1 {
   margin-top: 0.8rem;
 }
 
-/* Botón principal */
+
 #uploadBtn {
   background-color: var(--color-azul1);
   color: var(--color-blanco);
@@ -123,7 +118,7 @@ main h1 {
   transform: scale(1.03);
 }
 
-/* Botón “Back to Home” */
+
 #backBtn {
   background-color: transparent;
   border: 1px solid var(--color-azul2);
@@ -134,7 +129,6 @@ main h1 {
   color: var(--color-negro);
 }
 
-/* Botón “View Podcasts” */
 #viewPodcastsBtn {
   background-color: var(--color-morado);
   color: var(--color-blanco);
@@ -144,7 +138,6 @@ main h1 {
   transform: scale(1.03);
 }
 
-/* Botón “Go to Login” (si no hay sesión) */
 #loginBtn {
   background-color: var(--color-morado);
   color: var(--color-blanco);
@@ -159,9 +152,7 @@ main h1 {
   transform: scale(1.05);
 }
 
-/* ===============================
-   💬 Mensaje inferior
-   =============================== */
+
 #msg {
   margin-top: 1.2rem;
   font-weight: 500;
@@ -184,7 +175,7 @@ main h1 {
 }
 
 /* ===============================
-   📱 Responsividad
+   Responsive
    =============================== */
 @media (max-width: 600px) {
   #formContainer {

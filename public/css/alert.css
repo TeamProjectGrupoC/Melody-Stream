@@ -25,13 +25,11 @@
   animation: slideDown 0.35s ease-out forwards;
 }
 
-/* Tipos */
 .alert-success { background-color: #2ecc71; }
 .alert-error   { background-color: #e74c3c; }
 .alert-warning { background-color: #f39c12; }
 .alert-info    { background-color: #3E9ADE; }
 
-/* Entrada: baixa desde arriba */
 @keyframes slideDown {
   to {
     transform: translateY(0);
@@ -39,7 +37,6 @@
   }
 }
 
-/* Saída: volve subir cara arriba */
 .alert.hide {
   animation: slideUp 0.35s ease-in forwards;
 }

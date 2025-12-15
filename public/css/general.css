@@ -9,7 +9,7 @@
     font-family: 'Roboto', sans-serif;
 }
 
-/* Variables de colores */
+
 :root {
     --color-negro: #00010B;
     --color-gris: #3A3A3A;
@@ -19,7 +19,6 @@
     --color-blanco: #FFFFFF;
 }
 
-/* Configuración del cuerpo */
 body {
     background-color: var(--color-negro);
     background-image: 
@@ -36,7 +35,7 @@ body {
         radial-gradient(circle at 20% 90%, rgba(62, 154, 222, 0.25), transparent 30%); /* --color-morado */
     color: var(--color-blanco);
     line-height: 1.6;
-    font-size: 0.875rem; /* 14px */
+    font-size: 0.875rem; 
 }
 
 /* Header */

@@ -1,10 +1,7 @@
 /* ===============================
    MelodyStream — Search Songs (Spotify)
-   Compatible con header/footer
    =============================== */
 
-
-/* Centrado del contenido principal */
 main {
   flex: 1;
   display: flex;
@@ -23,7 +20,7 @@ main {
   gap: 20px;
 }
 
-/* Título */
+
 main h1 {
   font-size: 2.5rem;
   font-weight: 700;
@@ -32,9 +29,6 @@ main h1 {
   background: --color-blanco;
 }
 
-/* ===============================
-   🎵 Buscador
-   =============================== */
 #searchInput {
   width: min(600px, 90%);
   background-color: rgba(255, 255, 255, 0.08);
@@ -71,7 +65,6 @@ main h1 {
     margin-right: 20px;
 }
 
-/* Botón de búsqueda */
 #searchBtn {
   margin-top: 0.5rem;
   background-color: var(--color-azul1);
@@ -91,9 +84,6 @@ main h1 {
   transform: scale(1.05);
 }
 
-/* ===============================
-   🎧 Resultado de búsqueda
-   =============================== */
 #trackInfo {
   margin-top: 2rem;
   background-color: rgba(255, 255, 255, 0.05);
@@ -150,10 +140,6 @@ main h1 {
   outline: none; 
 }
 
-
-/* ===============================
-   ✨ Animación y responsivo
-   =============================== */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(15px); }
   to { opacity: 1; transform: translateY(0); }

@@ -153,11 +153,10 @@ main {
 
 /* placeholder */
 #loginContainer input::placeholder {
-  color: rgba(255, 255, 255, 0.6);   /* tono gris-blanco */
-  opacity: 1;                        /* asegúrate de que no se aplique opacidad extra */
+  color: rgba(255, 255, 255, 0.6);   
+  opacity: 1;                       
 }
 
-/* Para navegadores antiguos / específicos */
 #loginContainer input::-webkit-input-placeholder {
   color: rgba(255, 255, 255, 0.6);
 }

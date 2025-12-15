@@ -11,7 +11,7 @@ main {
   gap: 2rem;
 }
 
-/* Título */
+
 main h1 {
   font-size: 2.5rem;
   font-weight: 700;
@@ -21,7 +21,7 @@ main h1 {
   letter-spacing: 1px;
 }
 
-/* Mensaje */
+
 #msg {
   font-size: 1rem;
   font-weight: 500;
@@ -29,9 +29,7 @@ main h1 {
   color: var(--color-azul1);
 }
 
-/* ===============================
-   🧍‍♀️ Foto de perfil
-   =============================== */
+
 .perfil-foto-contenedor {
   background-color: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -59,9 +57,7 @@ main h1 {
   border: 2px solid var(--color-azul2);
 }
 
-/* ===============================
-   📤 Formulario de subida
-   =============================== */
+
 #uploadForm {
   width: 100%;
   max-width: 500px;
@@ -123,9 +119,7 @@ main h1 {
   transform: scale(1.03);
 }
 
-/* ===============================
-   🔗 Enlace al chat
-   =============================== */
+
 main a {
   color: var(--color-azul2);
   text-decoration: none;
@@ -138,9 +132,7 @@ main a:hover {
   text-decoration: underline;
 }
 
-/* ===============================
-   📱 Responsividad
-   =============================== */
+
 @media (max-width: 600px) {
   main {
     padding: 2rem 1rem;
@@ -165,9 +157,7 @@ main a:hover {
   }
 }
 
-/* ===============================
-   🧾 Datos del perfil (como en login)
-   =============================== */
+
 #userData {
   display: none;
   margin-top: 2rem;
@@ -197,9 +187,7 @@ main a:hover {
   color: var(--color-azul1);
 }
 
-/* ===============================
-   💬 Botón de ir a chat
-   =============================== */
+
 #goToChatBtn {
   background-color: var(--color-morado);
   border: none;
@@ -218,7 +206,7 @@ main a:hover {
   transform: scale(1.05);
 }
 
-/* Botón log out*/
+
 #logOutBtn {
   background-color: var(--color-morado);
   border: none;
@@ -254,9 +242,7 @@ main a:hover {
 /* ===============================
    🎵 MY PODCASTS & FOLDERS SECTION
    =============================== */
-/* ==================================== */
-/* 1. Estilos del Contenedor Principal (Module Box) */
-/* ==================================== */
+
 
 .module-box {
     background-color: rgba(255, 255, 255, 0.05); 
@@ -278,16 +264,14 @@ main a:hover {
     margin-right: auto;
 }
 
-/* ==================================== */
-/* 2. Estilos de Títulos y Enlaces */
-/* ==================================== */
+
 
 .module-box h2,
 .module-box h3 {
    
     font-weight: 700;
     font-size: 1.8rem;
-    text-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Pequeño resplandor en el texto */
+    text-shadow: 0 0 5px rgba(0, 123, 255, 0.5); 
 }
 
 .profileInformation,
@@ -299,7 +283,7 @@ main a:hover {
 }
 
 .saved-link {
-    color: #007bff; /* Azul brillante como color de acento */
+    color: #007bff; 
     text-align: center;
     display: block;
     text-decoration: none;
@@ -311,9 +295,6 @@ main a:hover {
     color: #4da5ff;
 }
 
-/* ==================================== */
-/* 3. Estilos de Input de Búsqueda */
-/* ==================================== */
 
 .search-input {
     background-color: #2a2a35; 
@@ -336,12 +317,9 @@ main a:hover {
     color: #a0a0a0;
 }
 
-/* ==================================== */
-/* 4. Estilos de Botón Principal (Azul) */
-/* ==================================== */
 
 .main-button {
-    background-color: #007bff; /* Azul primario */
+    background-color: #007bff;
     color: white;
     border: none;
     padding: 12px 20px;
@@ -352,7 +330,6 @@ main a:hover {
     font-weight: bold;
     font-size: 1rem;
     transition: background-color 0.3s ease, transform 0.1s;
-    /* Sombras para dar un aspecto elevado */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
 }
 
@@ -362,13 +339,10 @@ main a:hover {
 }
 
 .main-button:active {
-    transform: translateY(1px); /* Efecto de "clic" */
+    transform: translateY(1px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-/* ==================================== */
-/* 5. Estilos para Listas de Contenido Dinámico (Cards) */
-/* ==================================== */
 
 #folder-modal {
     display: none; 
@@ -394,7 +368,6 @@ main a:hover {
     width: 100%;
 }
 
-/*ESTILO TARJETAS INDIVIDUALES PODCAST Y FOLDER */
 
 .folder-item {
     background: rgba(255, 255, 255, 0.08); 
@@ -437,7 +410,7 @@ main a:hover {
     margin-bottom: 0.6rem; 
 }
 
-/* ESTILO BOTÓN VIEW */
+
 .folder-item .main-button {
     background-color: var(--color-azul1);
     color: var(--color-blanco);
@@ -913,13 +886,10 @@ main a:hover {
   background-color: #5a6268;
 }
 
-/* ==================================== */
-/* 6. Estilos para Mensajes Vacíos 'No has subido poscast pej' (Empty State) */
-/* ==================================== */
 
 #podcasts-content-wrapper,
 #folders-content-wrapper,
-#userFolders, /* Este es el contenedor de la lista de carpetas, necesita centrado */
+#userFolders, 
 #userPodcasts { 
     min-height: 150px; 
     
@@ -929,8 +899,8 @@ main a:hover {
 #userPodcasts,
 #userFolders { 
     display: flex;
-    flex-direction: column; /* Apila Título y Contenido (Content Wrapper) */
-    align-items: center; /* ¡Centra a los hijos (título y contentWrapper) horizontalmente! */
+    flex-direction: column; 
+    align-items: center; 
     width: 100%;
     max-width: 700px;
     margin-left: auto;
@@ -975,7 +945,6 @@ main a:hover {
 
 /* === Make folder modal podcast cards look exactly like podcast page === */
 
-/* Reuse podcast card visuals inside profile's folder modal */
 #folder-modal .podcast-card {
   background-color: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -1014,7 +983,6 @@ main a:hover {
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
 }
 
-/* Title / description style consistent with podcast page */
 #folder-modal .podcast-card h3,
 #folder-modal .podcast-card h4 {
   color: var(--color-azul2);
@@ -1039,7 +1007,6 @@ main a:hover {
   background-color: rgba(255,255,255,0.06);
 }
 
-/* modal grid same layout as podcasts page */
 #folder-modal > div #folder-podcast-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -1047,7 +1014,6 @@ main a:hover {
   align-items: start;
 }
 
-/* buttons inside cards match podcast page */
 #folder-modal .podcast-card .btn {
   width: 100%;
   padding: 0.6rem 1.2rem;
@@ -1056,19 +1022,13 @@ main a:hover {
   margin-top: 0.6rem;
 }
 
-/* ==========================================
-   ✅ User Picker UI (Share Artist / Share Song)
-   Reutiliza: .user-select-search, .user-select-list, etc.
-   ========================================== */
 
-/* Contenedores (uno para artista y otro para canción) */
 #shareArtistUserPicker,
 #shareSongUserPicker {
   width: 100%;
   margin-top: 12px;
 }
 
-/* Buscador: funciona en ambos modales */
 #shareArtistModal .user-select-search,
 #shareSongModal .user-select-search {
   width: 100%;
@@ -1094,7 +1054,7 @@ main a:hover {
   background: rgba(255, 255, 255, 0.10);
 }
 
-/* Lista */
+/* List */
 #shareArtistModal .user-select-list,
 #shareSongModal .user-select-list {
   list-style: none;
@@ -1162,7 +1122,7 @@ main a:hover {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 320px; /* un pelín más ancho */
+  max-width: 320px; 
 }
 
 #shareArtistModal .user-select-email,
@@ -1175,7 +1135,7 @@ main a:hover {
   max-width: 320px;
 }
 
-/* Botón Select */
+
 #shareArtistModal .user-select-btn,
 #shareSongModal .user-select-btn {
   width: auto !important;
@@ -1197,14 +1157,14 @@ main a:hover {
   transform: scale(1.03);
 }
 
-/* Seleccionado */
+
 #shareArtistModal .user-select-item.is-selected,
 #shareSongModal .user-select-item.is-selected {
   border-color: rgba(62, 154, 222, 0.90);
   box-shadow: 0 0 0 3px rgba(62, 154, 222, 0.22);
 }
 
-/* Vacío */
+
 #shareArtistModal .user-select-empty,
 #shareSongModal .user-select-empty {
   padding: 14px 12px;

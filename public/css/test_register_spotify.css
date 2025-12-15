@@ -2,9 +2,9 @@
    MelodyStream — Spotify Login (compatible con header/footer)
    =============================== */
 
-/* Centrado solo del contenido principal */
+
 main#spotifyLoginContainer {
-  flex: 1; /* ocupa todo el espacio entre header y footer */
+  flex: 1; 
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -14,7 +14,7 @@ main#spotifyLoginContainer {
   animation: fadeIn 1s ease-in-out;
 }
 
-/* Título */
+
 #spotifyLoginContainer h1 {
   font-size: 2.4rem;
   font-weight: 700;
@@ -23,9 +23,9 @@ main#spotifyLoginContainer {
   background: --color-blanco;
 }
 
-/* Botón principal */
+
 #spotifyLogin {
-  background-color: #1db954; /* verde Spotify */
+  background-color: #1db954;
   color: #000;
   border: none;
   padding: 1rem 2.5rem;
@@ -43,20 +43,20 @@ main#spotifyLoginContainer {
   gap: 0.7rem;
 }
 
-/* Logo dentro del botón */
+
 #spotifyLogin img {
   width: 30px;
   height: 30px;
 }
 
-/* Hover / efecto dinámico */
+
 #spotifyLogin:hover {
   background-color: #1ed760;
   transform: scale(1.05);
   box-shadow: 0 0 30px rgba(29, 185, 84, 0.5);
 }
 
-/* Click */
+
 #spotifyLogin:active {
   transform: scale(0.97);
   box-shadow: 0 0 15px rgba(29, 185, 84, 0.3);
@@ -76,13 +76,12 @@ main#spotifyLoginContainer {
     margin-right: 20px;
 }
 
-/* Botón Go to Music Library (estilo Spotify pero azul) */
 #musicLibrary {
   background-color: var(--color-azul1);
   color: white;
   border: none;
   padding: 1rem 2.5rem;
-  border-radius: 50px;            /* 👈 igual de redondeado */
+  border-radius: 50px; 
   font-size: 1.2rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -101,7 +100,6 @@ main#spotifyLoginContainer {
   box-shadow: 0 0 20px rgba(62, 154, 222, 0.45);
 }
 
-/* Icono dentro del botón */
 #musicLibrary img {
   width: 28px;
   height: 28px;
@@ -121,7 +119,6 @@ main#spotifyLoginContainer {
 }
 
 
-/* Animación */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }

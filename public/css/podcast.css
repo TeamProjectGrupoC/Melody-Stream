@@ -2,7 +2,7 @@
    MelodyStream — Podcast Search Page
    =============================== */
 
-/* Fondo y disposición general */
+
 main {
   display: flex;
   flex-direction: column;
@@ -17,7 +17,7 @@ main {
   margin: 0 auto;
 }
 
-/* Título */
+
 main h1 {
   font-size: 2.5rem;
   font-weight: 700;
@@ -27,7 +27,6 @@ main h1 {
   letter-spacing: 1px;
 }
 
-/* Subtítulo */
 main h2 {
   font-size: 1.8rem;
   font-weight: 600;
@@ -36,9 +35,7 @@ main h2 {
   text-align: center;
 }
 
-/* ===============================
-   🔍 Barra de búsqueda
-   =============================== */
+
 .search-row {
   display: flex;
   flex-wrap: wrap;
@@ -123,9 +120,7 @@ main h2 {
   background-color: #218838;
 }
 
-/* ===============================
-   📁 Lista de carpetas y podcasts
-   =============================== */
+
 #foldersList,
 #podcastList {
   display: grid;
@@ -222,7 +217,6 @@ main h2 {
   flex-shrink: 0;
 }
 
-/* Contenedor de botones - se pega al final */
 .podcast-card button {
   margin-top: auto;
   flex-shrink: 0;
@@ -232,7 +226,7 @@ main h2 {
   margin-bottom: 0.4rem;
 }
 
-/* Botones dentro de las tarjetas */
+
 .btn {
   padding: 0.6rem 1.2rem;
   border: none;
@@ -271,9 +265,7 @@ main h2 {
   margin-top: 1rem;
 }
 
-/* ===============================
-   🪟 Modal de carpetas
-   =============================== */
+
 #folder-modal {
   display: none;
   position: fixed;
@@ -468,7 +460,7 @@ main h2 {
 }
 
 /* ===============================
-   🖥️ Responsividad
+   Responsive
    =============================== */
 @media (max-width: 768px) {
   .search-row {
@@ -501,16 +493,13 @@ main h2 {
 
 }
 
-/* Botones de acciones de carpeta alineados y mismo tamaño */
 .folder-btn-row {
-  display: block; /* no interferir si queda en el DOM */
+  display: block; 
 }
 
-/* Eliminar/ignorar estilos anteriores de .folder-btn-row y usar el mismo estilo
-   que los botones de las tarjetas de podcast (apilados, ancho completo). */
 
 .podcast-card .btn {
-  width: 100% !important;    /* igual que botones Share/Delete de podcasts */
+  width: 100% !important;    
   min-width: 0 !important;
   padding: 0.6rem 1.2rem;
   box-sizing: border-box;
@@ -519,17 +508,15 @@ main h2 {
   align-items: center;
 }
 
-/* separación vertical igual a la de los otros botones */
 .podcast-card .btn + .btn {
   margin-top: 0.6rem;
 }
 
-/* responsive: si tenías reglas para folder-btn-row, no deben afectar */
 @media (max-width: 480px) {
   .podcast-card .btn { width: 100% !important; }
 }
 
-/* Make folder modal cards look exactly like profile page */
+
 #folder-modal .podcast-card {
   background: rgba(255, 255, 255, 0.08);
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -609,9 +596,7 @@ main h2 {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* ===============================
-   TOP ACTIONS (buttons row)
-   =============================== */
+
 .top-actions {
   display: flex;
   gap: 1rem;
@@ -641,14 +626,13 @@ main h2 {
   transform: scale(1.05);
 }
 
-/* keep your special colors */
 #uploadPodcastBtn { background-color: var(--color-morado); }
 #uploadPodcastBtn:hover { background-color: #4324a8; }
 #createFolderBtn { background-color: #28a745; }
 #createFolderBtn:hover { background-color: #218838; }
 
 /* ===============================
-   SEARCH BOX (TestSpotify vibe)
+   SEARCH BOX 
    =============================== */
 .search-box {
   width: 100%;
@@ -694,7 +678,7 @@ main h2 {
 }
 
 /* ===============================
-   RESULTS GRID (same cards you already use)
+   RESULTS GRID
    =============================== */
 #resultsList {
   display: grid;
