@@ -182,12 +182,17 @@ async function main() {
     
     (async () => {
         if (token && isPremium && await isSpotifyTokenValid(token)) {
-            console.log("Spotify token OK — Loading Web Playback SDK...");
+            console.log("Spotify token OK, PREMIUM — Loading Web Playback SDK...");
             initSpotifyPlaybackSDK();
+
+        } else if(token && !isPremium && await isSpotifyTokenValid(token)){
+            console.log("Spotify token OK, NO PREMIUM — Loading Web Playback SDK...");
+            initSpotifyPlaybackSDK();
+            
         } else {
             token=null;
             isPremium = false;
-            console.log("Spotify not available — premium or token invalid.");
+            console.log("Spotify not available — token invalid.");
         }
     })();
 
@@ -569,17 +574,6 @@ async function main() {
         isPlaying = true;
         playButton.textContent = "⏹ Stop";
         currentActivePlayButton = playButton;
-    }
-
-
-    async function isSpotifyTokenValid(token) {
-        if (!token) return false;
-
-        const res = await fetch("https://api.spotify.com/v1/me", {
-            headers: { "Authorization": "Bearer " + token }
-        });
-
-        return res.status === 200;
     }
 
     async function buildAttachmentCard(att, senderId) {
