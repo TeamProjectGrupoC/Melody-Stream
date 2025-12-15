@@ -385,7 +385,7 @@ main a:hover {
 
 .podcast-list{
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
     margin-top: 10px;
     justify-content: center;
@@ -1055,10 +1055,3 @@ main a:hover {
   font-weight: 600;
   margin-top: 0.6rem;
 }
-
-#userPodcasts, #userFolders,
-#favArtistsSection, #favSongsSection{
-  max-width: 1200px;
-  width: 100%;
-}
-
