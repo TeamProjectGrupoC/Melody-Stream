@@ -796,7 +796,7 @@ document.getElementById("btnSearchArtist").addEventListener("click", async () =>
           window.location.href = "test_register_spotify.html";
       });
 
-      meta.appendChild(reconnectBtn);
+      resultContainer.innerHTML.appendChild(reconnectBtn);
     }
 
     const artists = await searchArtist(query);
@@ -1170,7 +1170,7 @@ document.getElementById("btnSearchSong").addEventListener("click", async () => {
           window.location.href = "test_register_spotify.html";
       });
 
-      meta.appendChild(reconnectBtn);
+      resultContainer.innerHTML.appendChild(reconnectBtn);
     }
 
     const songs = await searchSong(query);
