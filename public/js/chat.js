@@ -2,6 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, get, child, set, push, onValue, off, update, onChildAdded } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 import { saveFavouriteArtist, saveFavouriteSong } from "./favourites.js";
+import { showAlert } from "./alert.js";
 
 /*
 DATABASE STRUCTURE AND LOGIC:
@@ -477,7 +478,8 @@ async function main() {
 
         const snap = await get(ref(db, `artistas/${artistId}`));
         if (!snap.exists()) {
-            alert(`Artist ${artistId} not found in /artistas`);
+            const artistError = `Artist ${artistId} not found in /artistas`
+            showAlert(artistError, "error");
         }
 
         const a = snap.val();
@@ -497,7 +499,8 @@ async function main() {
 
         const snap = await get(ref(db, `canciones/${songId}`));
         if (!snap.exists()) {
-            alert(`Artist ${songId} not found in /canciones`);
+            const artistError = `Song ${songId} not found in /canciones`
+            showAlert(artistError, "error");
         }
 
         const s = snap.val();
@@ -720,7 +723,7 @@ async function main() {
                 btn.addEventListener("click", async () => {
                     try {
                         const user = auth.currentUser;
-                        if (!user) return alert("You must log in");
+                        if (!user) return showAlert("You must log in", "warning");
 
                         // 1. BUSCAR EL ARTISTA 
                         const senderFavRef = ref(db, `artistas`);
@@ -737,7 +740,7 @@ async function main() {
                         }
 
                         if (!foundArtist) {
-                            alert("The sender does not have this artist saved in favourites.");
+                            showAlert("Artist not found", "error");
                             return;
                         }
 
@@ -746,11 +749,11 @@ async function main() {
                         await saveFavouriteArtist(user.uid, normalized);
 
 
-                        alert("Artist added to favourites!");
+                        showAlert("Artist added to favourites!", "success");
 
                     } catch (err) {
                         console.error(err);
-                        alert("Error saving artist");
+                        showAlert("Error saving artist", "error");
                     }
 
                 });
@@ -768,7 +771,7 @@ async function main() {
                 btnSong.addEventListener("click", async () => {
                     try {
                         const user = auth.currentUser;
-                        if (!user) return alert("You must log in");
+                        if (!user) return showAlert("You must log in", "warning");
 
                         // search in the favs of thse sender
                         const senderFavRef = ref(db, `users/${senderId}/favoritos`);
@@ -785,7 +788,7 @@ async function main() {
                         }
 
                         if (!foundSong) {
-                            alert("The sender does not have this song saved in favourites.");
+                            showAlert("Song not found", "error");
                             return;
                         }
 
@@ -793,11 +796,11 @@ async function main() {
                         await saveFavouriteSong(user.uid, normalized);
 
 
-                        alert("Song added to favourites!");
+                        showAlert("Song added to favourites!", "success");
 
                     } catch (err) {
                         console.error(err);
-                        alert("Error saving song");
+                        showAlert("Error saving song", "error");
                     }
                 });
 
