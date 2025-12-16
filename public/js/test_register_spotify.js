@@ -2,6 +2,61 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
+/**
+ * ============================================================================
+ * TEST_REGISTER_SPOTIFY.JS – CONNECT SPOTIFY ACCOUNT (OAUTH) + FIREBASE GATE
+ * ============================================================================
+ *
+ * SERVICES USED:
+ *
+ * Firebase Authentication
+ * - onAuthStateChanged(auth, callback)
+ *   -> Used to detect if the user is logged in to MelodyStream.
+ *   -> Spotify connection is only allowed when a Firebase user session exists.
+ *
+ * Spotify Web API / OAuth (Authorization Code flow – first step)
+ * - Redirects user to: https://accounts.spotify.com/authorize
+ * - Uses "response_type=code" (Spotify returns an authorization code to redirectUri)
+ * - Token is expected to be stored later in localStorage as "spotify_access_token"
+ *
+ * LOCAL STORAGE KEYS USED:
+ * - "spotify_access_token"
+ *   -> If present, this file validates it by calling GET https://api.spotify.com/v1/me
+ *   -> If invalid/expired, it is removed and the UI goes back to "Login with Spotify"
+ *
+ * MAIN FLOW:
+ * 1) Initialize Firebase App + Auth.
+ * 2) Wait for Firebase auth state:
+ *    - If user is NOT logged in:
+ *        - Disable Spotify button
+ *        - Show message requiring login
+ *    - If user IS logged in:
+ *        - Call updateSpotifyButton() to validate existing Spotify token (if any)
+ * 3) updateSpotifyButton():
+ *    - Reads token from localStorage
+ *    - If token exists, validates it against Spotify (/v1/me)
+ *      - If valid: shows "Continue with Spotify"
+ *      - If invalid: removes token and shows "Login with Spotify"
+ * 4) On Spotify button click:
+ *    - Builds the Spotify authorize URL with clientId, redirectUri and scopes
+ *    - Redirects the browser to Spotify login/consent screen
+ *
+ * UI ELEMENTS USED:
+ * - #spotifyLogin   → Button to start Spotify OAuth / continue session
+ * - #spotifyMsg     → Message shown when Firebase user is not logged in
+ * - #title_spotify  → Title/description text updated when token is valid
+ * - #musicLibrary   → Navigation to musiclibrary.html (optional element)
+ * - #volverhome     → Navigation back to index.html (optional element)
+ *
+ * IMPORTANT NOTES:
+ * - This file does NOT write to Firebase Database.
+ * - It only gates Spotify linking behind Firebase login + starts OAuth redirect.
+ * - Token exchange (code -> access_token) must be handled in the redirect page
+ *   (redirectUri) or backend/Cloud Function, then saved into localStorage.
+ * ============================================================================
+ */
+
+
 // --- FIREBASE CONFIG ---
 const firebaseConfig = {
   apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",

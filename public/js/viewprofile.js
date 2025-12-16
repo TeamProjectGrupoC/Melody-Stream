@@ -3,6 +3,154 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase
 import { getDatabase, ref, onValue, get, set, push, update } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 
+/**
+ * ============================================================================
+ * VIEWPROFILE.JS – PUBLIC PROFILE VIEW + FOLLOW REQUESTS + PRIVATE CONTENT GATE
+ * ============================================================================
+ *
+ * FIREBASE SERVICES USED:
+ *
+ * Firebase Authentication
+ * - onAuthStateChanged(auth, callback)
+ *   -> This page requires a logged-in Firebase user.
+ *   -> If not logged in, profile content and follow UI are hidden and a message is shown.
+ *
+ * Firebase Realtime Database (RTDB)
+ * This file reads and writes multiple nodes related to:
+ * - user profile data
+ * - followers / follow requests
+ * - chat notifications
+ * - user chat summaries
+ * - user favourites (songs + artists)
+ * - uploaded podcasts
+ *
+ * ---------------------------------------------------------------------------
+ * DATABASE STRUCTURE (NODES USED IN THIS FILE)
+ * ---------------------------------------------------------------------------
+ *
+ * /users/{profileUID}
+ *   - Public profile fields used:
+ *     - username, name, email, urlFotoPerfil
+ *
+ * /users/{profileUID}/followers/{followerUID} : true
+ *   - "Following" relationship (approved followers)
+ *   - Used to:
+ *     - count followers
+ *     - determine if current user can view private sections
+ *     - enable/disable Follow button states
+ *
+ * /users/{profileUID}/followRequests/{requesterUID} : true
+ *   - Pending follow requests (private profiles)
+ *   - Created when "Follow" is clicked (if not already following)
+ *
+ * /users/{uid}/favoritos/{songId} : true
+ *   - Per-user list of favourite song IDs (references only)
+ *   - Used to build the list of favourite songs in the profile
+ *
+ * /canciones/{songId}
+ *   - Global song metadata used to render favourites:
+ *     - title, artist, albumImageUrl, uri (optional), id (optional)
+ *
+ * /users/{uid}/favourite_artists/{artistId} : true
+ *   - Per-user list of favourite artist IDs (references only)
+ *
+ * /artistas/{artistId}
+ *   - Global artist metadata used to render favourites:
+ *     - name, image, followers, genres
+ *
+ * /podcasts/{podcastId}
+ *   - Uploaded podcasts (this file filters by creator):
+ *     - idcreador (uid)
+ *     - nombre, descripcion
+ *     - iconURL, audioURL
+ *
+ * CHAT NOTIFICATION NODES (used when sending a follow request):
+ *
+ * /chats/{chatId}
+ *   - chatId = uidA_uidB (lexicographically ordered)
+ *   - Updated/created when sending follow request:
+ *     - createdAt
+ *     - users/{uid}: true
+ *     - messages/{msgKey}: { sender, text, timestamp }
+ *
+ * /userChats/{uid}/{chatId}
+ *   - Chat list summary per user (sidebar/inbox)
+ *   - Updated with:
+ *     - lastMessage
+ *     - isRead (true for sender, false for receiver)
+ *
+ * ---------------------------------------------------------------------------
+ * SPOTIFY (OPTIONAL) – PREMIUM FULL PLAYBACK FOR FAVOURITE SONGS
+ * ---------------------------------------------------------------------------
+ *
+ * LOCAL STORAGE KEYS USED:
+ * - "spotify_access_token"  -> token to control Spotify playback
+ * - "spotify_is_premium"    -> "1" if Premium, enables full playback
+ *
+ * Spotify Web Playback SDK:
+ * - Loaded only if:
+ *     - token exists
+ *     - user is premium
+ *     - token is valid (GET https://api.spotify.com/v1/me)
+ * - Creates a deviceId and plays songs via Spotify endpoints:
+ *     - PUT /v1/me/player/play?device_id=...
+ *     - PUT /v1/me/player/pause?device_id=...
+ * - Button behavior:
+ *     - Click same song -> toggles play/pause (stop)
+ *     - Click different song -> pauses previous and plays the new one
+ *
+ * ---------------------------------------------------------------------------
+ * MAIN FLOW (WHAT THIS FILE DOES)
+ * ---------------------------------------------------------------------------
+ *
+ * 0) (Spotify) On load: if premium + valid token, initialize Web Playback SDK.
+ * 1) Read profileUID from URL: viewprofile.html?uid={profileUID}
+ * 2) Wait for Firebase auth:
+ *    - If not logged in -> show message and hide follow/followers UI
+ *    - If logged in -> detect "master" account by email and load profile data
+ * 3) loadProfile():
+ *    - Live listens to /users/{profileUID} to render picture + username
+ *    - Calls loadFollowers() and loads podcasts for that user
+ * 4) loadFollowers():
+ *    - Reads followers count and determines access to private sections:
+ *      ACCESS GRANTED if:
+ *        - viewing own profile OR
+ *        - current user is a follower OR
+ *        - current user is master account
+ *      Otherwise -> shows locked state messages
+ *    - Sets Follow button visual state:
+ *        - Following
+ *        - Follow
+ *        - Request Sent (pending)
+ * 5) Follow button click:
+ *    - If "Follow": creates /followRequests entry + sends a chat notification
+ *      and updates /userChats for sender/receiver.
+ *    - If "Following": removes follower entry (unfollow).
+ * 6) loadFavoriteSongs():
+ *    - Reads /users/{uid}/favoritos, then fetches song metadata from /canciones
+ *    - Renders each song with:
+ *        - "Connect Spotify" button if token invalid
+ *        - "Premium only" label if not premium
+ *        - Play/Stop button if premium + token valid
+ * 7) loadFavoriteArtists():
+ *    - Reads /users/{uid}/favourite_artists then fetches details from /artistas
+ * 8) loadPodcasts():
+ *    - Filters /podcasts by idcreador === uid and renders audio player
+ *
+ * UI ELEMENTS USED (MAIN IDS / AREAS):
+ * - #profileImg, #profileName, #msg
+ * - #viewUserSongs, #viewUserArtists, #viewUserPodcasts
+ * - .profile-info (container where follow button + followers count are injected)
+ * - (optional) #masterText
+ *
+ * IMPORTANT NOTES:
+ * - This page mixes "public" profile data with "private" sections gated by follow.
+ * - Private sections are enforced in the UI; secure enforcement should also be
+ *   handled in Firebase Security Rules if required by the project rubric.
+ * ============================================================================
+ */
+
+
 // --- CONFIG ---
 const firebaseConfig = {
   apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",

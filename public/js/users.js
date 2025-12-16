@@ -3,6 +3,73 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebas
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
 
+/**
+ * ============================================================================
+ * SEARCH_USERS.JS – USER DIRECTORY (RTDB) + AUTH GATE + PROFILE REDIRECT
+ * ============================================================================
+ *
+ * FIREBASE SERVICES USED:
+ *
+ * Firebase Authentication
+ * - onAuthStateChanged(auth, callback)
+ *   -> This page is protected: only logged-in users can see/search the directory.
+ *   -> If the user is not logged in, the script replaces the results area with
+ *      a warning message and a "Go to Login" button.
+ *
+ * Firebase Realtime Database (RTDB)
+ * - /users/{uid}
+ *   -> Public profile data used for search/listing.
+ *   -> Fields used in this file:
+ *      - username: string
+ *      - urlFotoPerfil: string (optional avatar URL)
+ *
+ * DATABASE STRUCTURE (NODES READ HERE):
+ * - /users
+ *   -> The script reads the full "users" node once (get()) and then:
+ *      - loads the first 10 users on page load
+ *      - filters users by username for search
+ *
+ * SPECIAL CASE / "MASTER USER":
+ * - If the logged-in Firebase user's email is "teamprojectgrupoc@gmail.com"
+ *   the UI shows a message indicating this user can see all info without following.
+ *   (Only affects UI text; it does not change database reads in this file.)
+ *
+ * MAIN FLOW (WHAT THIS FILE DOES):
+ * 1) Initialize Firebase App + Auth + RTDB.
+ * 2) Wait for Firebase session (onAuthStateChanged):
+ *    - If not logged in:
+ *        - Render warning + login redirect button inside #searchResults
+ *        - Stop execution (return)
+ *    - If logged in:
+ *        - Optionally show "Master User" text
+ *        - Load initial users list (first 10)
+ * 3) loadInitialUsers():
+ *    - Reads /users once
+ *    - Takes the first 10 entries
+ *    - Displays them in the results container
+ * 4) searchUsers():
+ *    - Reads /users once
+ *    - Filters by username containing the typed search term (case-insensitive)
+ *    - Displays matches
+ * 5) displayUsers(list):
+ *    - Renders each user as a clickable card with image + username
+ *    - Click redirects to: viewprofile.html?uid={uid}
+ *
+ * UI ELEMENTS USED:
+ * - #searchInput     → Text input for username search
+ * - #searchBtn       → Button that triggers searchUsers()
+ * - #searchResults   → Container where the users list / messages are rendered
+ * - #masterText      → Optional element to show Master User label
+ *
+ * IMPORTANT NOTES / LIMITATIONS:
+ * - This implementation reads the entire /users node (get()) for listing/search.
+ *   Works fine for small/medium datasets; for large datasets, consider indexing
+ *   and querying (orderByChild("username") + startAt/endAt).
+ * - If a user has no profile picture, a default silhouette image is used.
+ * ============================================================================
+ */
+
+
 // Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",

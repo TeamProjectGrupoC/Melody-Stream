@@ -1,6 +1,43 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, sendEmailVerification } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
 
+/**
+ * ============================================================================
+ * REGISTER.JS – USER REGISTRATION & EMAIL VERIFICATION
+ * ============================================================================
+ *
+ * FIREBASE SERVICES USED:
+ *
+ * Firebase Authentication
+ * - createUserWithEmailAndPassword
+ * - sendEmailVerification
+ *
+ * AUTHENTICATION FLOW:
+ *
+ * 1) Firebase App is initialized using the global project configuration.
+ * 2) Firebase Authentication service is obtained from the initialized app.
+ * 3) User provides email and password via the registration form.
+ * 4) On "Sign Up" button click:
+ *    - Input validation is performed (email & password required).
+ *    - A new Firebase Auth user is created.
+ *    - A verification email is sent to the registered email address.
+ * 5) The user is informed that they must verify their email before logging in.
+ *
+ * UI ELEMENTS USED:
+ * - #emailRegister      → Email input
+ * - #passwordRegister   → Password input
+ * - #signUpBtn          → Registration trigger
+ * - #goLoginBtn         → Redirect to login page
+ * - #msg                → Status / error messages
+ *
+ * IMPORTANT NOTES:
+ * - User profile data is NOT created here (handled elsewhere after login).
+ * - Email verification is mandatory before allowing access to the platform.
+ * - Errors are shown to the user but console logging is optional/commented.
+ * ============================================================================
+ */
+
+
 const firebaseConfig = {
     apiKey: "AIzaSyCCWExxM4ACcvnidBWMfBQ_CJk7KimIkns",
     authDomain: "melodystream123.firebaseapp.com",

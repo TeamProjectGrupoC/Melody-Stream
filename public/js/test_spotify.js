@@ -5,6 +5,88 @@ import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/
 import { saveFavouriteSong } from "./favourites.js";
 import { showAlert } from "./alert.js";
 
+/**
+ * ============================================================================
+ * TEST_SPOTIFY.JS – SPOTIFY SEARCH + (PREMIUM) FULL PLAYBACK + FIREBASE FAVOURITES
+ * ============================================================================
+ *
+ * SERVICES USED:
+ *
+ * Firebase Authentication
+ * - onAuthStateChanged (indirectly via auth.currentUser usage)
+ * - auth.currentUser is used to know if the user can save favourites
+ *
+ * Firebase Realtime Database (RTDB)
+ * - /users/{uid}/favoritos/{songId} : true|null
+ *   -> Stores the "reference" that a song is favourited by the user.
+ *   -> This file reads it to render the heart icon and toggles it on click.
+ *
+ * NOTE ABOUT FAVOURITES STORAGE (2-LAYER MODEL):
+ * - This file toggles the reference under /users/{uid}/favoritos/{songId}
+ * - The full song metadata is saved via favourites.js:
+ *     saveFavouriteSong(uid, track)
+ *   (that module typically stores song metadata globally under /canciones/{songId}
+ *    and/or a richer structure per-user, depending on your implementation)
+ *
+ * Spotify APIs USED:
+ * - OAuth token handling:
+ *   - Reads token from localStorage ("spotify_access_token")
+ *   - If no valid token exists, uses "?code=" from URL and exchanges it via Cloud Function:
+ *       https://us-central1-melodystream123.cloudfunctions.net/getSpotifyToken?code=...
+ * - Profile check:
+ *   - GET https://api.spotify.com/v1/me
+ *     -> Determines if the user is Premium (data.product === "premium")
+ * - Search:
+ *   - GET https://api.spotify.com/v1/search?type=track&limit=10&q=...
+ * - Track details:
+ *   - GET https://api.spotify.com/v1/tracks/{songId}
+ *
+ * PREMIUM PLAYBACK (Spotify Web Playback SDK):
+ * - Only loaded if the Spotify account is Premium.
+ * - Loads SDK script: https://sdk.scdn.co/spotify-player.js
+ * - Creates a player and obtains a deviceId when ready.
+ * - Plays full tracks using:
+ *     PUT https://api.spotify.com/v1/me/player/play?device_id={deviceId}
+ * - Also provides play/pause and seek via window.spotifyPlayer.
+ *
+ * LOCAL STORAGE KEYS USED:
+ * - "spotify_access_token"  -> Access token for Spotify Web API
+ * - "spotify_logged_in"     -> Flag used by the app to detect Spotify link
+ * - "spotify_is_premium"    -> "1" if Premium, "0" otherwise
+ * - (optional cleanup) "spotify_refresh_token", "spotify_token_expiration"
+ *
+ * MAIN FLOW:
+ * 1) Read "?code=" from URL and/or reuse a stored token from localStorage.
+ * 2) Validate the token by calling Spotify (/v1/me). If invalid -> remove it.
+ * 3) If token is missing and code exists -> fetch token from Cloud Function and store it.
+ * 4) Fetch Spotify profile -> detect Premium vs Free.
+ * 5) If Premium -> load Web Playback SDK and show player bar when device is ready.
+ * 6) Allow searching tracks and render up to 10 results.
+ * 7) For each track:
+ *    - Check if it is in Firebase favourites (/users/{uid}/favoritos/{songId})
+ *    - Render heart button accordingly
+ * 8) Toggle favourites on heart click:
+ *    - Add: updates UI + calls saveFavouriteSong(uid, track)
+ *    - Remove: set(..., null) to delete reference + updates UI
+ * 9) If Premium:
+ *    - Play selected track on the Web Playback device
+ *    - Provide play/pause and seek controls
+ *    - Update progress bar periodically (every 500ms)
+ *
+ * UI ELEMENTS USED (MAIN IDS):
+ * - #searchInput, #searchBtn, #trackInfo
+ * - #userStatus
+ * - #playerBar, #currentTrack
+ * - #playPauseBtn
+ * - #progressBar, #currentTime, #totalTime
+ * - #logoutSpotifyBtn
+ *
+ * IMPORTANT NOTES / LIMITATIONS:
+ * - Free Spotify accounts can search and view track info, but cannot use full playback.
+ * - Full playback requires: Premium + SDK ready (deviceId available).
+ * - Favourites require a Firebase logged-in user (auth.currentUser).
+ * ============================================================================
+ */
 
 // --- FIREBASE CONFIGURATION ---
 const firebaseConfig = {
