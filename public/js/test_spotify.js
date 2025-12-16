@@ -386,7 +386,6 @@ async function toggleFavorite(songId, button) {
       }
 
 		// Add favs
-		await set(favRef, true);
 		button.innerHTML = '<i class="bi bi-heart-fill"></i>';
 		button.classList.remove("not-fav");
 		button.classList.add("is-fav");

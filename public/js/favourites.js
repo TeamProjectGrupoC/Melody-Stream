@@ -28,6 +28,8 @@
  * * ============================================================================
  */
 import { getDatabase, ref, get, set, push } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-database.js";
+import { showAlert } from "./alert.js";
+
 
 export async function saveFavouriteSong(userId, track) {
     const db = getDatabase();
@@ -36,7 +38,7 @@ export async function saveFavouriteSong(userId, track) {
 
     const favSongSnapshot = await get(favSongRef);
     if(favSongSnapshot.exists()){
-      alert("This song is already in your favourites.");
+      showAlert("This song is already in your favourites", "warning");
       return;
     }
 
@@ -56,6 +58,7 @@ export async function saveFavouriteSong(userId, track) {
 
     // Add to the user favourites
     await set(favSongRef, true);
+    showAlert("Song added to your favourites", "success");
 }
 
 export async function saveFavouriteArtist(userId, artist) {
@@ -65,7 +68,7 @@ export async function saveFavouriteArtist(userId, artist) {
 
     const favSnapshot = await get(favArtistRef);
     if (favSnapshot.exists()) {
-      alert("This artist is already in your favourites.");
+      showAlert("This artist is already in your favourites", "warning");
       return;
     } 
 
@@ -85,5 +88,6 @@ export async function saveFavouriteArtist(userId, artist) {
     
     // Add to the user favourites
     await set(favArtistRef, true);
+    showAlert("Artist added to your favourites", "success");
 }
 
