@@ -342,8 +342,7 @@ async function deletePodcast(podcastId, audioURL, iconURL) {
     delete allPodcasts[podcastId];
     displayPodcasts(allPodcasts);
 
-    const podcastDelete = `Podcast "${podcastId}" deleted successfully`;
-    showAlert(podcastDelete, "info");
+    showAlert("Podcast deleted successfully", "info");
 
   } catch (error) {
     //console.error("Error deleting podcast:", error);

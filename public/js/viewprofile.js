@@ -36,7 +36,7 @@ async function isSpotifyTokenValid(token) {
         });
         return res.status === 200;
     } catch (e) {
-        console.warn("Token validation failed", e);
+        //console.warn("Token validation failed", e);
         return false;
     }
 }
@@ -59,13 +59,13 @@ function initSpotifyPlaybackSDK() {
         });
 
         window.spotifyPlayer.addListener("ready", ({ device_id }) => {
-            console.log("Device ready:", device_id);
+            //console.log("Device ready:", device_id);
             deviceId = device_id;
             playerReady = true;
         });
 
         window.spotifyPlayer.addListener("not_ready", ({ device_id }) => {
-            console.log("Device ID has gone offline", device_id);
+            //console.log("Device ID has gone offline", device_id);
             playerReady = false;
         });
 
@@ -76,18 +76,17 @@ function initSpotifyPlaybackSDK() {
 // 3. Auto-start SDK
 (async () => {
     if (token && isPremium && await isSpotifyTokenValid(token)) {
-        console.log("Spotify token OK — Loading Web Playback SDK...");
+        //console.log("Spotify token OK — Loading Web Playback SDK...");
         initSpotifyPlaybackSDK();
     } else {
-        console.log("Spotify not available — premium or token invalid.");
+        //console.log("Spotify not available — premium or token invalid.");
     }
 })();
 
 // 4. Main Function: Play Track (Endpoints 3 & 4)
 async function playTrack(uri, playButton) {
     if (!playerReady || !deviceId) {
-        console.warn("Spotify player not ready yet.");
-        alert("Player not ready. Please wait a moment.");
+        //console.warn("Spotify player not ready yet.");
         return;
     }
 
@@ -128,7 +127,7 @@ async function playTrack(uri, playButton) {
         }
     );
 
-    console.log("Playing:", uri);
+    //console.log("Playing:", uri);
     currentPlayingUri = uri;
     isPlaying = true;
     playButton.textContent = "⏹ Stop";
@@ -285,7 +284,7 @@ followBtn.addEventListener("click", async () => {
 
   // Prevent ANY action if request is pending
   if (hasRequested && followBtn.textContent === "Request Sent") {
-    console.log("Request already sent. Please wait for approval.");
+    //console.log("Request already sent. Please wait for approval.");
     return;
   }
 
@@ -362,7 +361,7 @@ followBtn.addEventListener("click", async () => {
     loadFollowers();
 
   } catch (err) {
-    console.error("Error handling follow/unfollow:", err);
+    //console.error("Error handling follow/unfollow:", err);
   } finally {
     // Re-enable button after operation completes
     followBtn.disabled = false;
@@ -455,7 +454,7 @@ async function loadFavoriteSongs(uid) {
     }
 
   } catch (err) {
-    console.error("Error loading favorite songs:", err);
+    //console.error("Error loading favorite songs:", err);
     container.innerHTML = "<p class='empty-msg'>Error loading songs.</p>";
   }
 }
@@ -505,7 +504,7 @@ async function loadFavoriteArtists(uid) {
     }
 
   } catch (err) {
-    console.error("Error loading favorite artists:", err);
+    //console.error("Error loading favorite artists:", err);
     container.innerHTML = "<p class='empty-msg'>Error loading artists.</p>";
   }
 }

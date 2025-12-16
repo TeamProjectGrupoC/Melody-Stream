@@ -478,8 +478,7 @@ async function main() {
 
         const snap = await get(ref(db, `artistas/${artistId}`));
         if (!snap.exists()) {
-            const artistError = `Artist ${artistId} not found in /artistas`
-            showAlert(artistError, "error");
+            showAlert("Artist not found", "error");
         }
 
         const a = snap.val();
@@ -499,8 +498,7 @@ async function main() {
 
         const snap = await get(ref(db, `canciones/${songId}`));
         if (!snap.exists()) {
-            const artistError = `Song ${songId} not found in /canciones`
-            showAlert(artistError, "error");
+            showAlert("Song not found", "error");
         }
 
         const s = snap.val();

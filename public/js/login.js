@@ -43,14 +43,14 @@ async function main() {
     const response = await fetch('/__/firebase/init.json');
     firebaseConfig = await response.json();
   } catch (e) {
-    console.warn("No se pudo cargar /__/firebase/init.json:", e);
+    //console.warn("No se pudo cargar /__/firebase/init.json:", e);
   }
 
   // Logic to prevent multiple Firebase app initializations
   if (!getApps().length) {
     // If no app exists, we initialize a new one
     if (!firebaseConfig) {
-      console.error("No hay configuración de Firebase disponible para inicializar la app.");
+      //console.error("No hay configuración de Firebase disponible para inicializar la app.");
       return;
     }
     app = initializeApp(firebaseConfig);
@@ -126,7 +126,7 @@ async function main() {
       const snap = await get(child(rootRef, `users/${uid}`));
       return snap.exists() ? snap.val() : null;
     } catch (e) {
-      console.error(e);
+      //console.error(e);
       return null;
     }
   }
@@ -193,7 +193,7 @@ async function main() {
       // 8. Success: Show user data
       showUserData(ud, user.uid);
     } catch (err) {
-      console.error(err);
+      //console.error(err);
       showAlert("LOGIN ERROR: Wrong user or password", "error");
     }
   });
@@ -224,7 +224,7 @@ async function main() {
       if (msg) msg.innerHTML = `Profile saved! Logged in as <span class="user-email">${user.email}</span>.`;
     } 
     catch (err) {
-      console.error(err);
+      //console.error(err);
       if (msg) msg.textContent = `Error saving profile: ${err.message}`;
     }
   });
@@ -248,7 +248,7 @@ async function main() {
       const headerPic = document.getElementById('headerUserPic');
       if (headerPic) headerPic.src = "images/logos/silueta.png";
     } catch (e) {
-      console.error("Error signing out:", e);
+      //console.error("Error signing out:", e);
     }
   });
 

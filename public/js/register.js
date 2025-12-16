@@ -33,7 +33,7 @@ signUpBtn.addEventListener('click', async () => {
         msg.textContent = `Registration successful! Verification email sent to ${user.email}. Please verify before logging in.`;
     } catch(err) {
         msg.textContent = `Registration error: ${err.message}`;
-        console.error(err);
+        //console.error(err);
     }
 });
 

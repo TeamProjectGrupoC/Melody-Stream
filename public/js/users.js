@@ -31,7 +31,7 @@ searchBtn.addEventListener("click", searchUsers);
 // --------------------------------------------------
 onAuthStateChanged(auth, (user) => {
   if (!user) {
-    console.warn("User not logged in.");
+    //console.warn("User not logged in.");
 
     // ---  Show message and button on the web ---
     resultsContainer.innerHTML = `
@@ -62,7 +62,7 @@ onAuthStateChanged(auth, (user) => {
     }
   }
 
-  console.log("Auth OK. Loading users...");
+  //console.log("Auth OK. Loading users...");
   loadInitialUsers();
 });
 
@@ -94,7 +94,7 @@ async function loadInitialUsers() {
     displayUsers(users);
 
   } catch (err) {
-    console.error("Error loading users:", err);
+    //console.error("Error loading users:", err);
     resultsContainer.innerHTML = "<p>Error loading users.</p>";
   }
 }
@@ -140,7 +140,7 @@ async function searchUsers() {
     displayUsers(matched);
 
   } catch (err) {
-    console.error("Error searching users:", err);
+    //console.error("Error searching users:", err);
     resultsContainer.innerHTML = "<p>Error searching users.</p>";
   }
 }

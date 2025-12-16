@@ -3,6 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/9.0.0/firebase
 import { getDatabase, ref, onValue, set, get } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js";
 import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js";
 import { saveFavouriteSong } from "./favourites.js";
+import { showAlert } from "./alert.js";
 
 
 // --- FIREBASE CONFIGURATION ---
@@ -56,13 +57,13 @@ async function validateToken(token) {
 async function getToken() {
   const savedToken = localStorage.getItem("spotify_access_token");
 
-  // 1. ¿Hay token guardado?
+  // 1. ¿Token saved?
   if (savedToken) {
-    console.log("Token encontrado en localStorage. Validando...");
+    //console.log("Token encontrado en localStorage. Validando...");
 
-    // 2. Validarlo llamando a Spotify
+    // 2. Validate calling Spotify
     if (await validateToken(savedToken)) {
-      console.log("Token válido. Usándolo.");
+      //console.log("Token válido. Usándolo.");
       accessToken = savedToken;
 
       await getUserProfile();
@@ -72,19 +73,19 @@ async function getToken() {
       return; 
     }
 
-    // 3. Token inválido → borrar
-    console.warn("Token guardado inválido. Borrando...");
+    // 3. Token not valid → delete
+    //console.warn("Token guardado inválido. Borrando...");
     localStorage.removeItem("spotify_access_token");
   }
 
-  // 4. Si no hay token guardado → necesitas ?code=
+  // 4. Token not saved → need ?code=
   if (!code) {
     document.getElementById("trackInfo").innerHTML =
       "<p>Code not found. Try logging in again.</p>";
     return;
   }
 
-  // 5. Código original para obtener token de la Cloud Function
+  // 5. Obtain token from Cloud Function
   try {
     const res = await fetch(
       `https://us-central1-melodystream123.cloudfunctions.net/getSpotifyToken?code=${code}`
@@ -92,7 +93,7 @@ async function getToken() {
 
     if (!res.ok) {
       const errorText = await res.text();
-      console.error(`HTTP Error ${res.status} al obtener el token:`, errorText);
+      //console.error(`HTTP Error ${res.status} al obtener el token:`, errorText);
       throw new Error(`Server error`);
     }
 
@@ -106,7 +107,7 @@ async function getToken() {
     if (isPremium) loadWebPlaybackSDK();
 
   } catch (err) {
-    console.error("Error getting the token", err);
+    //console.error("Error getting the token", err);
     document.getElementById("trackInfo").innerHTML =
       "<p>Error getting the token.</p>";
   }
@@ -130,13 +131,13 @@ async function getUserProfile() {
     userName = data.display_name;
     userEmail = data.email; 
 
-    // --- GUARDAR INFO EN LOCALSTORAGE PARA EL CHAT ---
+    // --- LOCALSTORAGE ---
     localStorage.setItem("spotify_logged_in", "1");
     localStorage.setItem("spotify_is_premium", isPremium ? "1" : "0");
 
 
   } catch (err) {
-    console.error("Error checking user profile", err);
+    //console.error("Error checking user profile", err);
   }
 }
 
@@ -157,7 +158,7 @@ function loadWebPlaybackSDK() {
 
     // When ready
     spotifyPlayer.addListener("ready", ({ device_id }) => {
-      console.log("Device ready:", device_id);
+      //console.log("Device ready:", device_id);
       deviceId = device_id;
       document.getElementById("playerBar").style.display = "block";
     });
@@ -181,8 +182,10 @@ function loadWebPlaybackSDK() {
  ***********************/
 async function searchTrack() {
   const query = document.getElementById("searchInput").value.trim();
-  if (!query) return alert("Type a song name");
-  if (!accessToken) return alert("Token not available.");
+  if (!query) return showAlert("Type a song name", "info");
+;
+  if (!accessToken) return showAlert("ERROR: Token not aviable", "error");
+;
 
   try {
     const res = await fetch(
@@ -240,7 +243,7 @@ async function searchTrack() {
   attachFavoriteButtons();
   } 
   catch (err) {
-    console.error(err);
+    //console.error(err);
     document.getElementById("trackInfo").innerHTML =
       "<p>Error searching for songs.</p>";
   }
@@ -252,14 +255,14 @@ async function searchTrack() {
 async function playTrack(uri) {
   // Not premium -> return
   if (!isPremium) {
-    console.warn("Requires Premium");
-    alert("You have to be premium and be authorized.");
+    //console.warn("Requires Premium");
+    showAlert("You have to be premium and be authorized", "warning");
     return;
   }
 
   // PREMIUM : COMPLETE PLAYBACK 
   if (!deviceId) {
-    alert("Try again later. The device is not ready yet.");
+    showAlert("Try again later. The device is not ready yet", "error");
     return;
   }
 
@@ -279,9 +282,9 @@ async function playTrack(uri) {
       }
     );
     document.getElementById("playPauseBtn").textContent = "||";
-    console.log("Playing full track on Premium device.");
+    //console.log("Playing full track on Premium device.");
   } catch (err) {
-    console.error("Error playing full track:", err);
+    //console.error("Error playing full track:", err);
   }
 }
 
@@ -299,7 +302,6 @@ function displayUserStatus() {
     message = `✅ Connected as **${userIdentifier}**. You are Spotify Premium: you can listen to the songs`;
     color = "#4CAF50"; 
   } else {
-    // Mensaje para usuarios Free, sin mencionar previews
     message = `❌ Connected as **${userIdentifier}**. You are Spotify Free: you can only read information`;
     color = "#FF9800"; 
   }
@@ -314,26 +316,25 @@ function displayUserStatus() {
 function playPauseSong() {
     const button = document.getElementById("playPauseBtn");
 
-    // Verificar si existe el Web Playback SDK
+    // Check if Web Playback SDK exists
     if (!window.spotifyPlayer) {
-        console.warn("El reproductor todavía no está listo.");
+        //console.warn("El reproductor todavía no está listo.");
         return;
     }
 
     window.spotifyPlayer.getCurrentState().then(state => {
         if (!state) {
-            console.warn("No hay canción reproduciéndose.");
+            //console.warn("No hay canción reproduciéndose.");
             return;
         }
 
         if (state.paused) {
-            // Si está pausado → Reanudar
             window.spotifyPlayer.resume();
-            button.textContent = "||";  // Cambiar icono a pause
+            button.textContent = "||";
+
         } else {
-            // Si está sonando → Pausar
             window.spotifyPlayer.pause();
-            button.textContent = "▶";  // Cambiar icono a play
+            button.textContent = "▶"; 
         }
     });
 }
@@ -370,7 +371,7 @@ async function toggleFavorite(songId, button) {
 	const user = auth.currentUser; 
 
 	if (!user) {
-		alert("You must log in to add songs to your favorites");
+    showAlert("You must log in to add songs to your favorites", "warning");
 		return;
 	}
 
@@ -380,11 +381,11 @@ async function toggleFavorite(songId, button) {
 	if (nowFavorite) {
       const favSnapshot = await get(favRef);
       if (favSnapshot.exists()) {
-        alert("This song is already in your favourites.");
+        showAlert("This song is already in your favourites", "info");
         return;
       }
 
-		// Agregar a favoritos
+		// Add favs
 		await set(favRef, true);
 		button.innerHTML = '<i class="bi bi-heart-fill"></i>';
 		button.classList.remove("not-fav");
@@ -392,7 +393,7 @@ async function toggleFavorite(songId, button) {
 
     const user = auth.currentUser;
     if (!user) {
-      alert("You must log in to add songs to your favorites");
+      showAlert("You must log in to add songs to your favorites", "warning");
       return;
       }
     
@@ -400,13 +401,13 @@ async function toggleFavorite(songId, button) {
     await saveFavouriteSong(user.uid,track);
 
   } else {
-		// Quitar de favoritos
+		// Delete from favs
 		await set(favRef, null);
 		button.innerHTML = '<i class="bi bi-heart"></i>';
 		button.classList.remove("is-fav");
 		button.classList.add("not-fav");
 
-    alert("This song has been removed from favorites")
+    showAlert("This song has been removed from favourites", "info");
 	}
 }
 
@@ -432,7 +433,7 @@ function seekToPosition() {
   const newPositionMs = Math.round(lastDuration * percentage);
 
   window.spotifyPlayer.seek(newPositionMs).then(() => {
-    console.log(`Buscando nueva posición: ${formatTime(newPositionMs)}`);
+    //console.log(`Buscando nueva posición: ${formatTime(newPositionMs)}`);
   });
 }
 
@@ -445,11 +446,11 @@ setInterval(() => {
     window.spotifyPlayer.getCurrentState().then(state => {
         if (!state || !state.duration) return;
 
-        // Actualizar barra de progreso
+        // Update progress bar
         const progressPercent = (state.position / state.duration) * 100;
         document.getElementById("progressBar").value = progressPercent;
 
-        // Actualizar tiempo actual y total (si existen)
+        // Update time if exists
         const currentTimeEl = document.getElementById("currentTime");
         const totalTimeEl = document.getElementById("totalTime");
 
@@ -465,17 +466,18 @@ setInterval(() => {
 const logoutBtn = document.getElementById("logoutSpotifyBtn");
 if (logoutBtn) {
   logoutBtn.addEventListener("click", () => {
-    // Borrar token y flags
+    // Delete token y flags
     localStorage.removeItem("spotify_access_token");
     localStorage.removeItem("spotify_is_premium");
 
-    // Opcional: limpiar cualquier info más
+
     localStorage.removeItem("spotify_refresh_token");
     localStorage.removeItem("spotify_token_expiration");
 
-    alert("You have logged out of Spotify.");
 
-    // Redirigir a login de Spotify
+    showAlert("You have logged out of Spotify", "info");
+
+    // Login  redirect
     window.location.href = "test_register_spotify.html";
   });
 }
@@ -494,6 +496,6 @@ document.getElementById("progressBar").addEventListener("change", seekToPosition
 getToken();
 
 
-// Exponer funciones al scope global
+// Expose funtions to the scope global
 window.playTrack = playTrack;
 window.searchTrack = searchTrack;
