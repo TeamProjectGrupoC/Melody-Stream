@@ -371,7 +371,7 @@ async function toggleFavorite(songId, button) {
 	const user = auth.currentUser; 
 
 	if (!user) {
-    showAlert("You must log in to add songs to your favorites", "warning");
+    showAlert("Log in to add songs to your favorites", "warning");
 		return;
 	}
 
@@ -392,7 +392,7 @@ async function toggleFavorite(songId, button) {
 
     const user = auth.currentUser;
     if (!user) {
-      showAlert("You must log in to add songs to your favorites", "warning");
+      showAlert("Log in to add songs to your favorites", "warning");
       return;
       }
     
@@ -406,7 +406,7 @@ async function toggleFavorite(songId, button) {
 		button.classList.remove("is-fav");
 		button.classList.add("not-fav");
 
-    showAlert("This song has been removed from favourites", "info");
+    showAlert("Song removed from your favourites", "info");
 	}
 }
 
