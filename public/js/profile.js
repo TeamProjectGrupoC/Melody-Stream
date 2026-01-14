@@ -1049,7 +1049,7 @@ async function loadUsersForShare(selectEl, { modalId, pickerId }) {
     render(filtered);
   };
 
-  if (usersArray.length) selectEl.value = usersArray[0].chatId;
+  if (usersArray.length) selectEl.value = "";
 }
 
 
@@ -1132,6 +1132,11 @@ async function shareArtistToChat(chatId, artist) {
 document.getElementById("shareArtistConfirm").addEventListener("click", async () => {
   const modal = document.getElementById("shareArtistModal");
   const chatId = document.getElementById("chatSelect").value;
+
+  if (!chatId) {
+    showAlert("You must select an user", "warning");
+    return;
+  }
 
   const artist = {
     id: modal.dataset.artistId,
@@ -1475,6 +1480,11 @@ document.getElementById("shareSongConfirm").addEventListener("click", async () =
 
   const chatId = document.getElementById("chatSelectSong").value;
   const modal = document.getElementById("shareSongModal");
+
+  if (!chatId) {
+    showAlert("You must select an user", "warning");
+    return;
+  }
 
   //create a track object from modal dataset
   const track = {
