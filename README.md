@@ -83,4 +83,3 @@ firebase deploy --only hosting
 ```
 
 Upon completion, the terminal will display the public Hosting URL where the updated application is live.
-```
