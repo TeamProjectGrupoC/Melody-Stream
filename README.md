@@ -7,6 +7,14 @@ Melody Stream is a web application that allows users to listen to music, upload 
 
 The application is deployed and publicly accessible at: [https://melodystream123.web.app/](https://melodystream123.web.app/)
 
+## Firebase Plan Limitations
+After downgrading our Firebase plan, some core features of the application may be affected due to service and quota limitations imposed by the free tier.
+
+Affected Features
+- Authentication tokens may stop working correctly due to changes in authentication persistence and backend restrictions.
+- Music and podcast storage may be limited or inaccessible due to Firebase Storage quota.
+- Real-time chat functionality may be affected due to Firestore/Realtime Database read and write limitations.
+
 ## Key Features
 
 * **User Authentication:** Secure login and user identification, including mandatory email verification.
